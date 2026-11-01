@@ -12,6 +12,14 @@ echo "=========================================================="
 export PYTHONPATH="$DIR:$PYTHONPATH"
 python3 "$DIR/backend/config_manager.py"
 
+# Preload libgtk4-layer-shell for Wayland Layer Shell support
+for lib in /usr/lib64/libgtk4-layer-shell.so /usr/lib/libgtk4-layer-shell.so /usr/lib/x86_64-linux-gnu/libgtk4-layer-shell.so; do
+    if [ -f "$lib" ]; then
+        export LD_PRELOAD="$lib${LD_PRELOAD:+:$LD_PRELOAD}"
+        break
+    fi
+done
+
 echo "🚀 Запуск AegisPlus..."
 echo "👉 Оверлей: прозрачное окно поверх экрана"
 echo "👉 Веб-панель: доступна по адресу http://127.0.0.1:3000 (также работает в Shift+Tab внутри игры)"

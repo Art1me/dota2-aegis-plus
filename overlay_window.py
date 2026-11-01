@@ -6,6 +6,20 @@ import sys
 import threading
 import time
 
+# Ensure libgtk4-layer-shell is preloaded on Wayland so Gtk4LayerShell symbols link properly
+if os.environ.get("XDG_SESSION_TYPE") == "wayland" and "libgtk4-layer-shell" not in os.environ.get("LD_PRELOAD", ""):
+    for candidate in [
+        "/usr/lib64/libgtk4-layer-shell.so",
+        "/usr/lib/libgtk4-layer-shell.so",
+        "/usr/lib/x86_64-linux-gnu/libgtk4-layer-shell.so"
+    ]:
+        if os.path.exists(candidate):
+            env = os.environ.copy()
+            cur_preload = env.get("LD_PRELOAD", "")
+            env["LD_PRELOAD"] = f"{candidate}:{cur_preload}" if cur_preload else candidate
+            os.execve(sys.executable, [sys.executable] + sys.argv, env)
+            break
+
 import cairo
 import gi
 
@@ -45,8 +59,8 @@ class OverlayApplication(Gtk.Application):
             css_provider = Gtk.CssProvider()
             css_provider.load_from_data(b"""
                 window, .background {
-                    background-color: transparent !important;
-                    background: transparent !important;
+                    background-color: transparent;
+                    background: transparent;
                 }
             """)
             Gtk.StyleContext.add_provider_for_display(
@@ -76,11 +90,10 @@ class OverlayApplication(Gtk.Application):
                 print("[AegisPlus] Запуск в режиме независимого прозрачного окна")
 
             # Setup WebKit UserContentManager to receive click-through toggle from JS
-            ucm = WebKit.UserContentManager()
+            self.webview = WebKit.WebView()
+            ucm = self.webview.get_user_content_manager()
             ucm.register_script_message_handler("overlay")
             ucm.connect("script-message-received::overlay", self.on_script_message)
-
-            self.webview = WebKit.WebView.new_with_user_content_manager(ucm)
             
             # Transparent background
             rgba = Gdk.RGBA()
@@ -92,7 +105,11 @@ class OverlayApplication(Gtk.Application):
             self.window.set_child(self.webview)
 
             # Listen for SIGUSR1 to toggle Lock/Menu mode via system hotkey
-            GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self.on_sigusr1)
+            try:
+                from gi.repository import GLibUnix
+                GLibUnix.signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self.on_sigusr1)
+            except Exception:
+                GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self.on_sigusr1)
 
             # Check for backend setting changes periodically
             GLib.timeout_add(500, self.check_backend_sync)

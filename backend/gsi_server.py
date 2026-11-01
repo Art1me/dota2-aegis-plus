@@ -543,6 +543,7 @@ def run_simulation():
     state.simulation_running = False
 
 def start_server(port: int = 3000):
+    ThreadingHTTPServer.allow_reuse_address = True
     server = ThreadingHTTPServer(("0.0.0.0", port), GSIHTTPRequestHandler)
     print(f"[AegisPlus] Сервер запущен на http://127.0.0.1:{port}")
     server.serve_forever()
