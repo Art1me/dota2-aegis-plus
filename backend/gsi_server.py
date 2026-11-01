@@ -390,6 +390,7 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
 
         elif parsed.path == "/api/overlay/open":
             state.overlay_open = True
+            state.force_show_requested = True
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")

@@ -133,15 +133,11 @@ class OverlayApplication(Gtk.Application):
             self.webview.load_uri(SERVER_URL)
             self.window.set_child(self.webview)
 
-            # Connect realize signal to apply input region as soon as surface is ready
-            self.window.connect("realize", lambda w: self.apply_overlay_state(self.overlay_open))
-
             # Check for backend setting changes periodically
             GLib.timeout_add(60, self.check_backend_sync)
 
         self.overlay_open = True
-        self.window.present()
-        GLib.timeout_add(100, lambda: self.apply_overlay_state(True))
+        self.apply_overlay_state(True)
         if self.webview:
             js = "if (window.setOverlayOpen) window.setOverlayOpen(true);"
             self.webview.evaluate_javascript(js, -1, None, None, None, None, None)
@@ -167,12 +163,7 @@ class OverlayApplication(Gtk.Application):
                 self.apply_lock_state(self.is_locked)
             elif action == "quit_app":
                 print("[AegisPlus] Получен сигнал закрытия из интерфейса")
-                state.should_quit = True
-                try:
-                    self.release()
-                except Exception:
-                    pass
-                self.quit()
+                self.quit_application()
         except Exception as e:
             print(f"[AegisPlus] Ошибка обработки WebKit сообщения: {e}")
 
@@ -200,18 +191,29 @@ class OverlayApplication(Gtk.Application):
 
         return False
 
+    def quit_application(self):
+        print("[AegisPlus] Завершение работы AegisPlus...")
+        remove_pid_file()
+        os._exit(0)
+
     def check_backend_sync(self):
         """Syncs overlay window state and input region if backend state changed."""
         if getattr(state, "should_quit", False):
             print("[AegisPlus] Получена команда завершения через бэкенд")
-            try:
-                self.release()
-            except Exception:
-                pass
-            self.quit()
+            self.quit_application()
             return GLib.SOURCE_REMOVE
 
-        if state.overlay_open != self.overlay_open:
+        force_show = getattr(state, "force_show_requested", False)
+        if force_show:
+            state.force_show_requested = False
+            self.overlay_open = True
+            state.overlay_open = True
+            print("[AegisPlus] Принудительное открытие оверлея по запросу API")
+            self.apply_overlay_state(True)
+            if self.webview:
+                js = "if (window.setOverlayOpen) window.setOverlayOpen(true);"
+                self.webview.evaluate_javascript(js, -1, None, None, None, None, None)
+        elif state.overlay_open != self.overlay_open:
             self.overlay_open = state.overlay_open
             print(f"[AegisPlus] Синхронизация бэкенда: оверлей = {self.overlay_open}")
             self.apply_overlay_state(self.overlay_open)
@@ -265,7 +267,7 @@ def main():
 
     def sigterm_handler(sig, frame):
         remove_pid_file()
-        sys.exit(0)
+        os._exit(0)
 
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)

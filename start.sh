@@ -4,6 +4,11 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 cd "$DIR"
 
+# 1. If already running, just open overlay and exit immediately!
+if curl -s -f -m 0.5 -X POST "http://127.0.0.1:3000/api/overlay/open" >/dev/null 2>&1; then
+    exit 0
+fi
+
 echo "=========================================================="
 echo "🛡️  AegisPlus - Профессиональный Dota 2 Overlay Assistant"
 echo "=========================================================="
