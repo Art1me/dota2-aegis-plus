@@ -1,0 +1,3395 @@
+{
+  "1": {
+    "name": "npc_dota_hero_antimage",
+    "display_name": "Anti-Mage",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "мага",
+      "am",
+      "антимаг",
+      "ам",
+      "antimage",
+      "anti-mage"
+    ],
+    "tags": [
+      "mana_burn",
+      "elusive",
+      "carry",
+      "flash_farm"
+    ],
+    "counters": [
+      "npc_dota_hero_medusa",
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_leshrac"
+    ],
+    "countered_by": [
+      "npc_dota_hero_meepo",
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_legion_commander",
+      "npc_dota_hero_bloodseeker"
+    ]
+  },
+  "2": {
+    "name": "npc_dota_hero_axe",
+    "display_name": "Axe",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "могул",
+      "axe",
+      "акс"
+    ],
+    "tags": [
+      "pure_damage",
+      "initiator",
+      "anti_melee",
+      "tank"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_dazzle",
+      "npc_dota_hero_slark"
+    ],
+    "countered_by": [
+      "npc_dota_hero_viper",
+      "npc_dota_hero_venomancer",
+      "npc_dota_hero_necrolyte"
+    ]
+  },
+  "3": {
+    "name": "npc_dota_hero_bane",
+    "display_name": "Bane",
+    "role": "Hard Support",
+    "attr": "all",
+    "aliases": [
+      "bane",
+      "беин",
+      "бейн",
+      "атропос"
+    ],
+    "tags": [
+      "single_target_lockdown",
+      "pure_damage",
+      "support"
+    ],
+    "counters": [
+      "npc_dota_hero_enigma",
+      "npc_dota_hero_ursa"
+    ],
+    "countered_by": [
+      "npc_dota_hero_abaddon",
+      "npc_dota_hero_rubick",
+      "npc_dota_hero_silencer"
+    ]
+  },
+  "4": {
+    "name": "npc_dota_hero_bloodseeker",
+    "display_name": "Bloodseeker",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "bs",
+      "сикер",
+      "bloodseeker",
+      "бладсикер",
+      "бс"
+    ],
+    "tags": [
+      "anti_mobility",
+      "pure_damage",
+      "sustain"
+    ],
+    "counters": [
+      "npc_dota_hero_slark",
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_weaver"
+    ],
+    "countered_by": [
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_medusa",
+      "npc_dota_hero_storm_spirit"
+    ]
+  },
+  "5": {
+    "name": "npc_dota_hero_crystal_maiden",
+    "display_name": "Crystal Maiden",
+    "role": "Hard Support",
+    "attr": "int",
+    "aliases": [
+      "crystal maiden",
+      "crystal_maiden",
+      "кристалка",
+      "см",
+      "cm",
+      "цм",
+      "цмка"
+    ],
+    "tags": [
+      "mana_battery",
+      "aoe_slow",
+      "magic_burst",
+      "support"
+    ],
+    "counters": [
+      "npc_dota_hero_slark",
+      "npc_dota_hero_phantom_assassin"
+    ],
+    "countered_by": [
+      "npc_dota_hero_bounty_hunter",
+      "npc_dota_hero_clockwerk",
+      "npc_dota_hero_nyx_assassin"
+    ]
+  },
+  "6": {
+    "name": "npc_dota_hero_drow_ranger",
+    "display_name": "Drow Ranger",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "dr",
+      "drow ranger",
+      "дрова",
+      "drow_ranger",
+      "дровка",
+      "drow",
+      "тракса"
+    ],
+    "tags": [
+      "ranged_physical",
+      "silence",
+      "armor_pierce"
+    ],
+    "counters": [
+      "npc_dota_hero_spectre",
+      "npc_dota_hero_morphling"
+    ],
+    "countered_by": [
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_spirit_breaker"
+    ]
+  },
+  "7": {
+    "name": "npc_dota_hero_earthshaker",
+    "display_name": "Earthshaker",
+    "role": "Soft Support",
+    "attr": "str",
+    "aliases": [
+      "es",
+      "ес",
+      "earthshaker",
+      "шейкер",
+      "эхослейм"
+    ],
+    "tags": [
+      "heavy_aoe_stun",
+      "initiator",
+      "anti_illusion"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_broodmother",
+      "npc_dota_hero_meepo"
+    ],
+    "countered_by": [
+      "npc_dota_hero_clockwerk",
+      "npc_dota_hero_spectre",
+      "npc_dota_hero_sniper"
+    ]
+  },
+  "8": {
+    "name": "npc_dota_hero_juggernaut",
+    "display_name": "Juggernaut",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "jugg",
+      "jug",
+      "juggernaut",
+      "джаггер",
+      "джага"
+    ],
+    "tags": [
+      "spell_immunity",
+      "physical_burst",
+      "healing_ward"
+    ],
+    "counters": [
+      "npc_dota_hero_necrolyte",
+      "npc_dota_hero_tidehunter"
+    ],
+    "countered_by": [
+      "npc_dota_hero_axe",
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_ursa"
+    ]
+  },
+  "9": {
+    "name": "npc_dota_hero_mirana",
+    "display_name": "Mirana",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "mirana",
+      "стрела",
+      "мирана",
+      "потма"
+    ],
+    "tags": [
+      "long_stun",
+      "team_invis",
+      "mobility"
+    ],
+    "counters": [
+      "npc_dota_hero_enigma",
+      "npc_dota_hero_sand_king"
+    ],
+    "countered_by": [
+      "npc_dota_hero_slark",
+      "npc_dota_hero_bloodseeker"
+    ]
+  },
+  "10": {
+    "name": "npc_dota_hero_morphling",
+    "display_name": "Morphling",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "morph",
+      "morphling",
+      "морф",
+      "морфлинг"
+    ],
+    "tags": [
+      "high_regen",
+      "stat_shift",
+      "waveform",
+      "elusive"
+    ],
+    "counters": [
+      "npc_dota_hero_drow_ranger",
+      "npc_dota_hero_sniper"
+    ],
+    "countered_by": [
+      "npc_dota_hero_ancient_apparition",
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_lion"
+    ]
+  },
+  "11": {
+    "name": "npc_dota_hero_nevermore",
+    "display_name": "Shadow Fiend",
+    "role": "Mid",
+    "attr": "agi",
+    "aliases": [
+      "sf",
+      "сф",
+      "nevermore",
+      "shadow fiend",
+      "шадоу финд",
+      "невермор"
+    ],
+    "tags": [
+      "high_physical",
+      "magic_burst",
+      "flash_farmer"
+    ],
+    "counters": [
+      "npc_dota_hero_broodmother",
+      "npc_dota_hero_phantom_lancer"
+    ],
+    "countered_by": [
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_templar_assassin",
+      "npc_dota_hero_spirit_breaker"
+    ]
+  },
+  "12": {
+    "name": "npc_dota_hero_phantom_lancer",
+    "display_name": "Phantom Lancer",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "иллюзионист",
+      "phantom lancer",
+      "пл",
+      "фантом лансер",
+      "phantom_lancer",
+      "pl"
+    ],
+    "tags": [
+      "illusion",
+      "mana_burn",
+      "elusive"
+    ],
+    "counters": [
+      "npc_dota_hero_wraith_king",
+      "npc_dota_hero_sniper"
+    ],
+    "countered_by": [
+      "npc_dota_hero_earthshaker",
+      "npc_dota_hero_axe",
+      "npc_dota_hero_sven",
+      "npc_dota_hero_sand_king"
+    ]
+  },
+  "13": {
+    "name": "npc_dota_hero_puck",
+    "display_name": "Puck",
+    "role": "Mid",
+    "attr": "int",
+    "aliases": [
+      "puck",
+      "пак"
+    ],
+    "tags": [
+      "elusive",
+      "magic_burst",
+      "coil_control"
+    ],
+    "counters": [
+      "npc_dota_hero_drow_ranger",
+      "npc_dota_hero_sniper"
+    ],
+    "countered_by": [
+      "npc_dota_hero_night_stalker",
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_faceless_void"
+    ]
+  },
+  "14": {
+    "name": "npc_dota_hero_pudge",
+    "display_name": "Pudge",
+    "role": "Soft Support",
+    "attr": "str",
+    "aliases": [
+      "хук",
+      "падж",
+      "pudge",
+      "мясник",
+      "пудж"
+    ],
+    "tags": [
+      "hook",
+      "bkb_piercing_dismember",
+      "pure_damage",
+      "tank"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "countered_by": [
+      "npc_dota_hero_lifestealer",
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_slark"
+    ]
+  },
+  "15": {
+    "name": "npc_dota_hero_razor",
+    "display_name": "Razor",
+    "role": "Offlane",
+    "attr": "agi",
+    "aliases": [
+      "разор",
+      "razor",
+      "статик"
+    ],
+    "tags": [
+      "static_link",
+      "anti_carry",
+      "speed"
+    ],
+    "counters": [
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_sven",
+      "npc_dota_hero_bristleback"
+    ],
+    "countered_by": [
+      "npc_dota_hero_viper",
+      "npc_dota_hero_queenofpain",
+      "npc_dota_hero_weaver"
+    ]
+  },
+  "16": {
+    "name": "npc_dota_hero_sand_king",
+    "display_name": "Sand King",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "sand king",
+      "сенд кинг",
+      "sand_king",
+      "sk",
+      "ск",
+      "скорпион"
+    ],
+    "tags": [
+      "aoe_magic",
+      "epicenter",
+      "burrowstrike"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_broodmother"
+    ],
+    "countered_by": [
+      "npc_dota_hero_zeus",
+      "npc_dota_hero_bounty_hunter",
+      "npc_dota_hero_slardar"
+    ]
+  },
+  "17": {
+    "name": "npc_dota_hero_storm_spirit",
+    "display_name": "Storm Spirit",
+    "role": "Mid",
+    "attr": "int",
+    "aliases": [
+      "storm_spirit",
+      "панда",
+      "storm",
+      "шторм",
+      "storm spirit"
+    ],
+    "tags": [
+      "infinite_mobility",
+      "ganker",
+      "magic_burst"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_tinker"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_night_stalker"
+    ]
+  },
+  "18": {
+    "name": "npc_dota_hero_sven",
+    "display_name": "Sven",
+    "role": "Carry",
+    "attr": "str",
+    "aliases": [
+      "рыцарь",
+      "свен",
+      "sven"
+    ],
+    "tags": [
+      "cleave",
+      "gods_strength",
+      "initiator",
+      "anti_illusion"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_meepo"
+    ],
+    "countered_by": [
+      "npc_dota_hero_razor",
+      "npc_dota_hero_troll_warlord",
+      "npc_dota_hero_viper"
+    ]
+  },
+  "19": {
+    "name": "npc_dota_hero_tiny",
+    "display_name": "Tiny",
+    "role": "Mid",
+    "attr": "str",
+    "aliases": [
+      "tiny",
+      "камень",
+      "тини"
+    ],
+    "tags": [
+      "burst_combo",
+      "tree_grab",
+      "tower_pusher"
+    ],
+    "counters": [
+      "npc_dota_hero_drow_ranger",
+      "npc_dota_hero_sniper"
+    ],
+    "countered_by": [
+      "npc_dota_hero_lifestealer",
+      "npc_dota_hero_necrolyte",
+      "npc_dota_hero_viper"
+    ]
+  },
+  "20": {
+    "name": "npc_dota_hero_vengefulspirit",
+    "display_name": "Vengeful Spirit",
+    "role": "Hard Support",
+    "attr": "all",
+    "aliases": [
+      "vengeful spirit",
+      "vengefulspirit",
+      "venge",
+      "венга"
+    ],
+    "tags": [
+      "swap_save",
+      "minus_armor",
+      "support"
+    ],
+    "counters": [
+      "npc_dota_hero_enigma",
+      "npc_dota_hero_batrider"
+    ],
+    "countered_by": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_slark"
+    ]
+  },
+  "21": {
+    "name": "npc_dota_hero_windrunner",
+    "display_name": "Windranger",
+    "role": "Mid",
+    "attr": "all",
+    "aliases": [
+      "windrunner",
+      "виндрейнджер",
+      "windranger",
+      "wr",
+      "врка",
+      "вр"
+    ],
+    "tags": [
+      "evasion",
+      "shackle",
+      "focus_fire",
+      "elusive"
+    ],
+    "counters": [
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_sven"
+    ],
+    "countered_by": [
+      "npc_dota_hero_axe",
+      "npc_dota_hero_spectre",
+      "npc_dota_hero_mars"
+    ]
+  },
+  "22": {
+    "name": "npc_dota_hero_zuus",
+    "display_name": "Zeus",
+    "role": "Mid",
+    "attr": "int",
+    "aliases": [
+      "zuus",
+      "зевс",
+      "zeus",
+      "молния"
+    ],
+    "tags": [
+      "global_magic",
+      "true_sight",
+      "percentage_damage"
+    ],
+    "counters": [
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_sand_king"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_huskar"
+    ]
+  },
+  "23": {
+    "name": "npc_dota_hero_kunkka",
+    "display_name": "Kunkka",
+    "role": "Mid",
+    "attr": "str",
+    "aliases": [
+      "корабль",
+      "кунка",
+      "kunkka",
+      "адмирал"
+    ],
+    "tags": [
+      "tidebringer",
+      "ghost_ship",
+      "x_marks",
+      "anti_illusion"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_meepo"
+    ],
+    "countered_by": [
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_lifestealer"
+    ]
+  },
+  "25": {
+    "name": "npc_dota_hero_lina",
+    "display_name": "Lina",
+    "role": "Carry",
+    "attr": "int",
+    "aliases": [
+      "огонь",
+      "лина",
+      "lina"
+    ],
+    "tags": [
+      "magic_burst",
+      "fast_attack_speed",
+      "long_range"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_slark"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_spectre"
+    ]
+  },
+  "26": {
+    "name": "npc_dota_hero_lion",
+    "display_name": "Lion",
+    "role": "Hard Support",
+    "attr": "int",
+    "aliases": [
+      "лион",
+      "палец",
+      "lion"
+    ],
+    "tags": [
+      "hex",
+      "finger_of_death",
+      "mana_drain",
+      "insta_kill_illusion"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_morphling"
+    ],
+    "countered_by": [
+      "npc_dota_hero_rubick",
+      "npc_dota_hero_silencer"
+    ]
+  },
+  "27": {
+    "name": "npc_dota_hero_shadow_shaman",
+    "display_name": "Shadow Shaman",
+    "role": "Hard Support",
+    "attr": "all",
+    "aliases": [
+      "расту",
+      "шаман",
+      "сс",
+      "shadow_shaman",
+      "shadow shaman",
+      "растор",
+      "ss"
+    ],
+    "tags": [
+      "long_hex_shackle",
+      "serpent_wards",
+      "push_power"
+    ],
+    "counters": [
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_slark"
+    ],
+    "countered_by": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_silencer"
+    ]
+  },
+  "28": {
+    "name": "npc_dota_hero_slardar",
+    "display_name": "Slardar",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "slardar",
+      "слардар",
+      "селедка"
+    ],
+    "tags": [
+      "corrosive_haze",
+      "bash",
+      "anti_invis",
+      "anti_armor"
+    ],
+    "counters": [
+      "npc_dota_hero_riki",
+      "npc_dota_hero_bounty_hunter"
+    ],
+    "countered_by": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_naga_siren"
+    ]
+  },
+  "29": {
+    "name": "npc_dota_hero_tidehunter",
+    "display_name": "Tidehunter",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "tidehunter",
+      "тайдхантер",
+      "арбуз",
+      "тайд"
+    ],
+    "tags": [
+      "ravage",
+      "kraken_shell_dispel",
+      "anchor_smash",
+      "tank"
+    ],
+    "counters": [
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_sven"
+    ],
+    "countered_by": [
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_slark"
+    ]
+  },
+  "30": {
+    "name": "npc_dota_hero_witch_doctor",
+    "display_name": "Witch Doctor",
+    "role": "Hard Support",
+    "attr": "int",
+    "aliases": [
+      "вич доктор",
+      "wd",
+      "witch_doctor",
+      "вд",
+      "witch doctor",
+      "маледикт",
+      "каска"
+    ],
+    "tags": [
+      "maledict_shred",
+      "death_ward",
+      "cask_stun"
+    ],
+    "counters": [
+      "npc_dota_hero_meepo",
+      "npc_dota_hero_huskar"
+    ],
+    "countered_by": [
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_sniper"
+    ]
+  },
+  "31": {
+    "name": "npc_dota_hero_lich",
+    "display_name": "Lich",
+    "role": "Hard Support",
+    "attr": "int",
+    "aliases": [
+      "лич",
+      "чайник",
+      "lich"
+    ],
+    "tags": [
+      "frost_shield",
+      "chain_frost",
+      "gaze",
+      "support"
+    ],
+    "counters": [
+      "npc_dota_hero_meepo",
+      "npc_dota_hero_chaos_knight"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_rubick",
+      "npc_dota_hero_silencer"
+    ]
+  },
+  "32": {
+    "name": "npc_dota_hero_riki",
+    "display_name": "Riki",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "riki",
+      "тучка",
+      "крыса",
+      "рики"
+    ],
+    "tags": [
+      "permanent_invis",
+      "smoke_screen",
+      "backstab"
+    ],
+    "counters": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_storm_spirit"
+    ],
+    "countered_by": [
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_bounty_hunter",
+      "npc_dota_hero_axe"
+    ]
+  },
+  "33": {
+    "name": "npc_dota_hero_enigma",
+    "display_name": "Enigma",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "блекхол",
+      "блэкхол",
+      "энигма",
+      "enigma"
+    ],
+    "tags": [
+      "black_hole",
+      "midnight_pulse_pure",
+      "teamfight_winner"
+    ],
+    "counters": [
+      "npc_dota_hero_sven",
+      "npc_dota_hero_spectre"
+    ],
+    "countered_by": [
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_rubick",
+      "npc_dota_hero_sniper"
+    ]
+  },
+  "34": {
+    "name": "npc_dota_hero_tinker",
+    "display_name": "Tinker",
+    "role": "Mid",
+    "attr": "int",
+    "aliases": [
+      "тинкер",
+      "робот",
+      "tinker"
+    ],
+    "tags": [
+      "rearm_burst",
+      "march",
+      "defense_matrix"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_bloodseeker"
+    ],
+    "countered_by": [
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_spectre"
+    ]
+  },
+  "35": {
+    "name": "npc_dota_hero_sniper",
+    "display_name": "Sniper",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "дед",
+      "снайпер",
+      "sniper"
+    ],
+    "tags": [
+      "ultra_long_range",
+      "headshot",
+      "shrapnel_slow",
+      "squishy"
+    ],
+    "counters": [
+      "npc_dota_hero_drow_ranger",
+      "npc_dota_hero_enigma"
+    ],
+    "countered_by": [
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_spectre",
+      "npc_dota_hero_spirit_breaker"
+    ]
+  },
+  "36": {
+    "name": "npc_dota_hero_necrolyte",
+    "display_name": "Necrophos",
+    "role": "Mid",
+    "attr": "int",
+    "aliases": [
+      "некрофос",
+      "дед",
+      "коса",
+      "necrolyte",
+      "necrophos",
+      "некр"
+    ],
+    "tags": [
+      "high_regen",
+      "reapers_scythe",
+      "heartstopper_aura"
+    ],
+    "counters": [
+      "npc_dota_hero_huskar",
+      "npc_dota_hero_axe"
+    ],
+    "countered_by": [
+      "npc_dota_hero_ancient_apparition",
+      "npc_dota_hero_drow_ranger",
+      "npc_dota_hero_antimage"
+    ]
+  },
+  "37": {
+    "name": "npc_dota_hero_warlock",
+    "display_name": "Warlock",
+    "role": "Hard Support",
+    "attr": "int",
+    "aliases": [
+      "варлок",
+      "warlock",
+      "связка",
+      "голем"
+    ],
+    "tags": [
+      "fatal_bonds",
+      "upheaval_slow",
+      "golem_stun"
+    ],
+    "counters": [
+      "npc_dota_hero_meepo",
+      "npc_dota_hero_phantom_lancer"
+    ],
+    "countered_by": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_rubick"
+    ]
+  },
+  "38": {
+    "name": "npc_dota_hero_beastmaster",
+    "display_name": "Beastmaster",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "бм",
+      "bm",
+      "beastmaster",
+      "бист",
+      "бистмастер"
+    ],
+    "tags": [
+      "roar_bkb_pierce",
+      "hawk_vision",
+      "push_aura"
+    ],
+    "counters": [
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_monkey_king"
+    ],
+    "countered_by": [
+      "npc_dota_hero_winter_wyvern",
+      "npc_dota_hero_timbersaw"
+    ]
+  },
+  "39": {
+    "name": "npc_dota_hero_queenofpain",
+    "display_name": "Queen of Pain",
+    "role": "Mid",
+    "attr": "int",
+    "aliases": [
+      "квопа",
+      "queen of pain",
+      "queenofpain",
+      "qop",
+      "квин"
+    ],
+    "tags": [
+      "blink_burst",
+      "sonic_wave_pure",
+      "ganker"
+    ],
+    "counters": [
+      "npc_dota_hero_huskar",
+      "npc_dota_hero_slark"
+    ],
+    "countered_by": [
+      "npc_dota_hero_puck",
+      "npc_dota_hero_disruptor",
+      "npc_dota_hero_silencer"
+    ]
+  },
+  "40": {
+    "name": "npc_dota_hero_venomancer",
+    "display_name": "Venomancer",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "веномансер",
+      "веник",
+      "venomancer",
+      "змея"
+    ],
+    "tags": [
+      "poison_slow",
+      "wards_vision",
+      "anti_blink"
+    ],
+    "counters": [
+      "npc_dota_hero_axe",
+      "npc_dota_hero_templar_assassin"
+    ],
+    "countered_by": [
+      "npc_dota_hero_abaddon",
+      "npc_dota_hero_legion_commander",
+      "npc_dota_hero_juggernaut"
+    ]
+  },
+  "41": {
+    "name": "npc_dota_hero_faceless_void",
+    "display_name": "Faceless Void",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "хроно",
+      "faceless void",
+      "faceless_void",
+      "купол",
+      "void",
+      "войд"
+    ],
+    "tags": [
+      "chronosphere",
+      "time_walk_revert",
+      "bash"
+    ],
+    "counters": [
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_slark"
+    ],
+    "countered_by": [
+      "npc_dota_hero_shadow_demon",
+      "npc_dota_hero_vengefulspirit",
+      "npc_dota_hero_axe"
+    ]
+  },
+  "42": {
+    "name": "npc_dota_hero_skeleton_king",
+    "display_name": "Wraith King",
+    "role": "Carry",
+    "attr": "str",
+    "aliases": [
+      "папич",
+      "леорик",
+      "wk",
+      "вк",
+      "skeleton_king",
+      "wraith king"
+    ],
+    "tags": [
+      "reincarnation",
+      "skeletons_farm",
+      "crit_lifesteal"
+    ],
+    "counters": [
+      "npc_dota_hero_legion_commander",
+      "npc_dota_hero_doom_bringer"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_phantom_lancer"
+    ]
+  },
+  "43": {
+    "name": "npc_dota_hero_death_prophet",
+    "display_name": "Death Prophet",
+    "role": "Mid",
+    "attr": "int",
+    "aliases": [
+      "кроба",
+      "дп",
+      "death prophet",
+      "банша",
+      "dp",
+      "death_prophet"
+    ],
+    "tags": [
+      "exorcism_spirits",
+      "silence_aoe",
+      "siphon_hp"
+    ],
+    "counters": [
+      "npc_dota_hero_dragon_knight",
+      "npc_dota_hero_tidehunter"
+    ],
+    "countered_by": [
+      "npc_dota_hero_ancient_apparition",
+      "npc_dota_hero_sniper"
+    ]
+  },
+  "44": {
+    "name": "npc_dota_hero_phantom_assassin",
+    "display_name": "Phantom Assassin",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "мортра",
+      "pa",
+      "phantom assassin",
+      "па",
+      "phantom_assassin",
+      "фантомка",
+      "мортред"
+    ],
+    "tags": [
+      "evasion",
+      "massive_crits",
+      "phantom_strike",
+      "passive_heavy"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "countered_by": [
+      "npc_dota_hero_axe",
+      "npc_dota_hero_legion_commander",
+      "npc_dota_hero_morphling"
+    ]
+  },
+  "45": {
+    "name": "npc_dota_hero_pugna",
+    "display_name": "Pugna",
+    "role": "Soft Support",
+    "attr": "int",
+    "aliases": [
+      "pugna",
+      "вардик",
+      "пугна"
+    ],
+    "tags": [
+      "nether_ward_anti_mana",
+      "life_drain_save",
+      "decrepify"
+    ],
+    "counters": [
+      "npc_dota_hero_skywrath_mage",
+      "npc_dota_hero_leshrac"
+    ],
+    "countered_by": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_antimage"
+    ]
+  },
+  "46": {
+    "name": "npc_dota_hero_templar_assassin",
+    "display_name": "Templar Assassin",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "templar assassin",
+      "templar_assassin",
+      "ланая",
+      "ta",
+      "та",
+      "темпларка"
+    ],
+    "tags": [
+      "refraction_shield",
+      "meld_minus_armor",
+      "psiblades"
+    ],
+    "counters": [
+      "npc_dota_hero_shadow_fiend",
+      "npc_dota_hero_puck"
+    ],
+    "countered_by": [
+      "npc_dota_hero_venomancer",
+      "npc_dota_hero_viper",
+      "npc_dota_hero_huskar",
+      "npc_dota_hero_batrider"
+    ]
+  },
+  "47": {
+    "name": "npc_dota_hero_viper",
+    "display_name": "Viper",
+    "role": "Mid",
+    "attr": "agi",
+    "aliases": [
+      "viper",
+      "вайпер"
+    ],
+    "tags": [
+      "break_nethertoxin",
+      "corrosive_skin",
+      "lane_dominator"
+    ],
+    "counters": [
+      "npc_dota_hero_bristleback",
+      "npc_dota_hero_spectre",
+      "npc_dota_hero_phantom_assassin"
+    ],
+    "countered_by": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_broodmother"
+    ]
+  },
+  "48": {
+    "name": "npc_dota_hero_luna",
+    "display_name": "Luna",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "luna",
+      "луна"
+    ],
+    "tags": [
+      "bouncing_glaives",
+      "eclipse_magic",
+      "fast_pusher"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_meepo"
+    ],
+    "countered_by": [
+      "npc_dota_hero_ancient_apparition",
+      "npc_dota_hero_slark"
+    ]
+  },
+  "49": {
+    "name": "npc_dota_hero_dragon_knight",
+    "display_name": "Dragon Knight",
+    "role": "Mid",
+    "attr": "str",
+    "aliases": [
+      "dragon_knight",
+      "дк",
+      "dk",
+      "dragon knight",
+      "дракон"
+    ],
+    "tags": [
+      "dragon_form_splash",
+      "high_armor_regen",
+      "stun_initiator"
+    ],
+    "counters": [
+      "npc_dota_hero_clinkz",
+      "npc_dota_hero_phantom_assassin"
+    ],
+    "countered_by": [
+      "npc_dota_hero_timbersaw",
+      "npc_dota_hero_necrolyte"
+    ]
+  },
+  "50": {
+    "name": "npc_dota_hero_dazzle",
+    "display_name": "Dazzle",
+    "role": "Hard Support",
+    "attr": "all",
+    "aliases": [
+      "грейв",
+      "крест",
+      "dazzle",
+      "даззл"
+    ],
+    "tags": [
+      "shallow_grave",
+      "armor_shred",
+      "heal_bomb"
+    ],
+    "counters": [
+      "npc_dota_hero_legion_commander",
+      "npc_dota_hero_necrolyte"
+    ],
+    "countered_by": [
+      "npc_dota_hero_axe",
+      "npc_dota_hero_ancient_apparition"
+    ]
+  },
+  "51": {
+    "name": "npc_dota_hero_rattletrap",
+    "display_name": "Clockwerk",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "rattletrap",
+      "клок",
+      "клокверк",
+      "clockwerk",
+      "коги"
+    ],
+    "tags": [
+      "hookshot_initiation",
+      "cogs_burn",
+      "rocket_flare"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "countered_by": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_juggernaut",
+      "npc_dota_hero_lifestealer"
+    ]
+  },
+  "52": {
+    "name": "npc_dota_hero_leshrac",
+    "display_name": "Leshrac",
+    "role": "Mid",
+    "attr": "int",
+    "aliases": [
+      "лешрак",
+      "пони",
+      "ослик",
+      "leshrac",
+      "леший"
+    ],
+    "tags": [
+      "aoe_magic_burst",
+      "pulse_nova",
+      "tower_pusher"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_meepo"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_pugna",
+      "npc_dota_hero_huskar"
+    ]
+  },
+  "53": {
+    "name": "npc_dota_hero_furion",
+    "display_name": "Nature's Prophet",
+    "role": "Offlane",
+    "attr": "int",
+    "aliases": [
+      "natures prophet",
+      "фура",
+      "фурион",
+      "furion",
+      "np",
+      "нп",
+      "nature's prophet"
+    ],
+    "tags": [
+      "global_teleport",
+      "sprout",
+      "split_push"
+    ],
+    "counters": [
+      "npc_dota_hero_enigma",
+      "npc_dota_hero_tinker"
+    ],
+    "countered_by": [
+      "npc_dota_hero_spirit_breaker",
+      "npc_dota_hero_spectre"
+    ]
+  },
+  "54": {
+    "name": "npc_dota_hero_life_stealer",
+    "display_name": "Lifestealer",
+    "role": "Carry",
+    "attr": "str",
+    "aliases": [
+      "наикс",
+      "ls",
+      "lifestealer",
+      "лс",
+      "лайфстилер",
+      "life_stealer",
+      "гуля"
+    ],
+    "tags": [
+      "rage_magic_immune",
+      "feast_tank_shred",
+      "infest"
+    ],
+    "counters": [
+      "npc_dota_hero_pudge",
+      "npc_dota_hero_axe"
+    ],
+    "countered_by": [
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_ursa"
+    ]
+  },
+  "55": {
+    "name": "npc_dota_hero_dark_seer",
+    "display_name": "Dark Seer",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "dark seer",
+      "ds",
+      "дс",
+      "вакуум",
+      "дарк сир",
+      "dark_seer",
+      "стенка"
+    ],
+    "tags": [
+      "vacuum_wall_combo",
+      "ion_shell",
+      "surge_haste"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_sven",
+      "npc_dota_hero_terrorblade"
+    ],
+    "countered_by": [
+      "npc_dota_hero_oracle",
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_sniper"
+    ]
+  },
+  "56": {
+    "name": "npc_dota_hero_clinkz",
+    "display_name": "Clinkz",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "clinkz",
+      "клинкз",
+      "боник"
+    ],
+    "tags": [
+      "burning_barrage",
+      "invis_speed",
+      "tar_bomb"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "countered_by": [
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_bounty_hunter",
+      "npc_dota_hero_bloodseeker"
+    ]
+  },
+  "57": {
+    "name": "npc_dota_hero_omniknight",
+    "display_name": "Omniknight",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "хил",
+      "омник",
+      "omniknight",
+      "ангел"
+    ],
+    "tags": [
+      "purification_pure",
+      "guardian_angel_phys_immune",
+      "repel"
+    ],
+    "counters": [
+      "npc_dota_hero_sven",
+      "npc_dota_hero_phantom_assassin"
+    ],
+    "countered_by": [
+      "npc_dota_hero_shadow_demon",
+      "npc_dota_hero_invoker",
+      "npc_dota_hero_silencer"
+    ]
+  },
+  "58": {
+    "name": "npc_dota_hero_enchantress",
+    "display_name": "Enchantress",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "enchantress",
+      "энча",
+      "коза"
+    ],
+    "tags": [
+      "untouchable_slow",
+      "impetus_pure",
+      "nature_attendants"
+    ],
+    "counters": [
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_lifestealer"
+    ],
+    "countered_by": [
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_lina",
+      "npc_dota_hero_lion",
+      "npc_dota_hero_phantom_lancer"
+    ]
+  },
+  "59": {
+    "name": "npc_dota_hero_huskar",
+    "display_name": "Huskar",
+    "role": "Mid",
+    "attr": "str",
+    "aliases": [
+      "huskar",
+      "копья",
+      "хусик",
+      "хускар"
+    ],
+    "tags": [
+      "berserker_blood",
+      "fire_spears",
+      "high_regen",
+      "passive_heavy"
+    ],
+    "counters": [
+      "npc_dota_hero_zeus",
+      "npc_dota_hero_leshrac"
+    ],
+    "countered_by": [
+      "npc_dota_hero_ancient_apparition",
+      "npc_dota_hero_viper",
+      "npc_dota_hero_necrolyte"
+    ]
+  },
+  "60": {
+    "name": "npc_dota_hero_night_stalker",
+    "display_name": "Night Stalker",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "ночной сталкер",
+      "нс",
+      "ns",
+      "night_stalker",
+      "баланар",
+      "night stalker"
+    ],
+    "tags": [
+      "night_flying_vision",
+      "crippling_fear_silence",
+      "void_slow"
+    ],
+    "counters": [
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_puck"
+    ],
+    "countered_by": [
+      "npc_dota_hero_meepo",
+      "npc_dota_hero_naga_siren",
+      "npc_dota_hero_terrorblade"
+    ]
+  },
+  "61": {
+    "name": "npc_dota_hero_broodmother",
+    "display_name": "Broodmother",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "паучиха",
+      "broodmother",
+      "пауки",
+      "бруда"
+    ],
+    "tags": [
+      "spiders_army",
+      "insatiable_hunger_lifesteal",
+      "web_invis"
+    ],
+    "counters": [
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_viper"
+    ],
+    "countered_by": [
+      "npc_dota_hero_earthshaker",
+      "npc_dota_hero_axe",
+      "npc_dota_hero_legion_commander",
+      "npc_dota_hero_sven"
+    ]
+  },
+  "62": {
+    "name": "npc_dota_hero_bounty_hunter",
+    "display_name": "Bounty Hunter",
+    "role": "Soft Support",
+    "attr": "agi",
+    "aliases": [
+      "баунти",
+      "гондор",
+      "bh",
+      "bounty_hunter",
+      "трек",
+      "bounty hunter",
+      "бх"
+    ],
+    "tags": [
+      "track_gold_vision",
+      "jinada_steal",
+      "shadow_walk"
+    ],
+    "counters": [
+      "npc_dota_hero_riki",
+      "npc_dota_hero_clinkz",
+      "npc_dota_hero_sand_king"
+    ],
+    "countered_by": [
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_spirit_breaker",
+      "npc_dota_hero_dust"
+    ]
+  },
+  "63": {
+    "name": "npc_dota_hero_weaver",
+    "display_name": "Weaver",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "weaver",
+      "таймлепс",
+      "жук",
+      "вивер"
+    ],
+    "tags": [
+      "shukuchi_invis",
+      "time_lapse_revert",
+      "the_swarm_armor"
+    ],
+    "counters": [
+      "npc_dota_hero_lifestealer",
+      "npc_dota_hero_ursa"
+    ],
+    "countered_by": [
+      "npc_dota_hero_bloodseeker",
+      "npc_dota_hero_faceless_void",
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_disruptor"
+    ]
+  },
+  "64": {
+    "name": "npc_dota_hero_jakiro",
+    "display_name": "Jakiro",
+    "role": "Hard Support",
+    "attr": "int",
+    "aliases": [
+      "двухголовый",
+      "джакиро",
+      "jakiro",
+      "дракон"
+    ],
+    "tags": [
+      "liquid_fire_tower_slow",
+      "ice_path_stun",
+      "macropyre"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_chaos_knight"
+    ],
+    "countered_by": [
+      "npc_dota_hero_rubick",
+      "npc_dota_hero_clockwerk",
+      "npc_dota_hero_sniper"
+    ]
+  },
+  "65": {
+    "name": "npc_dota_hero_batrider",
+    "display_name": "Batrider",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "batrider",
+      "мышь",
+      "бетрайдер",
+      "лассо"
+    ],
+    "tags": [
+      "flaming_lasso_drag",
+      "firefly_flying",
+      "sticky_napalm"
+    ],
+    "counters": [
+      "npc_dota_hero_monkey_king",
+      "npc_dota_hero_templar_assassin"
+    ],
+    "countered_by": [
+      "npc_dota_hero_abaddon",
+      "npc_dota_hero_oracle",
+      "npc_dota_hero_vengefulspirit"
+    ]
+  },
+  "66": {
+    "name": "npc_dota_hero_chen",
+    "display_name": "Chen",
+    "role": "Hard Support",
+    "attr": "all",
+    "aliases": [
+      "зоопарк",
+      "чен",
+      "крипы",
+      "chen"
+    ],
+    "tags": [
+      "holy_persuasion_creeps",
+      "hand_of_god_global_heal"
+    ],
+    "counters": [
+      "npc_dota_hero_bane",
+      "npc_dota_hero_pudge"
+    ],
+    "countered_by": [
+      "npc_dota_hero_clinkz",
+      "npc_dota_hero_enchantress",
+      "npc_dota_hero_doom_bringer"
+    ]
+  },
+  "67": {
+    "name": "npc_dota_hero_spectre",
+    "display_name": "Spectre",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "spectre",
+      "спектра",
+      "меркуриал"
+    ],
+    "tags": [
+      "global_haunt",
+      "dispersion_reflect",
+      "late_game_monster"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_tinker"
+    ],
+    "countered_by": [
+      "npc_dota_hero_viper",
+      "npc_dota_hero_slark",
+      "npc_dota_hero_necrolyte"
+    ]
+  },
+  "68": {
+    "name": "npc_dota_hero_ancient_apparition",
+    "display_name": "Ancient Apparition",
+    "role": "Hard Support",
+    "attr": "int",
+    "aliases": [
+      "айсбласт",
+      "aa",
+      "аа",
+      "аппарат",
+      "ancient apparition",
+      "ancient_apparition"
+    ],
+    "tags": [
+      "ice_blast_100pct_anti_heal",
+      "global_shatter",
+      "anti_regen"
+    ],
+    "counters": [
+      "npc_dota_hero_morphling",
+      "npc_dota_hero_alchemist",
+      "npc_dota_hero_huskar",
+      "npc_dota_hero_slark"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_storm_spirit"
+    ]
+  },
+  "69": {
+    "name": "npc_dota_hero_doom_bringer",
+    "display_name": "Doom",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "doom bringer",
+      "дум",
+      "doom",
+      "doom_bringer"
+    ],
+    "tags": [
+      "doom_mute_silence",
+      "devour_creep_skill",
+      "infernal_blade"
+    ],
+    "counters": [
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_weaver",
+      "npc_dota_hero_morphling"
+    ],
+    "countered_by": [
+      "npc_dota_hero_wraith_king",
+      "npc_dota_hero_meepo",
+      "npc_dota_hero_phantom_lancer"
+    ]
+  },
+  "70": {
+    "name": "npc_dota_hero_ursa",
+    "display_name": "Ursa",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "урса",
+      "медведь",
+      "ursa"
+    ],
+    "tags": [
+      "fury_swipes",
+      "enrage_damage_reduction",
+      "roshan_melter"
+    ],
+    "counters": [
+      "npc_dota_hero_pudge",
+      "npc_dota_hero_lifestealer"
+    ],
+    "countered_by": [
+      "npc_dota_hero_razor",
+      "npc_dota_hero_viper",
+      "npc_dota_hero_windrunner"
+    ]
+  },
+  "71": {
+    "name": "npc_dota_hero_spirit_breaker",
+    "display_name": "Spirit Breaker",
+    "role": "Soft Support",
+    "attr": "str",
+    "aliases": [
+      "sb",
+      "бара",
+      "баратрум",
+      "spirit_breaker",
+      "spirit breaker",
+      "разгон",
+      "сб"
+    ],
+    "tags": [
+      "global_charge",
+      "bkb_piercing_netherstrike",
+      "gank_initiator"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_tinker"
+    ],
+    "countered_by": [
+      "npc_dota_hero_rubick",
+      "npc_dota_hero_underlord"
+    ]
+  },
+  "72": {
+    "name": "npc_dota_hero_gyrocopter",
+    "display_name": "Gyrocopter",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "вертолет",
+      "дед",
+      "gyrocopter",
+      "гиро",
+      "гирокоптер"
+    ],
+    "tags": [
+      "flak_cannon_aoe",
+      "call_down_nuke",
+      "rocket_barrage"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_chaos_knight"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_juggernaut",
+      "npc_dota_hero_lifestealer"
+    ]
+  },
+  "73": {
+    "name": "npc_dota_hero_alchemist",
+    "display_name": "Alchemist",
+    "role": "Carry",
+    "attr": "str",
+    "aliases": [
+      "алхимик",
+      "монеты",
+      "алхим",
+      "alchemist"
+    ],
+    "tags": [
+      "goblins_greed_gpm",
+      "chemical_rage_regen",
+      "fast_itemizer"
+    ],
+    "counters": [
+      "npc_dota_hero_broodmother",
+      "npc_dota_hero_phantom_lancer"
+    ],
+    "countered_by": [
+      "npc_dota_hero_ancient_apparition",
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_ursa"
+    ]
+  },
+  "74": {
+    "name": "npc_dota_hero_invoker",
+    "display_name": "Invoker",
+    "role": "Mid",
+    "attr": "all",
+    "aliases": [
+      "инвокер",
+      "invoker",
+      "пианист",
+      "каэль",
+      "вокер"
+    ],
+    "tags": [
+      "versatile_spells",
+      "cataclysm",
+      "emp_mana_burn",
+      "combo_god"
+    ],
+    "counters": [
+      "npc_dota_hero_wraith_king",
+      "npc_dota_hero_medusa"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_faceless_void",
+      "npc_dota_hero_silencer"
+    ]
+  },
+  "75": {
+    "name": "npc_dota_hero_silencer",
+    "display_name": "Silencer",
+    "role": "Hard Support",
+    "attr": "int",
+    "aliases": [
+      "сайленсер",
+      "глобал",
+      "silencer",
+      "сало"
+    ],
+    "tags": [
+      "global_silence",
+      "int_steal",
+      "pure_glaives"
+    ],
+    "counters": [
+      "npc_dota_hero_enigma",
+      "npc_dota_hero_tidehunter"
+    ],
+    "countered_by": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_broodmother"
+    ]
+  },
+  "76": {
+    "name": "npc_dota_hero_obsidian_destroyer",
+    "display_name": "Outworld Destroyer",
+    "role": "Mid",
+    "attr": "int",
+    "aliases": [
+      "od",
+      "деструктор",
+      "obsidian_destroyer",
+      "дестр",
+      "outworld destroyer",
+      "од"
+    ],
+    "tags": [
+      "astral_save",
+      "pure_arcane_orb",
+      "sanity_eclipse"
+    ],
+    "counters": [
+      "npc_dota_hero_morphling",
+      "npc_dota_hero_medusa"
+    ],
+    "countered_by": [
+      "npc_dota_hero_pugna",
+      "npc_dota_hero_nyx_assassin"
+    ]
+  },
+  "77": {
+    "name": "npc_dota_hero_lycan",
+    "display_name": "Lycan",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "волк",
+      "ликан",
+      "люкан",
+      "lycan",
+      "волчара"
+    ],
+    "tags": [
+      "shapeshift_haste",
+      "wolves_invis",
+      "howl_armor_pierce"
+    ],
+    "counters": [
+      "npc_dota_hero_drow_ranger",
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_ancient_apparition"
+    ],
+    "countered_by": [
+      "npc_dota_hero_axe",
+      "npc_dota_hero_sven",
+      "npc_dota_hero_bristleback"
+    ]
+  },
+  "78": {
+    "name": "npc_dota_hero_brewmaster",
+    "display_name": "Brewmaster",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "брюмастер",
+      "brewmaster",
+      "панда",
+      "брю",
+      "хмель"
+    ],
+    "tags": [
+      "primal_split_spirits",
+      "cinder_brew",
+      "drunken_brawler_evasion"
+    ],
+    "counters": [
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_troll_warlord"
+    ],
+    "countered_by": [
+      "npc_dota_hero_lion",
+      "npc_dota_hero_shadow_shaman",
+      "npc_dota_hero_silencer"
+    ]
+  },
+  "79": {
+    "name": "npc_dota_hero_shadow_demon",
+    "display_name": "Shadow Demon",
+    "role": "Hard Support",
+    "attr": "int",
+    "aliases": [
+      "дизрапшн",
+      "шадоу демон",
+      "shadow demon",
+      "сд",
+      "shadow_demon",
+      "sd"
+    ],
+    "tags": [
+      "disruption_save",
+      "demonic_purge_slow",
+      "soul_catcher"
+    ],
+    "counters": [
+      "npc_dota_hero_omniknight",
+      "npc_dota_hero_faceless_void",
+      "npc_dota_hero_necrolyte"
+    ],
+    "countered_by": [
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_phantom_assassin"
+    ]
+  },
+  "80": {
+    "name": "npc_dota_hero_lone_druid",
+    "display_name": "Lone Druid",
+    "role": "Carry",
+    "attr": "all",
+    "aliases": [
+      "медведь",
+      "друид",
+      "lone druid",
+      "лд",
+      "ld",
+      "силла",
+      "lone_druid"
+    ],
+    "tags": [
+      "spirit_bear_demolish",
+      "entangling_claws",
+      "true_form_tank"
+    ],
+    "counters": [
+      "npc_dota_hero_spectre",
+      "npc_dota_hero_anti_mage"
+    ],
+    "countered_by": [
+      "npc_dota_hero_winter_wyvern",
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_necrolyte"
+    ]
+  },
+  "81": {
+    "name": "npc_dota_hero_chaos_knight",
+    "display_name": "Chaos Knight",
+    "role": "Carry",
+    "attr": "str",
+    "aliases": [
+      "хаос",
+      "ck",
+      "chaos knight",
+      "конь",
+      "chaos_knight",
+      "цк"
+    ],
+    "tags": [
+      "reality_rift",
+      "chaos_bolt_stun",
+      "phantasm_illusions"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "countered_by": [
+      "npc_dota_hero_earthshaker",
+      "npc_dota_hero_sven",
+      "npc_dota_hero_sand_king"
+    ]
+  },
+  "82": {
+    "name": "npc_dota_hero_meepo",
+    "display_name": "Meepo",
+    "role": "Mid",
+    "attr": "agi",
+    "aliases": [
+      "meepo",
+      "клоны",
+      "геомансер",
+      "мипо"
+    ],
+    "tags": [
+      "divided_we_stand_clones",
+      "poof_burst",
+      "earthbind_net"
+    ],
+    "counters": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_sniper"
+    ],
+    "countered_by": [
+      "npc_dota_hero_earthshaker",
+      "npc_dota_hero_winter_wyvern",
+      "npc_dota_hero_sven",
+      "npc_dota_hero_leshrac"
+    ]
+  },
+  "83": {
+    "name": "npc_dota_hero_treant",
+    "display_name": "Treant Protector",
+    "role": "Hard Support",
+    "attr": "all",
+    "aliases": [
+      "трент",
+      "дерево",
+      "treant",
+      "treant protector",
+      "руфтрел"
+    ],
+    "tags": [
+      "living_armor_heal",
+      "overgrowth_entangle",
+      "nature_guise_invis"
+    ],
+    "counters": [
+      "npc_dota_hero_spectre",
+      "npc_dota_hero_enigma"
+    ],
+    "countered_by": [
+      "npc_dota_hero_timbersaw",
+      "npc_dota_hero_batrider",
+      "npc_dota_hero_slardar"
+    ]
+  },
+  "84": {
+    "name": "npc_dota_hero_ogre_magi",
+    "display_name": "Ogre Magi",
+    "role": "Hard Support",
+    "attr": "str",
+    "aliases": [
+      "огр маг",
+      "ogre magi",
+      "огр",
+      "мультикаст",
+      "ogre_magi"
+    ],
+    "tags": [
+      "multicast",
+      "bloodlust_buff",
+      "high_base_armor_hp"
+    ],
+    "counters": [
+      "npc_dota_hero_templar_assassin",
+      "npc_dota_hero_phantom_assassin"
+    ],
+    "countered_by": [
+      "npc_dota_hero_chaos_knight",
+      "npc_dota_hero_lifestealer"
+    ]
+  },
+  "85": {
+    "name": "npc_dota_hero_undying",
+    "display_name": "Undying",
+    "role": "Hard Support",
+    "attr": "str",
+    "aliases": [
+      "андаинг",
+      "зомби",
+      "undying",
+      "томба"
+    ],
+    "tags": [
+      "decay_strength_steal",
+      "tombstone_zombies",
+      "flesh_golem"
+    ],
+    "counters": [
+      "npc_dota_hero_spectre",
+      "npc_dota_hero_phantom_assassin"
+    ],
+    "countered_by": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_gyrocopter",
+      "npc_dota_hero_weaver"
+    ]
+  },
+  "86": {
+    "name": "npc_dota_hero_rubick",
+    "display_name": "Rubick",
+    "role": "Soft Support",
+    "attr": "int",
+    "aliases": [
+      "rubick",
+      "рубик",
+      "вор заклинаний"
+    ],
+    "tags": [
+      "spell_steal",
+      "telekinesis",
+      "high_skill_playmaker"
+    ],
+    "counters": [
+      "npc_dota_hero_enigma",
+      "npc_dota_hero_tidehunter"
+    ],
+    "countered_by": [
+      "npc_dota_hero_riki",
+      "npc_dota_hero_clinkz"
+    ]
+  },
+  "87": {
+    "name": "npc_dota_hero_disruptor",
+    "display_name": "Disruptor",
+    "role": "Hard Support",
+    "attr": "int",
+    "aliases": [
+      "трактор",
+      "глимп",
+      "дизраптор",
+      "disruptor"
+    ],
+    "tags": [
+      "glimpse",
+      "static_storm_mute",
+      "kinetic_field"
+    ],
+    "counters": [
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_slark",
+      "npc_dota_hero_weaver"
+    ],
+    "countered_by": [
+      "npc_dota_hero_juggernaut",
+      "npc_dota_hero_lifestealer"
+    ]
+  },
+  "88": {
+    "name": "npc_dota_hero_nyx_assassin",
+    "display_name": "Nyx Assassin",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "nyx",
+      "жук",
+      "nyx assassin",
+      "никс",
+      "nyx_assassin"
+    ],
+    "tags": [
+      "mind_flare_burst",
+      "spiked_carapace",
+      "vendetta_invis"
+    ],
+    "counters": [
+      "npc_dota_hero_invoker",
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_medusa"
+    ],
+    "countered_by": [
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_bounty_hunter"
+    ]
+  },
+  "89": {
+    "name": "npc_dota_hero_naga_siren",
+    "display_name": "Naga Siren",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "naga siren",
+      "сирена",
+      "naga_siren",
+      "сон",
+      "нага"
+    ],
+    "tags": [
+      "mirror_image_illusions",
+      "ensnare_root",
+      "song_of_the_siren"
+    ],
+    "counters": [
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_lifestealer",
+      "npc_dota_hero_sven"
+    ],
+    "countered_by": [
+      "npc_dota_hero_earthshaker",
+      "npc_dota_hero_leshrac",
+      "npc_dota_hero_sand_king"
+    ]
+  },
+  "90": {
+    "name": "npc_dota_hero_keeper_of_the_light",
+    "display_name": "Keeper of the Light",
+    "role": "Soft Support",
+    "attr": "int",
+    "aliases": [
+      "keeper_of_the_light",
+      "keeper of the light",
+      "kotl",
+      "котл",
+      "свет",
+      "старик"
+    ],
+    "tags": [
+      "illuminate_wave",
+      "chakra_magic_mana",
+      "blinding_light_miss"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_chaos_knight"
+    ],
+    "countered_by": [
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_nyx_assassin"
+    ]
+  },
+  "91": {
+    "name": "npc_dota_hero_wisp",
+    "display_name": "Io",
+    "role": "Hard Support",
+    "attr": "all",
+    "aliases": [
+      "ио",
+      "wisp",
+      "шарик",
+      "io",
+      "висп"
+    ],
+    "tags": [
+      "tether_heal_link",
+      "overcharge_attack_speed",
+      "relocate_teleport"
+    ],
+    "counters": [
+      "npc_dota_hero_drow_ranger",
+      "npc_dota_hero_sniper"
+    ],
+    "countered_by": [
+      "npc_dota_hero_spirit_breaker",
+      "npc_dota_hero_ancient_apparition",
+      "npc_dota_hero_disruptor"
+    ]
+  },
+  "92": {
+    "name": "npc_dota_hero_visage",
+    "display_name": "Visage",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "visage",
+      "визаж",
+      "гаргульи",
+      "птицы"
+    ],
+    "tags": [
+      "soul_assumption_nuke",
+      "gravekeepers_cloak_armor",
+      "familiars_stun"
+    ],
+    "counters": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "countered_by": [
+      "npc_dota_hero_bristleback",
+      "npc_dota_hero_tidehunter",
+      "npc_dota_hero_axe"
+    ]
+  },
+  "93": {
+    "name": "npc_dota_hero_slark",
+    "display_name": "Slark",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "сларк",
+      "slark",
+      "рыба"
+    ],
+    "tags": [
+      "dark_pact_cleanse",
+      "shadow_dance_stealth",
+      "essence_shift_steal"
+    ],
+    "counters": [
+      "npc_dota_hero_spectre",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "countered_by": [
+      "npc_dota_hero_bloodseeker",
+      "npc_dota_hero_axe",
+      "npc_dota_hero_legion_commander"
+    ]
+  },
+  "94": {
+    "name": "npc_dota_hero_medusa",
+    "display_name": "Medusa",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "дуза",
+      "медуза",
+      "medusa"
+    ],
+    "tags": [
+      "mana_shield_ehp",
+      "stone_gaze",
+      "split_shot",
+      "hyper_carry"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_chaos_knight"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_nyx_assassin",
+      "npc_dota_hero_invoker"
+    ]
+  },
+  "95": {
+    "name": "npc_dota_hero_troll_warlord",
+    "display_name": "Troll Warlord",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "тролль",
+      "troll warlord",
+      "troll_warlord",
+      "troll",
+      "джахака"
+    ],
+    "tags": [
+      "battle_trance_unkillable",
+      "fervor_speed",
+      "axes_blind"
+    ],
+    "counters": [
+      "npc_dota_hero_anti_mage",
+      "npc_dota_hero_spectre"
+    ],
+    "countered_by": [
+      "npc_dota_hero_axe",
+      "npc_dota_hero_winter_wyvern",
+      "npc_dota_hero_razor",
+      "npc_dota_hero_halberd"
+    ]
+  },
+  "96": {
+    "name": "npc_dota_hero_centaur",
+    "display_name": "Centaur Warrunner",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "кентавр",
+      "кент",
+      "centaur warrunner",
+      "centaur"
+    ],
+    "tags": [
+      "stampede_haste",
+      "hoof_stomp_stun",
+      "return_damage"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_windrunner"
+    ],
+    "countered_by": [
+      "npc_dota_hero_lifestealer",
+      "npc_dota_hero_necrolyte",
+      "npc_dota_hero_timbersaw"
+    ]
+  },
+  "97": {
+    "name": "npc_dota_hero_magnataur",
+    "display_name": "Magnus",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "magnus",
+      "магнус",
+      "рп",
+      "magnataur"
+    ],
+    "tags": [
+      "reverse_polarity_pull",
+      "skewer_drag",
+      "empower_cleave"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_meepo"
+    ],
+    "countered_by": [
+      "npc_dota_hero_rubick",
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_tidehunter"
+    ]
+  },
+  "98": {
+    "name": "npc_dota_hero_shredder",
+    "display_name": "Timbersaw",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "дровосек",
+      "пила",
+      "timbersaw",
+      "тимбер",
+      "shredder"
+    ],
+    "tags": [
+      "reactive_armor_regen",
+      "chakram_pure",
+      "whirling_death_stat_cut"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_broodmother",
+      "npc_dota_hero_monkey_king"
+    ],
+    "countered_by": [
+      "npc_dota_hero_viper",
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_outworld_destroyer"
+    ]
+  },
+  "99": {
+    "name": "npc_dota_hero_bristleback",
+    "display_name": "Bristleback",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "брист",
+      "bristleback",
+      "еж",
+      "бристл",
+      "бб",
+      "bb"
+    ],
+    "tags": [
+      "passive_heavy",
+      "quill_spray",
+      "back_damage_reduction",
+      "tank"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_meepo"
+    ],
+    "countered_by": [
+      "npc_dota_hero_viper",
+      "npc_dota_hero_slark",
+      "npc_dota_hero_legion_commander",
+      "npc_dota_hero_silver_edge"
+    ]
+  },
+  "100": {
+    "name": "npc_dota_hero_tusk",
+    "display_name": "Tusk",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "снежок",
+      "туск",
+      "морж",
+      "tusk"
+    ],
+    "tags": [
+      "snowball_save",
+      "walrus_punch_crit",
+      "tag_team_physical"
+    ],
+    "counters": [
+      "npc_dota_hero_crystal_maiden",
+      "npc_dota_hero_sniper"
+    ],
+    "countered_by": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_slardar"
+    ]
+  },
+  "101": {
+    "name": "npc_dota_hero_skywrath_mage",
+    "display_name": "Skywrath Mage",
+    "role": "Soft Support",
+    "attr": "int",
+    "aliases": [
+      "skywrath mage",
+      "skywrath_mage",
+      "скайврат",
+      "sky",
+      "петух",
+      "птица",
+      "скай"
+    ],
+    "tags": [
+      "mystic_flare_burst",
+      "ancient_seal_silence",
+      "concussive_shot"
+    ],
+    "counters": [
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_tinker"
+    ],
+    "countered_by": [
+      "npc_dota_hero_pugna",
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_nyx_assassin"
+    ]
+  },
+  "102": {
+    "name": "npc_dota_hero_abaddon",
+    "display_name": "Abaddon",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "абаддон",
+      "щит",
+      "abaddon",
+      "абадон"
+    ],
+    "tags": [
+      "borrowed_time_invulnerable",
+      "aphotic_shield_dispel",
+      "mist_coil_heal"
+    ],
+    "counters": [
+      "npc_dota_hero_bane",
+      "npc_dota_hero_mirana",
+      "npc_dota_hero_batrider"
+    ],
+    "countered_by": [
+      "npc_dota_hero_ancient_apparition",
+      "npc_dota_hero_slark",
+      "npc_dota_hero_outworld_destroyer"
+    ]
+  },
+  "103": {
+    "name": "npc_dota_hero_elder_titan",
+    "display_name": "Elder Titan",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "дух",
+      "ет",
+      "et",
+      "elder titan",
+      "elder_titan",
+      "титан"
+    ],
+    "tags": [
+      "natural_order_zero_armor_res",
+      "echo_stomp_sleep",
+      "earth_splitter"
+    ],
+    "counters": [
+      "npc_dota_hero_morphling",
+      "npc_dota_hero_terrorblade",
+      "npc_dota_hero_meepo"
+    ],
+    "countered_by": [
+      "npc_dota_hero_juggernaut",
+      "npc_dota_hero_rubick",
+      "npc_dota_hero_sniper"
+    ]
+  },
+  "104": {
+    "name": "npc_dota_hero_legion_commander",
+    "display_name": "Legion Commander",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "дуэль",
+      "legion commander",
+      "lc",
+      "legion_commander",
+      "лк",
+      "легионка"
+    ],
+    "tags": [
+      "duel_lockdown",
+      "permanent_damage_gain",
+      "press_the_attack_dispel"
+    ],
+    "counters": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_slark",
+      "npc_dota_hero_phantom_assassin"
+    ],
+    "countered_by": [
+      "npc_dota_hero_dazzle",
+      "npc_dota_hero_oracle",
+      "npc_dota_hero_underlord"
+    ]
+  },
+  "105": {
+    "name": "npc_dota_hero_techies",
+    "display_name": "Techies",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "бомбы",
+      "течис",
+      "techies",
+      "минер"
+    ],
+    "tags": [
+      "sticky_bomb",
+      "blast_off_silence",
+      "minefield_sign"
+    ],
+    "counters": [
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_sniper"
+    ],
+    "countered_by": [
+      "npc_dota_hero_wraith_king",
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_zeus"
+    ]
+  },
+  "106": {
+    "name": "npc_dota_hero_ember_spirit",
+    "display_name": "Ember Spirit",
+    "role": "Mid",
+    "attr": "agi",
+    "aliases": [
+      "фисты",
+      "ember",
+      "эмбер",
+      "ember spirit",
+      "ember_spirit"
+    ],
+    "tags": [
+      "sleight_of_fist",
+      "remnant_escape",
+      "flame_guard"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_broodmother"
+    ],
+    "countered_by": [
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_huskar"
+    ]
+  },
+  "107": {
+    "name": "npc_dota_hero_earth_spirit",
+    "display_name": "Earth Spirit",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "earth spirit",
+      "земля",
+      "земеля",
+      "камни",
+      "earth_spirit"
+    ],
+    "tags": [
+      "rolling_boulder_stun",
+      "magnetize_spread",
+      "geomagnetic_grip_silence"
+    ],
+    "counters": [
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_sniper"
+    ],
+    "countered_by": [
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_bloodseeker",
+      "npc_dota_hero_abaddon"
+    ]
+  },
+  "108": {
+    "name": "npc_dota_hero_abyssal_underlord",
+    "display_name": "Underlord",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "abyssal_underlord",
+      "питлорд",
+      "андерлорд",
+      "портал",
+      "underlord"
+    ],
+    "tags": [
+      "atrophy_aura_damage_reduction",
+      "pit_of_malice_root",
+      "firestorm_percent"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_sven",
+      "npc_dota_hero_terrorblade"
+    ],
+    "countered_by": [
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_slark",
+      "npc_dota_hero_rubick"
+    ]
+  },
+  "109": {
+    "name": "npc_dota_hero_terrorblade",
+    "display_name": "Terrorblade",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "террор",
+      "тб",
+      "сандер",
+      "tb",
+      "terrorblade"
+    ],
+    "tags": [
+      "sunder_hp_swap",
+      "metamorphosis_ranged",
+      "high_base_armor"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_spectre"
+    ],
+    "countered_by": [
+      "npc_dota_hero_tinker",
+      "npc_dota_hero_leshrac",
+      "npc_dota_hero_zeus",
+      "npc_dota_hero_earthshaker"
+    ]
+  },
+  "110": {
+    "name": "npc_dota_hero_phoenix",
+    "display_name": "Phoenix",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "птица",
+      "phoenix",
+      "яйцо",
+      "феникс"
+    ],
+    "tags": [
+      "supernova_egg",
+      "fire_spirits_attack_slow",
+      "sun_ray_percent_heal"
+    ],
+    "counters": [
+      "npc_dota_hero_templar_assassin",
+      "npc_dota_hero_phantom_assassin"
+    ],
+    "countered_by": [
+      "npc_dota_hero_troll_warlord",
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_snapfire",
+      "npc_dota_hero_juggernaut"
+    ]
+  },
+  "111": {
+    "name": "npc_dota_hero_oracle",
+    "display_name": "Oracle",
+    "role": "Hard Support",
+    "attr": "int",
+    "aliases": [
+      "ульт",
+      "оракул",
+      "сейв",
+      "oracle"
+    ],
+    "tags": [
+      "false_promise_delay_damage",
+      "purifying_flames_heal",
+      "fate_edict_magic_immune"
+    ],
+    "counters": [
+      "npc_dota_hero_legion_commander",
+      "npc_dota_hero_batrider",
+      "npc_dota_hero_necrolyte"
+    ],
+    "countered_by": [
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_riki",
+      "npc_dota_hero_silencer"
+    ]
+  },
+  "112": {
+    "name": "npc_dota_hero_winter_wyvern",
+    "display_name": "Winter Wyvern",
+    "role": "Hard Support",
+    "attr": "all",
+    "aliases": [
+      "ww",
+      "вв",
+      "winter wyvern",
+      "курса",
+      "виверна",
+      "winter_wyvern"
+    ],
+    "tags": [
+      "winters_curse_taunt",
+      "cold_embrace_phys_immune",
+      "arctic_burn_slow"
+    ],
+    "counters": [
+      "npc_dota_hero_meepo",
+      "npc_dota_hero_chaos_knight",
+      "npc_dota_hero_terrorblade"
+    ],
+    "countered_by": [
+      "npc_dota_hero_timbersaw",
+      "npc_dota_hero_rubick",
+      "npc_dota_hero_silencer"
+    ]
+  },
+  "113": {
+    "name": "npc_dota_hero_arc_warden",
+    "display_name": "Arc Warden",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "arc_warden",
+      "двойник",
+      "arc warden",
+      "варден",
+      "арк"
+    ],
+    "tags": [
+      "tempest_double_clone",
+      "magnetic_field_evasion",
+      "spark_wraith_trap"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "countered_by": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_broodmother"
+    ]
+  },
+  "114": {
+    "name": "npc_dota_hero_monkey_king",
+    "display_name": "Monkey King",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "monkey_king",
+      "mk",
+      "обезьяна",
+      "палка",
+      "мк",
+      "monkey king"
+    ],
+    "tags": [
+      "jingu_mastery",
+      "wukongs_command",
+      "tree_dance"
+    ],
+    "counters": [
+      "npc_dota_hero_slark",
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_bristleback"
+    ],
+    "countered_by": [
+      "npc_dota_hero_timbersaw",
+      "npc_dota_hero_beastmaster",
+      "npc_dota_hero_batrider"
+    ]
+  },
+  "119": {
+    "name": "npc_dota_hero_dark_willow",
+    "display_name": "Dark Willow",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "dark willow",
+      "дв",
+      "фея",
+      "dw",
+      "dark_willow",
+      "вилка"
+    ],
+    "tags": [
+      "shadow_realm_untargetable",
+      "bramble_maze_root",
+      "bedlam_terrorize"
+    ],
+    "counters": [
+      "npc_dota_hero_monkey_king",
+      "npc_dota_hero_ursa"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_juggernaut",
+      "npc_dota_hero_puck"
+    ]
+  },
+  "120": {
+    "name": "npc_dota_hero_pangolier",
+    "display_name": "Pangolier",
+    "role": "Offlane",
+    "attr": "all",
+    "aliases": [
+      "панго",
+      "pangolier",
+      "рулет",
+      "шар",
+      "пангольер"
+    ],
+    "tags": [
+      "rolling_thunder_spell_immune",
+      "swashbuckle_slash",
+      "shield_crash"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_broodmother"
+    ],
+    "countered_by": [
+      "npc_dota_hero_bloodseeker",
+      "npc_dota_hero_bane",
+      "npc_dota_hero_faceless_void"
+    ]
+  },
+  "121": {
+    "name": "npc_dota_hero_grimstroke",
+    "display_name": "Grimstroke",
+    "role": "Hard Support",
+    "attr": "all",
+    "aliases": [
+      "кисть",
+      "гримстрок",
+      "грим",
+      "grimstroke"
+    ],
+    "tags": [
+      "soulbind_double_target",
+      "ink_swell_stun",
+      "phantom_silence"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_meepo"
+    ],
+    "countered_by": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_silencer"
+    ]
+  },
+  "123": {
+    "name": "npc_dota_hero_hoodwink",
+    "display_name": "Hoodwink",
+    "role": "Soft Support",
+    "attr": "agi",
+    "aliases": [
+      "белка",
+      "худвинк",
+      "арбалет",
+      "hoodwink"
+    ],
+    "tags": [
+      "sharpshooter_break",
+      "bushwhack_tree_stun",
+      "acorn_shot"
+    ],
+    "counters": [
+      "npc_dota_hero_bristleback",
+      "npc_dota_hero_spectre",
+      "npc_dota_hero_huskar"
+    ],
+    "countered_by": [
+      "npc_dota_hero_storm_spirit",
+      "npc_dota_hero_spirit_breaker"
+    ]
+  },
+  "126": {
+    "name": "npc_dota_hero_void_spirit",
+    "display_name": "Void Spirit",
+    "role": "Mid",
+    "attr": "all",
+    "aliases": [
+      "void_spirit",
+      "void spirit",
+      "воид спирит",
+      "инай",
+      "фиолетовый"
+    ],
+    "tags": [
+      "astral_step_burst",
+      "dissimilate_untargetable",
+      "aether_remnant_pull"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_tinker"
+    ],
+    "countered_by": [
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_night_stalker",
+      "npc_dota_hero_puck"
+    ]
+  },
+  "128": {
+    "name": "npc_dota_hero_snapfire",
+    "display_name": "Snapfire",
+    "role": "Soft Support",
+    "attr": "all",
+    "aliases": [
+      "ящерица",
+      "снепфайр",
+      "snapfire",
+      "бабка"
+    ],
+    "tags": [
+      "mortimer_kisses_artillery",
+      "lil_shredder_attacks",
+      "cookie_jump_stun"
+    ],
+    "counters": [
+      "npc_dota_hero_phoenix",
+      "npc_dota_hero_tombstone",
+      "npc_dota_hero_undying"
+    ],
+    "countered_by": [
+      "npc_dota_hero_faceless_void",
+      "npc_dota_hero_storm_spirit"
+    ]
+  },
+  "129": {
+    "name": "npc_dota_hero_mars",
+    "display_name": "Mars",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "арена",
+      "копье",
+      "mars",
+      "марс"
+    ],
+    "tags": [
+      "arena_of_blood",
+      "spear_stun",
+      "gods_rebuke_crit",
+      "anti_ranged"
+    ],
+    "counters": [
+      "npc_dota_hero_drow_ranger",
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_windrunner"
+    ],
+    "countered_by": [
+      "npc_dota_hero_lifestealer",
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_viper"
+    ]
+  },
+  "135": {
+    "name": "npc_dota_hero_dawnbreaker",
+    "display_name": "Dawnbreaker",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "dawnbreaker",
+      "валора",
+      "даунбрейкер",
+      "молот"
+    ],
+    "tags": [
+      "solar_guardian_global_heal",
+      "starbreaker_aoe",
+      "converge"
+    ],
+    "counters": [
+      "npc_dota_hero_phantom_lancer",
+      "npc_dota_hero_meepo"
+    ],
+    "countered_by": [
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_disruptor",
+      "npc_dota_hero_nyx_assassin"
+    ]
+  },
+  "136": {
+    "name": "npc_dota_hero_marci",
+    "display_name": "Marci",
+    "role": "Carry",
+    "attr": "all",
+    "aliases": [
+      "marci",
+      "бокс",
+      "марсичка",
+      "марси"
+    ],
+    "tags": [
+      "unleash_rapid_punch",
+      "rebound_jump",
+      "sidekick_lifesteal"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "countered_by": [
+      "npc_dota_hero_razor",
+      "npc_dota_hero_halberd",
+      "npc_dota_hero_axe"
+    ]
+  },
+  "137": {
+    "name": "npc_dota_hero_primal_beast",
+    "display_name": "Primal Beast",
+    "role": "Offlane",
+    "attr": "str",
+    "aliases": [
+      "primal beast",
+      "динозавр",
+      "бегемот",
+      "праймал",
+      "primal_beast"
+    ],
+    "tags": [
+      "onslaught_charge",
+      "pulverize_bkb_pierce",
+      "uproar_damage"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "countered_by": [
+      "npc_dota_hero_viper",
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_razor"
+    ]
+  },
+  "138": {
+    "name": "npc_dota_hero_muerta",
+    "display_name": "Muerta",
+    "role": "Carry",
+    "attr": "int",
+    "aliases": [
+      "пистолеты",
+      "muerta",
+      "муерта",
+      "муэрта"
+    ],
+    "tags": [
+      "pierce_the_veil_ethereal",
+      "gunslinger",
+      "magic_rightclick"
+    ],
+    "counters": [
+      "npc_dota_hero_terrorblade",
+      "npc_dota_hero_sven",
+      "npc_dota_hero_morphling"
+    ],
+    "countered_by": [
+      "npc_dota_hero_antimage",
+      "npc_dota_hero_bkb_users",
+      "npc_dota_hero_sniper"
+    ]
+  },
+  "145": {
+    "name": "npc_dota_hero_ringmaster",
+    "display_name": "Ringmaster",
+    "role": "Soft Support",
+    "attr": "int",
+    "aliases": [
+      "рингмастер",
+      "ringmaster",
+      "клоун",
+      "циркач"
+    ],
+    "tags": [
+      "wheel_of_wonder",
+      "tame_the_beasts",
+      "escape_act_save"
+    ],
+    "counters": [
+      "npc_dota_hero_enigma",
+      "npc_dota_hero_tidehunter",
+      "npc_dota_hero_faceless_void"
+    ],
+    "countered_by": [
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_nyx_assassin",
+      "npc_dota_hero_slark"
+    ]
+  },
+  "146": {
+    "name": "npc_dota_hero_kez",
+    "display_name": "Kez",
+    "role": "Carry",
+    "attr": "agi",
+    "aliases": [
+      "kez",
+      "птица",
+      "самурай",
+      "кез"
+    ],
+    "tags": [
+      "katana_sai_stances",
+      "high_mobility",
+      "bleed_burst"
+    ],
+    "counters": [
+      "npc_dota_hero_sniper",
+      "npc_dota_hero_drow_ranger",
+      "npc_dota_hero_zeus"
+    ],
+    "countered_by": [
+      "npc_dota_hero_axe",
+      "npc_dota_hero_legion_commander",
+      "npc_dota_hero_bloodseeker"
+    ]
+  }
+}

@@ -1,0 +1,165 @@
+[
+  {
+    "id": "item_black_king_bar",
+    "name": "Black King Bar",
+    "icon": "bkb",
+    "trigger_tags": ["magic_burst", "heavy_aoe_stun", "long_hex_shackle"],
+    "priority": 10,
+    "advice_ru": "Защита от массового маг. урона и контроля",
+    "advice_en": "Immunity against heavy magical burst and stuns"
+  },
+  {
+    "id": "item_silver_edge",
+    "name": "Silver Edge",
+    "icon": "silver_edge",
+    "trigger_heroes": [
+      "npc_dota_hero_bristleback",
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_spectre",
+      "npc_dota_hero_huskar",
+      "npc_dota_hero_viper",
+      "npc_dota_hero_tidehunter"
+    ],
+    "priority": 9,
+    "advice_ru": "Отключение ключевых пассивок врага (Истощение/Break)",
+    "advice_en": "Break enemy passives (Bristleback, PA, Spectre)"
+  },
+  {
+    "id": "item_monkey_king_bar",
+    "name": "Monkey King Bar",
+    "icon": "mkb",
+    "trigger_heroes": [
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_windrunner",
+      "npc_dota_hero_brewmaster"
+    ],
+    "trigger_tags": ["evasion"],
+    "priority": 9,
+    "advice_ru": "Пробивание уклонений (True Strike против миссов)",
+    "advice_en": "True Strike to counter evasion & blind"
+  },
+  {
+    "id": "item_spirit_vessel",
+    "name": "Spirit Vessel",
+    "icon": "spirit_vessel",
+    "trigger_heroes": [
+      "npc_dota_hero_morphling",
+      "npc_dota_hero_alchemist",
+      "npc_dota_hero_necrolyte",
+      "npc_dota_hero_slark",
+      "npc_dota_hero_huskar",
+      "npc_dota_hero_dazzle"
+    ],
+    "trigger_tags": ["high_regen"],
+    "priority": 8,
+    "advice_ru": "Снижение бешеного отхила и регенерации на 45%",
+    "advice_en": "Reduces extreme HP regen/healing by 45%"
+  },
+  {
+    "id": "item_shivas_guard",
+    "name": "Shiva's Guard",
+    "icon": "shivas_guard",
+    "trigger_tags": ["illusion", "high_regen"],
+    "priority": 8,
+    "advice_ru": "Снижение хила + броня и аура замедления атак",
+    "advice_en": "Reduces regen/lifesteal + armor & attack slow aura"
+  },
+  {
+    "id": "item_sphere",
+    "name": "Linken's Sphere",
+    "icon": "linkens",
+    "trigger_heroes": [
+      "npc_dota_hero_doom_bringer",
+      "npc_dota_hero_legion_commander",
+      "npc_dota_hero_batrider",
+      "npc_dota_hero_spirit_breaker",
+      "npc_dota_hero_bane",
+      "npc_dota_hero_bloodseeker"
+    ],
+    "priority": 7,
+    "advice_ru": "Блок точечных ультимейтов (Duel, Doom, Rupture, Roar)",
+    "advice_en": "Blocks deadly single-target initiations"
+  },
+  {
+    "id": "item_lotus_orb",
+    "name": "Lotus Orb",
+    "icon": "lotus_orb",
+    "trigger_heroes": [
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_bounty_hunter",
+      "npc_dota_hero_slardar",
+      "npc_dota_hero_clinkz"
+    ],
+    "priority": 7,
+    "advice_ru": "Снятие дебаффов и сайленса (Purge) + отражение скиллов",
+    "advice_en": "Dispel debuffs/silence + echo shell"
+  },
+  {
+    "id": "item_dust",
+    "name": "Dust of Appearance",
+    "icon": "dust",
+    "trigger_heroes": [
+      "npc_dota_hero_riki",
+      "npc_dota_hero_clinkz",
+      "npc_dota_hero_bounty_hunter",
+      "npc_dota_hero_nyx_assassin",
+      "npc_dota_hero_weaver"
+    ],
+    "trigger_tags": ["invis"],
+    "priority": 10,
+    "advice_ru": "Обязательно носить против невидимых героев!",
+    "advice_en": "Essential True Sight detection vs invis"
+  },
+  {
+    "id": "item_manta",
+    "name": "Manta Style",
+    "icon": "manta",
+    "trigger_heroes": [
+      "npc_dota_hero_silencer",
+      "npc_dota_hero_treant_protector",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "priority": 8,
+    "advice_ru": "Мгновенное снятие безмолвия и замедления (Dispel)",
+    "advice_en": "Instant basic dispel for silences and roots"
+  },
+  {
+    "id": "item_ghost",
+    "name": "Ghost Scepter",
+    "icon": "ghost",
+    "trigger_heroes": [
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_sven",
+      "npc_dota_hero_phantom_assassin",
+      "npc_dota_hero_juggernaut",
+      "npc_dota_hero_clinkz"
+    ],
+    "priority": 8,
+    "advice_ru": "Спасение саппорта от ваншота физ. дамагеров",
+    "advice_en": "Immunity to physical attacks (Omnislash, Sven god strength)"
+  },
+  {
+    "id": "item_heavens_halberd",
+    "name": "Heaven's Halberd",
+    "icon": "halberd",
+    "trigger_heroes": [
+      "npc_dota_hero_ursa",
+      "npc_dota_hero_sven",
+      "npc_dota_hero_huskar",
+      "npc_dota_hero_troll_warlord",
+      "npc_dota_hero_drow_ranger"
+    ],
+    "priority": 7,
+    "advice_ru": "Безоружность (Disarm) на 3–5 секунд через BKB",
+    "advice_en": "Disarm right-click carries (cannot be dispelled by BKB if applied first)"
+  },
+  {
+    "id": "item_bloodthorn",
+    "name": "Bloodthorn",
+    "icon": "bloodthorn",
+    "trigger_tags": ["elusive", "evasion"],
+    "priority": 6,
+    "advice_ru": "Сайленс + гарантированные криты и True Strike всей тиме",
+    "advice_en": "Silence + True Strike + 100% team crits on target"
+  }
+]

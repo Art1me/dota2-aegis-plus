@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AegisPlus - Dota 2 Pro Overlay</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="hud-container" id="hudContainer">
+    
+    <!-- Top Bar Controls & Radar -->
+    <header class="top-bar">
+      <!-- Left Controls Cluster -->
+      <div class="controls-cluster glass interactive">
+        <div class="status-pill">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusText">Ожидание Dota 2</span>
+        </div>
+
+        <div class="selector-group">
+          <span class="selector-label">Ранг:</span>
+          <select id="rankSelector">
+            <option value="Herald">Herald</option>
+            <option value="Guardian">Guardian</option>
+            <option value="Crusader">Crusader</option>
+            <option value="Archon" selected>Archon</option>
+            <option value="Legend">Legend</option>
+            <option value="Ancient">Ancient</option>
+            <option value="Divine">Divine</option>
+            <option value="Immortal">Immortal</option>
+          </select>
+        </div>
+
+        <div class="selector-group">
+          <span class="selector-label">Роль:</span>
+          <select id="roleSelector">
+            <option value="Carry" selected>Pos 1 (Carry)</option>
+            <option value="Mid">Pos 2 (Mid)</option>
+            <option value="Offlane">Pos 3 (Offlane)</option>
+            <option value="Support">Pos 4/5 (Support)</option>
+          </select>
+        </div>
+
+        <button class="btn-icon" id="btnDraftToggle" title="Открыть драфт-помощник и выбор врагов">
+          <span>🎯 Драфт</span>
+        </button>
+
+        <button class="btn-icon active" id="btnAudioToggle" title="Звуковые подсказки">
+          <span id="audioIcon">🔊 Звук</span>
+        </button>
+
+        <button class="btn-icon" id="btnSimulate" title="Запустить симуляцию матча для теста">
+          <span>▶ Демо</span>
+        </button>
+
+        <button class="btn-icon" id="btnClickthrough" title="Блокировка кликов (прокликивание в игру)">
+          <span id="lockIcon">🔓 Меню</span>
+        </button>
+      </div>
+
+      <!-- Macro Radar (Top Center) -->
+      <div class="macro-radar glass interactive" id="macroRadar">
+        <div class="clock-display">
+          <span class="clock-time" id="clockDisplay">00:00</span>
+          <span class="clock-sub" id="dayNightSub">День</span>
+        </div>
+
+        <div class="timer-chips" id="timerChips">
+          <div class="timer-chip">
+            <span>🌸 Лотос:</span>
+            <span class="chip-time">03:00</span>
+          </div>
+          <div class="timer-chip">
+            <span>🌟 Мудрость:</span>
+            <span class="chip-time">07:00</span>
+          </div>
+          <div class="timer-chip">
+            <span>⚡ Руна:</span>
+            <span class="chip-time">06:00</span>
+          </div>
+          <div class="timer-chip">
+            <span>🛡️ Рошан:</span>
+            <span class="chip-time">Жив</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Compact Toast Alerts Banner (Top-Right) -->
+    <div class="alerts-banner" id="alertsBanner">
+      <!-- Dynamically populated toasts with countdown and auto-fade -->
+    </div>
+
+    <!-- Main In-Game HUD -->
+    <main class="main-body" id="mainBody">
+      <!-- Left Panel: Shifted above minimap (leaves bottom 310px free) -->
+      <aside class="left-hud">
+        <div class="hud-card glass interactive" id="itemsCard">
+          <div class="card-header">
+            <span class="card-title">💡 Рекомендации сборок</span>
+            <span class="selector-label">Ситуативные</span>
+          </div>
+          <div id="itemsContainer" style="display: flex; flex-direction: column; gap: 6px;">
+            <!-- Populated with fixed icons & steam CDN -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center Spacer / Game View Area -->
+      <div style="flex: 1;"></div>
+
+      <!-- Right Panel: Live Benchmarks & Buyback -->
+      <aside class="right-hud">
+        <!-- Benchmarks Card -->
+        <div class="hud-card glass interactive" id="benchmarksCard">
+          <div class="card-header">
+            <span class="card-title">📊 Бенчмарк ранга</span>
+            <div class="grade-badge" id="gradeBadge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
+              <span id="gradeLetter">A</span>
+              <span id="gradeLabel">В графике</span>
+            </div>
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-name">Крипстат (LH / DN):</span>
+            <div class="metric-value-wrap">
+              <span class="metric-val" id="metricCS">0 / 0</span>
+              <span class="metric-delta positive" id="deltaCS">+0</span>
+            </div>
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-name">Нетворс:</span>
+            <div class="metric-value-wrap">
+              <span class="metric-val" id="metricNW">600 💰</span>
+              <span class="metric-delta positive" id="deltaNW">+0</span>
+            </div>
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-name">Темп GPM / XPM:</span>
+            <div class="metric-value-wrap">
+              <span class="metric-val" id="metricGPM">0 / 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Buyback Card with 4 statuses & death loss indicator -->
+        <div class="hud-card glass interactive" id="buybackCard">
+          <div class="card-header">
+            <span class="card-title">🪙 Статус выкупа</span>
+            <span class="selector-label" id="bbSurplusLabel">+0g</span>
+          </div>
+          <div class="buyback-status-box" id="bbStatusBox">
+            <div style="display: flex; flex-direction: column;">
+              <span class="bb-title" id="bbStatusText">Выкуп готов</span>
+              <span style="font-size: 10px; color: var(--text-muted);" id="bbRiskNote"></span>
+            </div>
+            <span class="bb-cost" id="bbCost">240 💰</span>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Draft Assistant Overlay Modal -->
+    <div class="draft-overlay glass interactive hidden" id="draftOverlay">
+      <div class="draft-header">
+        <div>
+          <h2 style="font-size: 15px; font-weight: 800;">🎯 Ассистент драфта и контрпиков</h2>
+          <span style="font-size: 11px; color: var(--text-muted);">Анализ сетапов и синергий команд</span>
+        </div>
+        <div class="advantage-bar-wrap">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700;">
+            <span style="color: var(--color-green);">Radiant: <span id="radAdvantage">50%</span></span>
+            <span style="color: var(--color-red);">Dire: <span id="direAdvantage">50%</span></span>
+          </div>
+          <div class="advantage-bar">
+            <div class="advantage-fill" id="advantageFill" style="width: 50%;"></div>
+          </div>
+        </div>
+        <button class="btn-icon" id="btnCloseDraft">✕</button>
+      </div>
+
+      <!-- Manual Enemy Heroes Picker (for All Pick / Ranked) -->
+      <div class="manual-enemies-section">
+        <div class="manual-enemies-header">
+          <span style="font-weight: 700; font-size: 11px; color: #f87171;">⚔️ Пик противника (для All Pick / Рейтинга):</span>
+          <span style="font-size: 10px; color: var(--text-muted);" id="manualEnemiesCount">0/5 выбрано</span>
+        </div>
+        <div class="enemy-slots-grid" id="enemySlotsGrid">
+          <!-- 5 slots rendered via JS -->
+        </div>
+        <div class="hero-search-wrapper" id="heroSearchWrapper">
+          <input type="text" id="heroSearchInput" placeholder="🔍 Введите имя героя врага (напр. Bristle, PA, Morphling, Pudge)..." autocomplete="off" />
+          <div class="hero-dropdown hidden" id="heroDropdown"></div>
+        </div>
+      </div>
+
+      <!-- Role Tabs -->
+      <div class="draft-tabs">
+        <button class="draft-tab active" data-role="Carry">Pos 1 (Carry)</button>
+        <button class="draft-tab" data-role="Mid">Pos 2 (Mid)</button>
+        <button class="draft-tab" data-role="Offlane">Pos 3 (Offlane)</button>
+        <button class="draft-tab" data-role="Support">Pos 4/5 (Support)</button>
+      </div>
+
+      <!-- Counter Pick Grid -->
+      <div class="recommendations-grid" id="draftRecGrid">
+        <!-- Populated via JS -->
+      </div>
+
+      <!-- Recommended Bans & Team Gaps -->
+      <div style="display: flex; gap: 10px; margin-top: 6px;">
+        <div style="flex: 1; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
+          <span style="font-size: 11px; font-weight: 700; color: #f87171;">🚫 Рекомендуемые баны:</span>
+          <div id="banList" style="font-size: 11px; color: #cbd5e1; margin-top: 4px;"></div>
+        </div>
+        <div style="flex: 1; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
+          <span style="font-size: 11px; font-weight: 700; color: #fbbf24;">⚠️ Проблемы сетапа:</span>
+          <div id="gapsList" style="font-size: 11px; color: #cbd5e1; margin-top: 4px;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

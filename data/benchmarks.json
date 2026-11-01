@@ -1,0 +1,166 @@
+{
+  "ranks": ["Herald", "Guardian", "Crusader", "Archon", "Legend", "Ancient", "Divine", "Immortal"],
+  "roles": ["Carry", "Mid", "Offlane", "Soft Support", "Hard Support"],
+  "benchmarks": {
+    "Herald": {
+      "Carry": {
+        "5":  { "cs": 18, "denies": 2, "net_worth": 1600, "gpm": 320, "xpm": 340 },
+        "10": { "cs": 40, "denies": 4, "net_worth": 3300, "gpm": 360, "xpm": 400 },
+        "15": { "cs": 70, "denies": 5, "net_worth": 5400, "gpm": 390, "xpm": 450 },
+        "20": { "cs": 110, "denies": 6, "net_worth": 8200, "gpm": 420, "xpm": 500 },
+        "25": { "cs": 150, "denies": 7, "net_worth": 11000, "gpm": 450, "xpm": 540 },
+        "30": { "cs": 195, "denies": 8, "net_worth": 14200, "gpm": 480, "xpm": 580 },
+        "40": { "cs": 280, "denies": 9, "net_worth": 20000, "gpm": 510, "xpm": 620 }
+      },
+      "Mid": {
+        "5":  { "cs": 20, "denies": 3, "net_worth": 1700, "gpm": 340, "xpm": 420 },
+        "10": { "cs": 45, "denies": 5, "net_worth": 3600, "gpm": 380, "xpm": 480 },
+        "15": { "cs": 75, "denies": 6, "net_worth": 5800, "gpm": 410, "xpm": 520 },
+        "20": { "cs": 115, "denies": 7, "net_worth": 8600, "gpm": 440, "xpm": 570 },
+        "30": { "cs": 190, "denies": 8, "net_worth": 14500, "gpm": 490, "xpm": 620 }
+      },
+      "Offlane": {
+        "5":  { "cs": 14, "denies": 2, "net_worth": 1450, "gpm": 290, "xpm": 330 },
+        "10": { "cs": 32, "denies": 3, "net_worth": 2900, "gpm": 330, "xpm": 390 },
+        "15": { "cs": 58, "denies": 4, "net_worth": 4800, "gpm": 360, "xpm": 440 },
+        "20": { "cs": 90, "denies": 5, "net_worth": 7200, "gpm": 390, "xpm": 480 },
+        "30": { "cs": 150, "denies": 6, "net_worth": 12000, "gpm": 430, "xpm": 530 }
+      },
+      "Support": {
+        "5":  { "cs": 4, "denies": 2, "net_worth": 1100, "gpm": 220, "xpm": 260, "wards": 2 },
+        "10": { "cs": 10, "denies": 3, "net_worth": 2100, "gpm": 250, "xpm": 310, "wards": 5 },
+        "15": { "cs": 18, "denies": 4, "net_worth": 3300, "gpm": 270, "xpm": 350, "wards": 8 },
+        "20": { "cs": 28, "denies": 4, "net_worth": 4800, "gpm": 290, "xpm": 390, "wards": 11 },
+        "30": { "cs": 50, "denies": 5, "net_worth": 7800, "gpm": 320, "xpm": 440, "wards": 16 }
+      }
+    },
+    "Archon": {
+      "Carry": {
+        "5":  { "cs": 26, "denies": 5, "net_worth": 1950, "gpm": 390, "xpm": 410 },
+        "10": { "cs": 58, "denies": 9, "net_worth": 4200, "gpm": 460, "xpm": 500 },
+        "15": { "cs": 105, "denies": 11, "net_worth": 7200, "gpm": 510, "xpm": 560 },
+        "20": { "cs": 165, "denies": 13, "net_worth": 11200, "gpm": 570, "xpm": 620 },
+        "25": { "cs": 230, "denies": 14, "net_worth": 15500, "gpm": 630, "xpm": 680 },
+        "30": { "cs": 300, "denies": 15, "net_worth": 20000, "gpm": 680, "xpm": 730 },
+        "40": { "cs": 430, "denies": 16, "net_worth": 28000, "gpm": 720, "xpm": 790 }
+      },
+      "Mid": {
+        "5":  { "cs": 28, "denies": 6, "net_worth": 2100, "gpm": 420, "xpm": 490 },
+        "10": { "cs": 62, "denies": 10, "net_worth": 4600, "gpm": 490, "xpm": 570 },
+        "15": { "cs": 110, "denies": 12, "net_worth": 7800, "gpm": 540, "xpm": 630 },
+        "20": { "cs": 170, "denies": 13, "net_worth": 11800, "gpm": 600, "xpm": 690 },
+        "30": { "cs": 290, "denies": 15, "net_worth": 19800, "gpm": 670, "xpm": 750 }
+      },
+      "Offlane": {
+        "5":  { "cs": 20, "denies": 4, "net_worth": 1750, "gpm": 350, "xpm": 390 },
+        "10": { "cs": 46, "denies": 6, "net_worth": 3700, "gpm": 410, "xpm": 460 },
+        "15": { "cs": 80, "denies": 7, "net_worth": 6200, "gpm": 450, "xpm": 520 },
+        "20": { "cs": 125, "denies": 8, "net_worth": 9500, "gpm": 490, "xpm": 570 },
+        "30": { "cs": 215, "denies": 10, "net_worth": 16000, "gpm": 540, "xpm": 630 }
+      },
+      "Support": {
+        "5":  { "cs": 6, "denies": 4, "net_worth": 1350, "gpm": 260, "xpm": 300, "wards": 3 },
+        "10": { "cs": 14, "denies": 5, "net_worth": 2600, "gpm": 290, "xpm": 360, "wards": 7 },
+        "15": { "cs": 26, "denies": 6, "net_worth": 4200, "gpm": 320, "xpm": 410, "wards": 11 },
+        "20": { "cs": 40, "denies": 6, "net_worth": 6200, "gpm": 350, "xpm": 460, "wards": 15 },
+        "30": { "cs": 75, "denies": 7, "net_worth": 10200, "gpm": 380, "xpm": 510, "wards": 22 }
+      }
+    },
+    "Legend": {
+      "Carry": {
+        "5":  { "cs": 30, "denies": 7, "net_worth": 2150, "gpm": 430, "xpm": 440 },
+        "10": { "cs": 68, "denies": 12, "net_worth": 4800, "gpm": 520, "xpm": 550 },
+        "15": { "cs": 122, "denies": 14, "net_worth": 8200, "gpm": 580, "xpm": 620 },
+        "20": { "cs": 190, "denies": 16, "net_worth": 12800, "gpm": 645, "xpm": 690 },
+        "25": { "cs": 265, "denies": 17, "net_worth": 17800, "gpm": 710, "xpm": 750 },
+        "30": { "cs": 345, "denies": 18, "net_worth": 23200, "gpm": 770, "xpm": 810 },
+        "40": { "cs": 490, "denies": 20, "net_worth": 32000, "gpm": 810, "xpm": 860 }
+      },
+      "Mid": {
+        "5":  { "cs": 32, "denies": 8, "net_worth": 2300, "gpm": 460, "xpm": 530 },
+        "10": { "cs": 72, "denies": 13, "net_worth": 5200, "gpm": 550, "xpm": 620 },
+        "15": { "cs": 125, "denies": 15, "net_worth": 8800, "gpm": 610, "xpm": 680 },
+        "20": { "cs": 195, "denies": 16, "net_worth": 13200, "gpm": 670, "xpm": 740 },
+        "30": { "cs": 330, "denies": 18, "net_worth": 22500, "gpm": 750, "xpm": 810 }
+      },
+      "Offlane": {
+        "5":  { "cs": 24, "denies": 5, "net_worth": 1900, "gpm": 380, "xpm": 420 },
+        "10": { "cs": 54, "denies": 8, "net_worth": 4200, "gpm": 450, "xpm": 490 },
+        "15": { "cs": 94, "denies": 10, "net_worth": 7100, "gpm": 500, "xpm": 560 },
+        "20": { "cs": 145, "denies": 11, "net_worth": 10800, "gpm": 550, "xpm": 620 },
+        "30": { "cs": 245, "denies": 12, "net_worth": 18200, "gpm": 610, "xpm": 690 }
+      },
+      "Support": {
+        "5":  { "cs": 7, "denies": 5, "net_worth": 1450, "gpm": 280, "xpm": 320, "wards": 4 },
+        "10": { "cs": 17, "denies": 6, "net_worth": 2850, "gpm": 315, "xpm": 390, "wards": 8 },
+        "15": { "cs": 31, "denies": 7, "net_worth": 4650, "gpm": 345, "xpm": 440, "wards": 13 },
+        "20": { "cs": 48, "denies": 7, "net_worth": 6900, "gpm": 380, "xpm": 490, "wards": 18 },
+        "30": { "cs": 88, "denies": 8, "net_worth": 11500, "gpm": 415, "xpm": 550, "wards": 26 }
+      }
+    },
+    "Divine": {
+      "Carry": {
+        "5":  { "cs": 35, "denies": 9, "net_worth": 2350, "gpm": 470, "xpm": 470 },
+        "10": { "cs": 78, "denies": 15, "net_worth": 5400, "gpm": 580, "xpm": 600 },
+        "15": { "cs": 140, "denies": 17, "net_worth": 9400, "gpm": 660, "xpm": 680 },
+        "20": { "cs": 220, "denies": 19, "net_worth": 14800, "gpm": 745, "xpm": 750 },
+        "25": { "cs": 305, "denies": 20, "net_worth": 20500, "gpm": 820, "xpm": 810 },
+        "30": { "cs": 395, "denies": 21, "net_worth": 26800, "gpm": 890, "xpm": 870 },
+        "40": { "cs": 550, "denies": 23, "net_worth": 36500, "gpm": 930, "xpm": 920 }
+      },
+      "Mid": {
+        "5":  { "cs": 37, "denies": 11, "net_worth": 2500, "gpm": 500, "xpm": 570 },
+        "10": { "cs": 82, "denies": 16, "net_worth": 5800, "gpm": 615, "xpm": 670 },
+        "15": { "cs": 142, "denies": 18, "net_worth": 9900, "gpm": 680, "xpm": 730 },
+        "20": { "cs": 222, "denies": 19, "net_worth": 15100, "gpm": 760, "xpm": 790 },
+        "30": { "cs": 375, "denies": 21, "net_worth": 25500, "gpm": 850, "xpm": 860 }
+      },
+      "Offlane": {
+        "5":  { "cs": 28, "denies": 7, "net_worth": 2100, "gpm": 420, "xpm": 460 },
+        "10": { "cs": 62, "denies": 11, "net_worth": 4700, "gpm": 500, "xpm": 540 },
+        "15": { "cs": 108, "denies": 13, "net_worth": 8100, "gpm": 570, "xpm": 610 },
+        "20": { "cs": 168, "denies": 14, "net_worth": 12200, "gpm": 630, "xpm": 680 },
+        "30": { "cs": 285, "denies": 16, "net_worth": 20500, "gpm": 700, "xpm": 750 }
+      },
+      "Support": {
+        "5":  { "cs": 9, "denies": 6, "net_worth": 1600, "gpm": 310, "xpm": 350, "wards": 5 },
+        "10": { "cs": 21, "denies": 8, "net_worth": 3150, "gpm": 345, "xpm": 420, "wards": 9 },
+        "15": { "cs": 38, "denies": 9, "net_worth": 5200, "gpm": 380, "xpm": 480, "wards": 15 },
+        "20": { "cs": 58, "denies": 9, "net_worth": 7700, "gpm": 415, "xpm": 530, "wards": 21 },
+        "30": { "cs": 105, "denies": 10, "net_worth": 12800, "gpm": 455, "xpm": 590, "wards": 30 }
+      }
+    },
+    "Immortal": {
+      "Carry": {
+        "5":  { "cs": 38, "denies": 11, "net_worth": 2500, "gpm": 500, "xpm": 490 },
+        "10": { "cs": 85, "denies": 18, "net_worth": 5900, "gpm": 620, "xpm": 630 },
+        "15": { "cs": 155, "denies": 20, "net_worth": 10300, "gpm": 720, "xpm": 720 },
+        "20": { "cs": 240, "denies": 22, "net_worth": 16200, "gpm": 810, "xpm": 790 },
+        "25": { "cs": 330, "denies": 23, "net_worth": 22400, "gpm": 890, "xpm": 850 },
+        "30": { "cs": 430, "denies": 24, "net_worth": 29500, "gpm": 980, "xpm": 910 },
+        "40": { "cs": 590, "denies": 26, "net_worth": 39500, "gpm": 1020, "xpm": 960 }
+      },
+      "Mid": {
+        "5":  { "cs": 40, "denies": 13, "net_worth": 2650, "gpm": 530, "xpm": 600 },
+        "10": { "cs": 88, "denies": 19, "net_worth": 6200, "gpm": 650, "xpm": 700 },
+        "15": { "cs": 155, "denies": 21, "net_worth": 10800, "gpm": 730, "xpm": 770 },
+        "20": { "cs": 240, "denies": 22, "net_worth": 16500, "gpm": 825, "xpm": 830 },
+        "30": { "cs": 405, "denies": 24, "net_worth": 28000, "gpm": 930, "xpm": 900 }
+      },
+      "Offlane": {
+        "5":  { "cs": 31, "denies": 9, "net_worth": 2250, "gpm": 450, "xpm": 480 },
+        "10": { "cs": 68, "denies": 13, "net_worth": 5100, "gpm": 540, "xpm": 570 },
+        "15": { "cs": 120, "denies": 15, "net_worth": 8900, "gpm": 620, "xpm": 640 },
+        "20": { "cs": 185, "denies": 16, "net_worth": 13400, "gpm": 690, "xpm": 710 },
+        "30": { "cs": 310, "denies": 18, "net_worth": 22500, "gpm": 765, "xpm": 780 }
+      },
+      "Support": {
+        "5":  { "cs": 11, "denies": 7, "net_worth": 1750, "gpm": 330, "xpm": 370, "wards": 6 },
+        "10": { "cs": 24, "denies": 10, "net_worth": 3400, "gpm": 370, "xpm": 450, "wards": 10 },
+        "15": { "cs": 44, "denies": 11, "net_worth": 5600, "gpm": 410, "xpm": 510, "wards": 17 },
+        "20": { "cs": 66, "denies": 11, "net_worth": 8400, "gpm": 445, "xpm": 560, "wards": 24 },
+        "30": { "cs": 118, "denies": 12, "net_worth": 13900, "gpm": 490, "xpm": 620, "wards": 34 }
+      }
+    }
+  }
+}
