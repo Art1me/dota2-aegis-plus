@@ -84,6 +84,11 @@
             <span class="chip-time">Жив</span>
           </div>
         </div>
+
+        <div class="radar-actions">
+          <button class="radar-action-btn" id="btnRoshKilled" title="Рошан убит (копирует тайминг в буфер)">⚔️ Рошан</button>
+          <button class="radar-action-btn" id="btnGlyphUsed" title="Глиф врага использован (КД 300с)">🛡️ Глиф</button>
+        </div>
       </div>
     </header>
 
@@ -140,10 +145,12 @@
 
           <div class="metric-row">
             <span class="metric-name">Темп GPM / XPM:</span>
-            <div class="metric-value-wrap">
+            <div class="metric-value-wrap" style="align-items: flex-end;">
               <span class="metric-val" id="metricGPM">0 / 0</span>
+              <span class="metric-sub" id="metricRollingGPM" style="font-size: 10px; color: var(--text-muted);">3м: 0</span>
             </div>
           </div>
+          <div id="highTempoBadge" class="high-tempo-badge hidden">🔥 Темп выше нормы</div>
         </div>
 
         <!-- Buyback Card with 4 statuses & death loss indicator -->

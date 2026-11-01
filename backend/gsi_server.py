@@ -86,12 +86,12 @@ class AppState:
         game_state_str = map_data.get("game_state", "")
         clock_time = int(map_data.get("clock_time", 0))
 
-        # Check Roshan State changes
+        # Check Roshan State changes from GSI
         roshan_state = map_data.get("roshan_state", "alive")
         if roshan_state != "alive" and self.last_roshan_state == "alive" and clock_time > 0:
-            self.roshan_death_time = clock_time
-        elif roshan_state == "alive":
-            self.roshan_death_time = None
+            self.engine.record_roshan_killed(clock_time)
+        elif roshan_state == "alive" and self.last_roshan_state != "alive":
+            self.engine.roshan_death_time = None
         self.last_roshan_state = roshan_state
 
         # Determine Game Phase
@@ -125,14 +125,20 @@ class AppState:
         else:
             effective_enemy_heroes = dire_heroes if user_team == "radiant" else radiant_heroes
 
-        # Extract current player items
+        # Extract current player items and check for Aegis in slot0..slot5
         player_item_list = []
+        has_aegis = False
         for slot in ["slot0", "slot1", "slot2", "slot3", "slot4", "slot5"]:
             item_info = items_data.get(slot)
             if item_info and isinstance(item_info, dict):
                 iname = item_info.get("name")
                 if iname and iname not in ["empty", "none"]:
                     player_item_list.append(iname)
+                    if iname == "item_aegis":
+                        has_aegis = True
+
+        # Update hybrid Aegis tracker in engine
+        self.engine.update_aegis_inventory(has_aegis, clock_time)
 
         # Compute draft analysis
         draft_rad = radiant_heroes if user_team == "radiant" else effective_enemy_heroes
@@ -181,15 +187,20 @@ class AppState:
             buyback_cooldown=bb_cd
         )
 
+        daytime = bool(map_data.get("daytime", True))
         radar_analysis = self.engine.get_macro_timers(
             clock_time=clock_time,
-            roshan_death_time=self.roshan_death_time,
+            daytime=daytime,
             role=self.selected_role
         )
 
         # Inventory inspection (neutral0, teleport0, backpack active items)
         inventory_alerts = self.engine.inspect_inventory(items_data, clock_time)
         radar_analysis["active_alerts"].extend(inventory_alerts)
+
+        # Enemy power spikes (Ursa/Huskar @ 9:30, Blink @ 10:30, Orchid @ 14:30)
+        power_spike_alerts = self.engine.check_power_spikes(clock_time, effective_enemy_heroes)
+        radar_analysis["active_alerts"].extend(power_spike_alerts)
 
         item_advice = self.engine.recommend_items(
             enemy_heroes=effective_enemy_heroes,
@@ -317,6 +328,46 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(str(e).encode())
             return
 
+        elif parsed.path == "/api/roshan_killed":
+            try:
+                clock_time = int(state.raw_gsi.get("map", {}).get("clock_time", 0)) if state.raw_gsi else 0
+                res = state.engine.record_roshan_killed(clock_time)
+                if state.raw_gsi:
+                    state.process_gsi_payload(state.raw_gsi)
+                else:
+                    state.cached_analysis["radar"] = state.engine.get_macro_timers(clock_time, daytime=True, role=state.selected_role)
+                    state.notify_subscribers()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "roshan_recorded", **res}).encode("utf-8"))
+            except Exception as e:
+                self.send_response(HTTPStatus.INTERNAL_SERVER_ERROR)
+                self.end_headers()
+                self.wfile.write(str(e).encode())
+            return
+
+        elif parsed.path == "/api/glyph_used":
+            try:
+                clock_time = int(state.raw_gsi.get("map", {}).get("clock_time", 0)) if state.raw_gsi else 0
+                left = state.engine.record_glyph_used(clock_time)
+                if state.raw_gsi:
+                    state.process_gsi_payload(state.raw_gsi)
+                else:
+                    state.cached_analysis["radar"] = state.engine.get_macro_timers(clock_time, daytime=True, role=state.selected_role)
+                    state.notify_subscribers()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "glyph_recorded", "seconds_left": left}).encode("utf-8"))
+            except Exception as e:
+                self.send_response(HTTPStatus.INTERNAL_SERVER_ERROR)
+                self.end_headers()
+                self.wfile.write(str(e).encode())
+            return
+
         elif parsed.path == "/api/simulate":
             threading.Thread(target=run_simulation, daemon=True).start()
             self.send_response(HTTPStatus.OK)
@@ -326,6 +377,13 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
             return
 
         self.send_response(HTTPStatus.NOT_FOUND)
+        self.end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
     def do_GET(self):

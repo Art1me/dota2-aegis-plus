@@ -62,6 +62,25 @@ function speakAlert(text) {
   }
 }
 
+function copyToClipboard(text) {
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(err => {
+      console.warn("Clipboard write failed:", err);
+    });
+  }
+}
+
+function showSingleToast(title, text, severity = "info") {
+  renderAlerts([{
+    id: "toast_" + Date.now(),
+    title: title,
+    text: text,
+    severity: severity,
+    sound: severity === "critical" ? "wisdom_soon" : "power_soon"
+  }]);
+}
+
 // Fetch all heroes for manual picker
 function fetchHeroesList() {
   fetch("/api/heroes")
@@ -119,7 +138,7 @@ function renderUI(data) {
     document.getElementById("clockDisplay").innerText = data.radar.clock_formatted || "00:00";
     document.getElementById("dayNightSub").innerText = data.radar.day_night_title || "День";
 
-    renderTimerChips(data.radar.timers || [], data.radar.roshan);
+    renderTimerChips(data.radar.timers || [], data.radar.roshan, data.radar.glyph);
     renderAlerts(data.radar.active_alerts || []);
   }
 
@@ -148,6 +167,18 @@ function renderUI(data) {
     deltaNWEl.className = "metric-delta " + (b.delta_nw >= 0 ? "positive" : "negative");
 
     document.getElementById("metricGPM").innerText = `${b.current_gpm} / ${b.current_xpm}`;
+    const rollingGPMEl = document.getElementById("metricRollingGPM");
+    if (rollingGPMEl) {
+      rollingGPMEl.innerText = `3м: ${b.rolling_gpm !== undefined ? b.rolling_gpm : b.current_gpm} GPM`;
+    }
+    const highTempoEl = document.getElementById("highTempoBadge");
+    if (highTempoEl) {
+      if (b.is_high_tempo) {
+        highTempoEl.classList.remove("hidden");
+      } else {
+        highTempoEl.classList.add("hidden");
+      }
+    }
 
     // Buyback (4 Statuses: READY, AT_RISK, DEFICIT, COOLDOWN)
     if (perf.buyback) {
@@ -207,7 +238,7 @@ function renderUI(data) {
   }
 }
 
-function renderTimerChips(timers, roshan) {
+function renderTimerChips(timers, roshan, glyph) {
   const container = document.getElementById("timerChips");
   container.innerHTML = "";
 
@@ -237,9 +268,46 @@ function renderTimerChips(timers, roshan) {
 
   if (roshan) {
     const roshChip = document.createElement("div");
-    roshChip.className = "timer-chip";
-    roshChip.innerHTML = `<span>⚔️ Рошан:</span><span class="chip-time">${roshan.window || 'Жив'}</span>`;
+    roshChip.className = "timer-chip clickable";
+
+    if (roshan.chat_string) {
+      roshChip.title = `Кликните, чтобы скопировать тайминг в буфер:\n${roshan.chat_string}\nТекущее логово: ${roshan.pit_location}`;
+      roshChip.onclick = () => {
+        copyToClipboard(roshan.chat_string);
+        showSingleToast("⚔️ Тайминг Рошана", `Скопировано: ${roshan.chat_string}`, "info");
+      };
+    } else {
+      roshChip.title = `Текущее логово: ${roshan.pit_location}`;
+    }
+
+    if (roshan.aegis_left > 0) {
+      const aMin = Math.floor(roshan.aegis_left / 60);
+      const aSec = roshan.aegis_left % 60;
+      const aStr = `${aMin}:${aSec < 10 ? '0' : ''}${aSec}`;
+      if (roshan.aegis_left <= 30) {
+        roshChip.classList.add("urgent");
+      } else {
+        roshChip.classList.add("warning");
+      }
+      roshChip.innerHTML = `<span>🛡️ Аегис:</span><span class="chip-time">${aStr}</span>`;
+    } else if (roshan.status === "in_window") {
+      roshChip.classList.add("urgent");
+      roshChip.innerHTML = `<span>⚔️ Рошан:</span><span class="chip-time">${roshan.window}</span>`;
+    } else if (roshan.status === "respawning") {
+      roshChip.classList.add("warning");
+      roshChip.innerHTML = `<span>⚔️ Рошан:</span><span class="chip-time">${roshan.window}</span>`;
+    } else {
+      roshChip.innerHTML = `<span>⚔️ Рошан:</span><span class="chip-time">Жив</span>`;
+    }
     container.appendChild(roshChip);
+  }
+
+  if (glyph && glyph.is_on_cooldown) {
+    const glyphChip = document.createElement("div");
+    glyphChip.className = "timer-chip warning";
+    glyphChip.title = "Перезарядка вражеского укрепления строений (300с)";
+    glyphChip.innerHTML = `<span>🛡️ Глиф:</span><span class="chip-time">${glyph.status}</span>`;
+    container.appendChild(glyphChip);
   }
 }
 
@@ -587,6 +655,33 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btnSimulate").addEventListener("click", () => {
     fetch("/api/simulate", { method: "POST" });
   });
+
+  const btnRosh = document.getElementById("btnRoshKilled");
+  if (btnRosh) {
+    btnRosh.addEventListener("click", () => {
+      fetch("/api/roshan_killed", { method: "POST" })
+        .then(r => r.json())
+        .then(data => {
+          if (data.chat_string) {
+            copyToClipboard(data.chat_string);
+            showSingleToast("⚔️ Рошан зафиксирован!", `Тайминг скопирован в буфер: ${data.chat_string}`, "info");
+          }
+        })
+        .catch(e => console.error("Roshan killed err:", e));
+    });
+  }
+
+  const btnGlyph = document.getElementById("btnGlyphUsed");
+  if (btnGlyph) {
+    btnGlyph.addEventListener("click", () => {
+      fetch("/api/glyph_used", { method: "POST" })
+        .then(r => r.json())
+        .then(data => {
+          showSingleToast("🛡️ Глиф врага использован!", "Таймер перезарядки (300с) запущен", "warning");
+        })
+        .catch(e => console.error("Glyph used err:", e));
+    });
+  }
 
   document.getElementById("btnClickthrough").addEventListener("click", () => {
     window.toggleClickthrough();

@@ -1,7 +1,8 @@
 import json
 import math
+import subprocess
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 
@@ -12,10 +13,21 @@ class AnalyticsEngine:
         self.items_data: List[Dict[str, Any]] = []
         self._load_datasets()
         
-        # Mapping by hero name and hero id
         self.hero_by_id: Dict[str, Dict[str, Any]] = {}
         self.hero_by_name: Dict[str, Dict[str, Any]] = {}
         self._build_hero_indexes()
+
+        # Hybrid Roshan & Aegis state
+        self.roshan_death_time: Optional[int] = None
+        self.aegis_start_time: Optional[int] = None
+        self.aegis_expired: bool = False
+        self.player_had_aegis: bool = False
+
+        # Enemy Glyph state
+        self.glyph_cooldown_start: Optional[int] = None
+
+        # Rolling 3-min GPM buffer: [(clock_time, net_worth), ...]
+        self.nw_history: List[Tuple[int, int]] = []
 
     def _load_datasets(self):
         heroes_path = DATA_DIR / "heroes.json"
@@ -63,7 +75,137 @@ class AnalyticsEngine:
         return None
 
     # ==========================================
-    # 1. DRAFT ANALYTICS & COUNTER RECOMMENDER
+    # 1. HYBRID ROSHAN & GLYPH TRACKER
+    # ==========================================
+    def record_roshan_killed(self, clock_time: int) -> Dict[str, Any]:
+        """
+        Manually or automatically marks Roshan killed at clock_time.
+        Computes Aegis & respawn window and copies chat string to clipboard.
+        """
+        self.roshan_death_time = clock_time
+        self.aegis_start_time = clock_time
+        self.aegis_expired = False
+
+        aegis_end = clock_time + 300
+        rosh_min = clock_time + 480
+        rosh_max = clock_time + 660
+
+        chat_string = f"{self.format_clock(aegis_end)} Aegis | {self.format_clock(rosh_min)} - {self.format_clock(rosh_max)} Roshan"
+
+        # Copy to clipboard via wl-copy (Wayland) if available
+        try:
+            subprocess.run(["wl-copy", chat_string], timeout=1, check=False, stderr=subprocess.DEVNULL)
+        except Exception:
+            pass
+
+        return {
+            "roshan_death_time": clock_time,
+            "aegis_end": aegis_end,
+            "rosh_min": rosh_min,
+            "rosh_max": rosh_max,
+            "chat_string": chat_string
+        }
+
+    def update_aegis_inventory(self, has_aegis: bool, clock_time: int):
+        """
+        Auto-detection of Aegis in player inventory:
+        - Auto-start if picked up first time.
+        - Auto-expire if lost before 300 seconds.
+        """
+        if has_aegis and not self.player_had_aegis:
+            if self.roshan_death_time is None:
+                self.record_roshan_killed(clock_time)
+            self.aegis_start_time = clock_time
+            self.aegis_expired = False
+        elif not has_aegis and self.player_had_aegis:
+            if self.aegis_start_time is not None and (clock_time - self.aegis_start_time) < 300:
+                self.aegis_expired = True
+
+        self.player_had_aegis = has_aegis
+
+    def record_glyph_used(self, clock_time: int) -> int:
+        """Starts 300s enemy Glyph cooldown."""
+        self.glyph_cooldown_start = clock_time
+        return 300
+
+    # ==========================================
+    # 2. ENEMY POWER SPIKE WARNINGS
+    # ==========================================
+    def check_power_spikes(self, clock_time: int, enemy_heroes: List[Any]) -> List[Dict[str, Any]]:
+        """
+        Checks dangerous clock_time power spikes for selected enemy heroes:
+        - 09:30: Ursa, Huskar, Meepo, Troll Warlord -> Early Roshan risk
+        - 10:30: Axe, Magnus, Earthshaker, LC, Centaur, Sand King, Tidehunter -> Blink Dagger timing
+        - 14:30: Storm Spirit, Clinkz, Queen of Pain, Nyx Assassin -> Orchid / Ganking window
+        """
+        alerts = []
+        if clock_time <= 0 or not enemy_heroes:
+            return alerts
+
+        enemy_objs = [self.get_hero_by_identifier(h) for h in enemy_heroes if self.get_hero_by_identifier(h)]
+        enemy_names = {e["name"] for e in enemy_objs}
+
+        # Spike 1: 09:30 (570s) Early Roshan Risk
+        if 560 <= clock_time <= 585:
+            early_rosh_threats = [
+                "npc_dota_hero_ursa",
+                "npc_dota_hero_huskar",
+                "npc_dota_hero_meepo",
+                "npc_dota_hero_troll_warlord"
+            ]
+            matching = [e["display_name"] for e in enemy_objs if e["name"] in early_rosh_threats]
+            if matching:
+                alerts.append({
+                    "id": "spike_early_rosh",
+                    "title": "РИСК РАННЕГО РОШАНА!",
+                    "text": f"Враг ({', '.join(matching)}) может забирать Рошана на 9-10 мин! Проверьте логово.",
+                    "severity": "critical",
+                    "sound": "wisdom_soon"
+                })
+
+        # Spike 2: 10:30 (630s) Blink Dagger Timing
+        if 620 <= clock_time <= 645:
+            blink_threats = [
+                "npc_dota_hero_axe",
+                "npc_dota_hero_magnataur",
+                "npc_dota_hero_earthshaker",
+                "npc_dota_hero_legion_commander",
+                "npc_dota_hero_centaur",
+                "npc_dota_hero_sand_king",
+                "npc_dota_hero_tidehunter"
+            ]
+            matching = [e["display_name"] for e in enemy_objs if e["name"] in blink_threats]
+            if matching:
+                alerts.append({
+                    "id": "spike_blink_dagger",
+                    "title": "ТАЙМИНГ BLINK DAGGER У ВРАГА!",
+                    "text": f"10:30 — средний тайминг Блинка у {', '.join(matching)}! Играйте аккуратнее на линиях.",
+                    "severity": "warning",
+                    "sound": "power_soon"
+                })
+
+        # Spike 3: 14:30 (870s) Orchid / Gank Window
+        if 860 <= clock_time <= 885:
+            orchid_threats = [
+                "npc_dota_hero_storm_spirit",
+                "npc_dota_hero_clinkz",
+                "npc_dota_hero_queenofpain",
+                "npc_dota_hero_nyx_assassin"
+            ]
+            matching = [e["display_name"] for e in enemy_objs if e["name"] in orchid_threats]
+            if matching:
+                alerts.append({
+                    "id": "spike_orchid_gank",
+                    "title": "ОКНО ПОКУПКИ ORCHID / ГАНГА!",
+                    "text": f"14:30 — опасный пик силы {', '.join(matching)} с Orchid / прокастом! Носите детекцию и сейв.",
+                    "severity": "warning",
+                    "sound": "lotus_soon"
+                })
+
+        return alerts
+
+    # ==========================================
+    # 3. DRAFT ANALYTICS & COUNTER RECOMMENDER
     # ==========================================
     def analyze_draft(
         self,
@@ -187,7 +329,7 @@ class AnalyticsEngine:
         return gaps
 
     # ==========================================
-    # 2. LIVE GAME PERFORMANCE & BENCHMARKING
+    # 4. LIVE PERFORMANCE & ROLLING 3-MIN GPM
     # ==========================================
     def evaluate_performance(
         self,
@@ -205,10 +347,6 @@ class AnalyticsEngine:
         hero_buyback_cost: Optional[int] = None,
         buyback_cooldown: int = 0
     ) -> Dict[str, Any]:
-        """
-        Compares player's in-game stats against rank benchmarks and calculates buyback
-        with unreliable gold loss upon death accounted for.
-        """
         minute = max(1, math.floor(clock_time / 60)) if clock_time > 0 else 0
         rank_data = self.benchmarks_data.get("benchmarks", {}).get(rank, {}).get(role, {})
 
@@ -222,6 +360,27 @@ class AnalyticsEngine:
         delta_gpm = current_gpm - target_gpm
         delta_xpm = current_xpm - target_xpm
 
+        # Rolling 3-minute GPM calculation (180s circular window)
+        if clock_time > 0:
+            if not self.nw_history or clock_time > self.nw_history[-1][0]:
+                self.nw_history.append((clock_time, current_networth))
+            # Keep only items in the last 180s
+            cutoff = clock_time - 180
+            self.nw_history = [item for item in self.nw_history if item[0] >= cutoff]
+
+        if len(self.nw_history) >= 2:
+            t_old, nw_old = self.nw_history[0]
+            dt = clock_time - t_old
+            dnw = current_networth - nw_old
+            if dt >= 20:
+                rolling_gpm = max(0, int((dnw / dt) * 60))
+            else:
+                rolling_gpm = current_gpm
+        else:
+            rolling_gpm = current_gpm
+
+        is_high_tempo = (rolling_gpm > target_gpm)
+
         score_pct = 100.0
         if target_nw > 0:
             score_pct = (current_networth / target_nw) * 100.0
@@ -229,30 +388,27 @@ class AnalyticsEngine:
         if score_pct >= 115:
             grade = "S"
             grade_label = "Доминирование"
-            grade_color = "#10B981" # Green
+            grade_color = "#10B981"
         elif score_pct >= 95:
             grade = "A"
             grade_label = "В графике ранга"
-            grade_color = "#3B82F6" # Blue
+            grade_color = "#3B82F6"
         elif score_pct >= 80:
             grade = "B"
             grade_label = "Отставание"
-            grade_color = "#F59E0B" # Yellow
+            grade_color = "#F59E0B"
         else:
             grade = "C"
             grade_label = "Критически позади"
-            grade_color = "#EF4444" # Red
+            grade_color = "#EF4444"
 
         # Buyback calculation
         bb_cost = hero_buyback_cost if hero_buyback_cost else int(200 + (current_networth / 13))
-        
-        # Loss of unreliable gold upon death
         death_penalty = min(gold_unreliable, current_networth // 40) if hero_alive else 0
         gold_after_death = max(0, current_gold - death_penalty)
         surplus = current_gold - bb_cost
         surplus_after_death = gold_after_death - bb_cost
 
-        # 4 Explicit Statuses: COOLDOWN, READY, AT_RISK, DEFICIT
         if buyback_cooldown > 0:
             status = "COOLDOWN"
             status_text = f"КД выкупа ({buyback_cooldown}с)"
@@ -292,7 +448,9 @@ class AnalyticsEngine:
                 "delta_gpm": delta_gpm,
                 "target_xpm": target_xpm,
                 "current_xpm": current_xpm,
-                "delta_xpm": delta_xpm
+                "delta_xpm": delta_xpm,
+                "rolling_gpm": rolling_gpm,
+                "is_high_tempo": is_high_tempo
             },
             "buyback": {
                 "cost": bb_cost,
@@ -358,30 +516,23 @@ class AnalyticsEngine:
         return cs, nw, gpm, xpm
 
     # ==========================================
-    # 3. INVENTORY INSPECTION
+    # 5. INVENTORY INSPECTION
     # ==========================================
     def inspect_inventory(self, items_data: Dict[str, Any], clock_time: int) -> List[Dict[str, Any]]:
-        """
-        Inspects items block in GSI:
-        - Neutral slot neutral0 (empty or outdated tier after 7, 17, 27, 37, 60m)
-        - Teleport slot teleport0 (missing after 4:00)
-        - Active item without CD in backpack (slot6..slot8) with empty/branch slots in main (slot0..slot5)
-        """
         alerts = []
         if clock_time <= 0 or not items_data:
             return alerts
 
-        # 1. Neutral Item Check
         expected_tier = 0
-        if clock_time >= 3600: # 60 min
+        if clock_time >= 3600:
             expected_tier = 5
-        elif clock_time >= 2220: # 37 min
+        elif clock_time >= 2220:
             expected_tier = 4
-        elif clock_time >= 1620: # 27 min
+        elif clock_time >= 1620:
             expected_tier = 3
-        elif clock_time >= 1020: # 17 min
+        elif clock_time >= 1020:
             expected_tier = 2
-        elif clock_time >= 420: # 7 min
+        elif clock_time >= 420:
             expected_tier = 1
 
         neutral_obj = items_data.get("neutral0", {})
@@ -397,7 +548,6 @@ class AnalyticsEngine:
                 "sound": "lotus_soon"
             })
 
-        # 2. Teleport Scroll Check (after 4:00 = 240s)
         if clock_time >= 240:
             tp_obj = items_data.get("teleport0", {})
             tp_name = tp_obj.get("name", "") if isinstance(tp_obj, dict) else str(tp_obj)
@@ -413,7 +563,6 @@ class AnalyticsEngine:
                     "sound": "wisdom_soon"
                 })
 
-        # 3. Backpack Active Items vs Main Inventory Free/Branch Slots
         main_slots = ["slot0", "slot1", "slot2", "slot3", "slot4", "slot5"]
         backpack_slots = ["slot6", "slot7", "slot8"]
 
@@ -449,25 +598,14 @@ class AnalyticsEngine:
         return alerts
 
     # ==========================================
-    # 4. MACRO RADAR & TIMERS ENGINE
+    # 6. MACRO RADAR & TIMERS ENGINE
     # ==========================================
     def get_macro_timers(
         self,
         clock_time: int,
-        roshan_death_time: Optional[int] = None,
+        daytime: bool = True,
         role: str = "Carry"
     ) -> Dict[str, Any]:
-        """
-        Calculates upcoming map objectives with role-based filtering:
-        - Water Runes (2:00, 4:00) for Mid
-        - Lotus Pools (every 3m = 180s)
-        - Wisdom Runes (every 7m = 420s)
-        - Power Runes (every 2m starting from 6:00 = 360s)
-        - Bounty Runes (every 3m = 180s)
-        - Tormentor (at 20:00 = 1200s)
-        - Camp Stacking alert (:48 - :54 of every minute)
-        - Day/Night (every 5m = 300s, with proper Russian declension)
-        """
         if clock_time < 0:
             return {
                 "phase": "pre_game",
@@ -478,7 +616,20 @@ class AnalyticsEngine:
                     "title": "СТАРТ ИГРЫ",
                     "text": f"Выход крипов через {abs(clock_time)}с",
                     "severity": "info"
-                }]
+                }],
+                "roshan": {
+                    "status": "alive",
+                    "window": "Жив",
+                    "aegis_left": 0,
+                    "aegis_expired": True,
+                    "pit_location": "Нижнее логово (Radiant)",
+                    "chat_string": ""
+                },
+                "glyph": {
+                    "seconds_left": 0,
+                    "status": "Готов",
+                    "is_on_cooldown": False
+                }
             }
 
         timers = []
@@ -487,7 +638,7 @@ class AnalyticsEngine:
         is_mid = "mid" in r_lower or "pos 2" in r_lower
         is_support = "support" in r_lower or "pos 4" in r_lower or "pos 5" in r_lower
 
-        # 1. Water Runes (Руны Воды: 2:00 = 120s, 4:00 = 240s)
+        # 1. Water Runes (2:00 = 120s, 4:00 = 240s)
         if clock_time < 240:
             if clock_time < 120:
                 sec_to_water = 120 - clock_time
@@ -604,40 +755,96 @@ class AnalyticsEngine:
                 "sound": "stack_alert"
             })
 
-        # 7. Day / Night Cycle (fixed Russian declension: "до ночи", "до дня")
-        is_day = ((clock_time // 300) % 2) == 0
+        # 7. Day / Night Cycle (Day -> Bottom/Radiant pit, Night -> Top/Dire pit)
+        is_day = daytime if daytime is not None else (((clock_time // 300) % 2) == 0)
         sec_to_cycle = 300 - (clock_time % 300)
         day_night_name = "День" if is_day else "Ночь"
         next_cycle_genitive = "ночи" if is_day else "дня"
         day_night_title = f"{day_night_name} (до {next_cycle_genitive} {sec_to_cycle}с)"
+        pit_location = "Нижнее логово (Radiant)" if is_day else "Верхнее логово (Dire)"
 
-        # 8. Roshan Tracker
-        roshan_info = {"status": "alive", "window": "Рошан жив"}
-        if roshan_death_time is not None:
-            time_since_death = clock_time - roshan_death_time
-            if time_since_death < 300: # 5 min Aegis
-                roshan_info = {
-                    "status": "aegis_active",
-                    "window": f"Аегис истекает через {self.format_clock(300 - time_since_death)}"
-                }
-            elif time_since_death < 480: # 5-8 min Aegis expired, wait for min spawn
-                roshan_info = {
-                    "status": "respawning",
-                    "window": f"Мин. спавн через {self.format_clock(480 - time_since_death)}"
-                }
-            elif time_since_death <= 660: # 8-11 min random spawn window
-                roshan_info = {
-                    "status": "in_window",
-                    "window": f"Окно респавна! (до {self.format_clock(660 - time_since_death)})"
-                }
+        # 8. Hybrid Roshan Tracker
+        aegis_left = 0
+        chat_string = ""
+
+        if self.roshan_death_time is not None:
+            elapsed = clock_time - self.roshan_death_time
+            chat_string = f"{self.format_clock(self.roshan_death_time + 300)} Aegis | {self.format_clock(self.roshan_death_time + 480)} - {self.format_clock(self.roshan_death_time + 660)} Roshan"
+
+            # Aegis (300s)
+            if not self.aegis_expired and elapsed < 300:
+                aegis_left = 300 - elapsed
+                if 10 < aegis_left <= 30:
+                    alerts.append({
+                        "id": "aegis_warn_30",
+                        "title": "АЕГИС СКОРО ИСТЕКАЕТ",
+                        "text": f"Аегис исчезнет через {aegis_left}с! Готовьтесь к аккуратной позиции",
+                        "severity": "warning",
+                        "sound": "lotus_soon"
+                    })
+                elif aegis_left <= 10:
+                    alerts.append({
+                        "id": "aegis_warn_10",
+                        "title": "АЕГИС: ПОСЛЕДНИЕ СЕКУНДЫ!",
+                        "text": f"Аегис пропадёт через {aegis_left}с!",
+                        "severity": "critical",
+                        "sound": "wisdom_soon"
+                    })
+            else:
+                self.aegis_expired = True
+                aegis_left = 0
+
+            # Respawn window (480s - 660s)
+            if elapsed < 480:
+                rosh_status = "respawning"
+                min_sec = 480 - elapsed
+                rosh_window_str = f"Мин. спавн: {self.format_clock(min_sec)}"
+            elif elapsed <= 660:
+                rosh_status = "in_window"
+                max_sec = 660 - elapsed
+                rosh_window_str = f"Окно респавна! (до {self.format_clock(max_sec)})"
                 alerts.append({
-                    "id": "roshan_window",
-                    "title": "РОШАН В ОКНЕ РЕСПАВНА",
-                    "text": "Рошан может появиться в любую секунду! Проверьте логово",
+                    "id": "roshan_window_alert",
+                    "title": "РОШАН В ОКНЕ РЕСПАВНА!",
+                    "text": f"Рошан может появиться в любую секунду! Проверьте {pit_location}",
                     "severity": "warning"
                 })
+            else:
+                rosh_status = "alive"
+                rosh_window_str = "Жив"
+                self.roshan_death_time = None
+        else:
+            rosh_status = "alive"
+            rosh_window_str = "Жив"
 
-        # Filter and prioritize timers based on role
+        # 9. Enemy Glyph Cooldown (300s)
+        glyph_left = 0
+        if self.glyph_cooldown_start is not None:
+            g_elapsed = clock_time - self.glyph_cooldown_start
+            if g_elapsed < 300:
+                glyph_left = 300 - g_elapsed
+                glyph_status = f"{self.format_clock(glyph_left)}"
+            else:
+                self.glyph_cooldown_start = None
+                glyph_status = "Готов"
+        else:
+            glyph_status = "Готов"
+
+        roshan_info = {
+            "status": rosh_status,
+            "window": rosh_window_str,
+            "aegis_left": aegis_left,
+            "aegis_expired": self.aegis_expired,
+            "pit_location": pit_location,
+            "chat_string": chat_string
+        }
+
+        glyph_info = {
+            "seconds_left": glyph_left,
+            "status": glyph_status,
+            "is_on_cooldown": (glyph_left > 0)
+        }
+
         sorted_timers = sorted(timers, key=lambda x: x["seconds_left"])
 
         return {
@@ -647,11 +854,12 @@ class AnalyticsEngine:
             "day_night_title": day_night_title,
             "timers": sorted_timers,
             "active_alerts": alerts,
-            "roshan": roshan_info
+            "roshan": roshan_info,
+            "glyph": glyph_info
         }
 
     # ==========================================
-    # 5. DYNAMIC SITUATIONAL ITEM ADVISOR
+    # 7. DYNAMIC SITUATIONAL ITEM ADVISOR
     # ==========================================
     def recommend_items(self, enemy_heroes: List[Any], current_player_items: List[str] = []) -> List[Dict[str, Any]]:
         enemy_objs = [self.get_hero_by_identifier(h) for h in enemy_heroes if self.get_hero_by_identifier(h)]

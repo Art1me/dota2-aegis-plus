@@ -222,6 +222,50 @@ select option {
   font-family: monospace;
 }
 
+.timer-chip.clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.timer-chip.clickable:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.radar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  padding-left: 8px;
+}
+
+.radar-action-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--text-main);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.radar-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.radar-action-btn:active {
+  transform: translateY(0);
+}
+
 /* Compact Toast Alerts Banner (Moved to top-right corner) */
 .alerts-banner {
   position: fixed;
@@ -373,6 +417,40 @@ select option {
 .metric-delta.negative {
   color: var(--color-red);
   background: rgba(239, 68, 68, 0.15);
+}
+
+.metric-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.high-tempo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+  animation: pulse-tempo 2s infinite ease-in-out;
+  margin-top: 4px;
+}
+
+@keyframes pulse-tempo {
+  0%, 100% {
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.3);
+    border-color: rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.7);
+    border-color: rgba(16, 185, 129, 0.8);
+  }
 }
 
 /* Buyback Card */
