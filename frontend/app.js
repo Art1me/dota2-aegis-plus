@@ -127,6 +127,27 @@ function renderUI(data) {
 
   // Update sync settings if received
   if (data.settings) {
+    if (data.settings.rank) {
+      const rankVal = data.settings.rank;
+      const rankElem = document.getElementById("rankSelectValue");
+      if (rankElem) rankElem.innerText = rankVal;
+      const nativeRank = document.getElementById("rankSelector");
+      if (nativeRank) nativeRank.value = rankVal;
+      document.querySelectorAll("#rankSelectOptions .custom-select-option").forEach(opt => {
+        opt.classList.toggle("selected", opt.getAttribute("data-value") === rankVal);
+      });
+    }
+    if (data.settings.role) {
+      const roleVal = data.settings.role;
+      const roleLabels = { "Carry": "Pos 1 (Carry)", "Mid": "Pos 2 (Mid)", "Offlane": "Pos 3 (Offlane)", "Support": "Pos 4/5 (Support)" };
+      const roleElem = document.getElementById("roleSelectValue");
+      if (roleElem) roleElem.innerText = roleLabels[roleVal] || roleVal;
+      const nativeRole = document.getElementById("roleSelector");
+      if (nativeRole) nativeRole.value = roleVal;
+      document.querySelectorAll("#roleSelectOptions .custom-select-option").forEach(opt => {
+        opt.classList.toggle("selected", opt.getAttribute("data-value") === roleVal);
+      });
+    }
     if (data.settings.manual_enemy_heroes && manualEnemyHeroes.length === 0) {
       manualEnemyHeroes = data.settings.manual_enemy_heroes;
       renderManualEnemySlots();
@@ -597,28 +618,79 @@ window.toggleClickthrough = function() {
   window.setLockState(!isLockedClickthrough);
 };
 
+// Custom Wayland Layer-Shell Dropdown Selectors
+function setupCustomSelects() {
+  const configs = [
+    { containerId: "customRankSelect", triggerId: "rankSelectTrigger", valueId: "rankSelectValue", optionsId: "rankSelectOptions", selectId: "rankSelector", settingKey: "rank" },
+    { containerId: "customRoleSelect", triggerId: "roleSelectTrigger", valueId: "roleSelectValue", optionsId: "roleSelectOptions", selectId: "roleSelector", settingKey: "role" }
+  ];
+
+  configs.forEach(cfg => {
+    const container = document.getElementById(cfg.containerId);
+    const trigger = document.getElementById(cfg.triggerId);
+    const valueSpan = document.getElementById(cfg.valueId);
+    const optionsPanel = document.getElementById(cfg.optionsId);
+    const nativeSelect = document.getElementById(cfg.selectId);
+
+    if (!container || !trigger || !optionsPanel || !nativeSelect) return;
+
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = container.classList.contains("open");
+      // Close other dropdowns
+      document.querySelectorAll(".custom-select").forEach(cs => {
+        cs.classList.remove("open");
+        const panel = cs.querySelector(".custom-select-options");
+        if (panel) panel.classList.add("hidden");
+      });
+
+      if (!isOpen) {
+        container.classList.add("open");
+        optionsPanel.classList.remove("hidden");
+      }
+    });
+
+    optionsPanel.querySelectorAll(".custom-select-option").forEach(opt => {
+      opt.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const val = opt.getAttribute("data-value");
+        const text = opt.innerText;
+
+        valueSpan.innerText = text;
+        nativeSelect.value = val;
+
+        optionsPanel.querySelectorAll(".custom-select-option").forEach(o => o.classList.remove("selected"));
+        opt.classList.add("selected");
+
+        container.classList.remove("open");
+        optionsPanel.classList.add("hidden");
+
+        fetch("/api/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ [cfg.settingKey]: val })
+        });
+      });
+    });
+  });
+
+  // Global click outside listener to close dropdowns
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".custom-select").forEach(cs => {
+      cs.classList.remove("open");
+      const panel = cs.querySelector(".custom-select-options");
+      if (panel) panel.classList.add("hidden");
+    });
+  });
+}
+
 // Event Listeners on DOM Ready
 document.addEventListener("DOMContentLoaded", () => {
   fetchHeroesList();
   initEventSource();
   setupHeroSearch();
   renderManualEnemySlots();
-
-  document.getElementById("rankSelector").addEventListener("change", (e) => {
-    fetch("/api/settings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rank: e.target.value })
-    });
-  });
-
-  document.getElementById("roleSelector").addEventListener("change", (e) => {
-    fetch("/api/settings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: e.target.value })
-    });
-  });
+  setupCustomSelects();
 
   document.getElementById("btnAudioToggle").addEventListener("click", () => {
     audioEnabled = !audioEnabled;
@@ -634,7 +706,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btnDraftToggle").addEventListener("click", () => {
-    document.getElementById("draftOverlay").classList.toggle("hidden");
+    const draftModal = document.getElementById("draftOverlay");
+    draftModal.classList.toggle("hidden");
+    if (!draftModal.classList.contains("hidden")) {
+      const searchInp = document.getElementById("heroSearchInput");
+      if (searchInp) searchInp.focus();
+    }
   });
 
   document.getElementById("btnCloseDraft").addEventListener("click", () => {
@@ -652,13 +729,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  document.getElementById("btnSimulate").addEventListener("click", () => {
-    fetch("/api/simulate", { method: "POST" });
-  });
+  const btnSim = document.getElementById("btnSimulate");
+  if (btnSim) {
+    btnSim.addEventListener("click", () => {
+      const origHtml = btnSim.innerHTML;
+      btnSim.innerHTML = "<span>⏳ Тест...</span>";
+      fetch("/api/simulate", { method: "POST" })
+        .then(() => {
+          setTimeout(() => { btnSim.innerHTML = origHtml; }, 1000);
+        })
+        .catch(() => {
+          btnSim.innerHTML = origHtml;
+        });
+    });
+  }
 
   const btnRosh = document.getElementById("btnRoshKilled");
   if (btnRosh) {
     btnRosh.addEventListener("click", () => {
+      btnRosh.innerText = "✓ Скопировано!";
+      setTimeout(() => { btnRosh.innerText = "⚔️ Рошан"; }, 1500);
       fetch("/api/roshan_killed", { method: "POST" })
         .then(r => r.json())
         .then(data => {
@@ -674,9 +764,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnGlyph = document.getElementById("btnGlyphUsed");
   if (btnGlyph) {
     btnGlyph.addEventListener("click", () => {
+      btnGlyph.innerText = "✓ Запущен";
+      setTimeout(() => { btnGlyph.innerText = "🛡️ Глиф"; }, 1500);
       fetch("/api/glyph_used", { method: "POST" })
         .then(r => r.json())
-        .then(data => {
+        .then(() => {
           showSingleToast("🛡️ Глиф врага использован!", "Таймер перезарядки (300с) запущен", "warning");
         })
         .catch(e => console.error("Glyph used err:", e));
@@ -694,13 +786,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnQuit) {
     btnQuit.addEventListener("click", () => {
       window.quitApp();
-    });
-  }
-
-  const backdrop = document.getElementById("steamBackdrop");
-  if (backdrop) {
-    backdrop.addEventListener("click", () => {
-      window.closeOverlay();
     });
   }
 

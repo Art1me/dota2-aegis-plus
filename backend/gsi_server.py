@@ -278,9 +278,13 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length)
 
-        if parsed.path == "/gsi":
+        if parsed.path in ["/gsi", "/gsi/", "/", ""]:
             try:
                 data = json.loads(body.decode("utf-8"))
+                phase = data.get("map", {}).get("game_state", "")
+                hero = data.get("hero", {}).get("name", "")
+                if phase or hero:
+                    print(f"[AegisPlus GSI] Данные из Dota 2: фаза={phase}, герой={hero}")
                 state.process_gsi_payload(data)
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "application/json")

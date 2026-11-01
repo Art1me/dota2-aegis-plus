@@ -23,26 +23,54 @@
 
         <div class="selector-group">
           <span class="selector-label">Ранг:</span>
-          <select id="rankSelector">
-            <option value="Herald">Herald</option>
-            <option value="Guardian">Guardian</option>
-            <option value="Crusader">Crusader</option>
-            <option value="Archon" selected>Archon</option>
-            <option value="Legend">Legend</option>
-            <option value="Ancient">Ancient</option>
-            <option value="Divine">Divine</option>
-            <option value="Immortal">Immortal</option>
-          </select>
+          <div class="custom-select" id="customRankSelect">
+            <button class="custom-select-trigger" type="button" id="rankSelectTrigger">
+              <span id="rankSelectValue">Archon</span>
+              <span class="custom-select-arrow">▾</span>
+            </button>
+            <div class="custom-select-options hidden" id="rankSelectOptions">
+              <div class="custom-select-option" data-value="Herald">Herald</div>
+              <div class="custom-select-option" data-value="Guardian">Guardian</div>
+              <div class="custom-select-option" data-value="Crusader">Crusader</div>
+              <div class="custom-select-option selected" data-value="Archon">Archon</div>
+              <div class="custom-select-option" data-value="Legend">Legend</div>
+              <div class="custom-select-option" data-value="Ancient">Ancient</div>
+              <div class="custom-select-option" data-value="Divine">Divine</div>
+              <div class="custom-select-option" data-value="Immortal">Immortal</div>
+            </div>
+            <select id="rankSelector" style="display: none;">
+              <option value="Herald">Herald</option>
+              <option value="Guardian">Guardian</option>
+              <option value="Crusader">Crusader</option>
+              <option value="Archon" selected>Archon</option>
+              <option value="Legend">Legend</option>
+              <option value="Ancient">Ancient</option>
+              <option value="Divine">Divine</option>
+              <option value="Immortal">Immortal</option>
+            </select>
+          </div>
         </div>
 
         <div class="selector-group">
           <span class="selector-label">Роль:</span>
-          <select id="roleSelector">
-            <option value="Carry" selected>Pos 1 (Carry)</option>
-            <option value="Mid">Pos 2 (Mid)</option>
-            <option value="Offlane">Pos 3 (Offlane)</option>
-            <option value="Support">Pos 4/5 (Support)</option>
-          </select>
+          <div class="custom-select" id="customRoleSelect">
+            <button class="custom-select-trigger" type="button" id="roleSelectTrigger">
+              <span id="roleSelectValue">Pos 1 (Carry)</span>
+              <span class="custom-select-arrow">▾</span>
+            </button>
+            <div class="custom-select-options hidden" id="roleSelectOptions">
+              <div class="custom-select-option selected" data-value="Carry">Pos 1 (Carry)</div>
+              <div class="custom-select-option" data-value="Mid">Pos 2 (Mid)</div>
+              <div class="custom-select-option" data-value="Offlane">Pos 3 (Offlane)</div>
+              <div class="custom-select-option" data-value="Support">Pos 4/5 (Support)</div>
+            </div>
+            <select id="roleSelector" style="display: none;">
+              <option value="Carry" selected>Pos 1 (Carry)</option>
+              <option value="Mid">Pos 2 (Mid)</option>
+              <option value="Offlane">Pos 3 (Offlane)</option>
+              <option value="Support">Pos 4/5 (Support)</option>
+            </select>
+          </div>
         </div>
 
         <button class="btn-icon" id="btnDraftToggle" title="Открыть драфт-помощник и выбор врагов">

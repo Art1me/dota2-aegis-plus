@@ -86,6 +86,7 @@ class OverlayApplication(Gtk.Application):
                         Gtk4LayerShell.init_for_window(self.window)
                         Gtk4LayerShell.set_namespace(self.window, "aegis-overlay")
                         Gtk4LayerShell.set_layer(self.window, Gtk4LayerShell.Layer.OVERLAY)
+                        Gtk4LayerShell.set_keyboard_mode(self.window, Gtk4LayerShell.KeyboardMode.ON_DEMAND)
                         Gtk4LayerShell.set_exclusive_zone(self.window, -1)
                         Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.TOP, True)
                         Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.BOTTOM, True)
