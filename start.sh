@@ -6,6 +6,7 @@ cd "$DIR"
 
 # 1. If already running, just open overlay and exit immediately!
 if curl -s -f -m 0.5 -X POST "http://127.0.0.1:3000/api/overlay/open" >/dev/null 2>&1; then
+    echo "🛡️  AegisPlus уже запущен! Оверлей развернут на экране."
     exit 0
 fi
 
@@ -39,6 +40,7 @@ for lib in /usr/lib64/libgtk4-layer-shell.so /usr/lib/libgtk4-layer-shell.so /us
 done
 
 export PYTHONUNBUFFERED=1
+export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1
 
 echo "🚀 Запуск AegisPlus..."
 echo "👉 Оверлей: прозрачное окно поверх экрана"

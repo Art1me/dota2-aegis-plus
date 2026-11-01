@@ -37,6 +37,11 @@ if os.environ.get("XDG_SESSION_TYPE") == "wayland" and "libgtk4-layer-shell" not
             os.execve(sys.executable, [sys.executable] + sys.argv, env)
             break
 
+# Disable WebKit bubblewrap sandbox & clear LD_PRELOAD so child processes (WebKitWebProcess)
+# do not inherit LD_PRELOAD and crash in bubblewrap with libGLX_nvidia.so.0!
+os.environ["WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS"] = "1"
+os.environ.pop("LD_PRELOAD", None)
+
 import cairo
 import gi
 
@@ -81,21 +86,14 @@ class OverlayApplication(Gtk.Application):
                         Gtk4LayerShell.init_for_window(self.window)
                         Gtk4LayerShell.set_namespace(self.window, "aegis-overlay")
                         Gtk4LayerShell.set_layer(self.window, Gtk4LayerShell.Layer.OVERLAY)
-                        Gtk4LayerShell.set_keyboard_mode(self.window, Gtk4LayerShell.KeyboardMode.NONE)
                         Gtk4LayerShell.set_exclusive_zone(self.window, -1)
                         Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.TOP, True)
                         Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.BOTTOM, True)
                         Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.LEFT, True)
                         Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.RIGHT, True)
 
-                        disp = Gdk.Display.get_default()
-                        if disp:
-                            mons = disp.get_monitors()
-                            if mons.get_n_items() > 0:
-                                Gtk4LayerShell.set_monitor(self.window, mons.get_item(0))
-
                         layer_shell_active = True
-                        print("[AegisPlus] Wayland Layer Shell (OVERLAY) успешно активирован на основном мониторе")
+                        print("[AegisPlus] Wayland Layer Shell (OVERLAY) успешно активирован")
                 except Exception as e:
                     print(f"[AegisPlus] Layer Shell запущен с предупреждением: {e}")
 
@@ -104,22 +102,16 @@ class OverlayApplication(Gtk.Application):
                 self.window.set_decorated(False)
                 print("[AegisPlus] Запуск в режиме независимого прозрачного окна")
 
-            # Apply CSS for 100% transparent background
-            css_provider = Gtk.CssProvider()
-            css_provider.load_from_data(b"""
-                window, window.background, .background {
-                    background-color: rgba(0, 0, 0, 0);
-                    background-image: none;
-                }
-            """)
-            Gtk.StyleContext.add_provider_for_display(
-                Gdk.Display.get_default(),
-                css_provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-            )
-
             # Setup WebKit UserContentManager to receive click-through toggle from JS
             self.webview = WebKit.WebView()
+            settings = self.webview.get_settings()
+            settings.set_enable_write_console_messages_to_stdout(True)
+            settings.set_enable_developer_extras(True)
+
+            def on_load_changed(wv, event):
+                print(f"[AegisPlus WebKit] Load event: {event.value_name}")
+            self.webview.connect("load-changed", on_load_changed)
+
             ucm = self.webview.get_user_content_manager()
             ucm.register_script_message_handler("overlay")
             ucm.connect("script-message-received::overlay", self.on_script_message)
