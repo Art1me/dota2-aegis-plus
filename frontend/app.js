@@ -690,6 +690,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const btnQuit = document.getElementById("btnQuitOverlay");
+  if (btnQuit) {
+    btnQuit.addEventListener("click", () => {
+      window.quitApp();
+    });
+  }
+
   const backdrop = document.getElementById("steamBackdrop");
   if (backdrop) {
     backdrop.addEventListener("click", () => {
@@ -718,6 +725,16 @@ let isSteamOverlayOpen = true;
 
 window.closeOverlay = function() {
   window.setOverlayOpen(false);
+};
+
+window.quitApp = function() {
+  fetch("/api/quit", { method: "POST" })
+    .catch(() => {})
+    .finally(() => {
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.overlay) {
+        window.webkit.messageHandlers.overlay.postMessage({ action: "quit_app" });
+      }
+    });
 };
 
 window.setOverlayOpen = function(open) {

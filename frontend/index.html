@@ -8,7 +8,7 @@
 </head>
 <body>
   <!-- Steam Overlay Backdrop (blurred dark backdrop when overlay is open) -->
-  <div class="steam-overlay-backdrop hidden" id="steamBackdrop"></div>
+  <div class="steam-overlay-backdrop" id="steamBackdrop"></div>
 
   <div class="hud-container" id="hudContainer">
     
@@ -97,7 +97,8 @@
       <!-- Steam Overlay Quick Exit (Top Right) -->
       <div class="steam-control glass interactive">
         <span class="hotkey-pill" title="Нажмите Super + O или Esc для возврата в игру">⌨️ Super + O / Esc</span>
-        <button class="btn-close-overlay" id="btnCloseOverlay" title="Закрыть оверлей и вернуться в игру (Esc)">✕</button>
+        <button class="btn-close-overlay" id="btnCloseOverlay" title="Свернуть оверлей и вернуться в игру (Esc / Super+O)">✕</button>
+        <button class="btn-quit-overlay" id="btnQuitOverlay" title="Полностью закрыть и выключить AegisPlus (Super+Shift+O)">⏻ Выход</button>
       </div>
     </header>
 

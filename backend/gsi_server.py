@@ -2,6 +2,7 @@ import asyncio
 import json
 import mimetypes
 import os
+import socket
 import threading
 import time
 from http import HTTPStatus
@@ -22,6 +23,8 @@ class AppState:
         self.selected_role = "Carry"
         self.audio_enabled = True
         self.clickthrough = False
+        self.overlay_open = True
+        self.should_quit = False
         self.manual_enemy_heroes: List[str] = []
         
         # Live state from GSI
@@ -376,6 +379,42 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.wfile.write(b'{"status":"simulation_started"}')
             return
 
+        elif parsed.path == "/api/overlay/toggle":
+            state.overlay_open = not state.overlay_open
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok", "overlay_open": state.overlay_open}).encode("utf-8"))
+            return
+
+        elif parsed.path == "/api/overlay/open":
+            state.overlay_open = True
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok", "overlay_open": True}).encode("utf-8"))
+            return
+
+        elif parsed.path == "/api/overlay/close":
+            state.overlay_open = False
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok", "overlay_open": False}).encode("utf-8"))
+            return
+
+        elif parsed.path == "/api/quit":
+            state.should_quit = True
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(b'{"status":"quitting"}')
+            return
+
         self.send_response(HTTPStatus.NOT_FOUND)
         self.end_headers()
 
@@ -542,11 +581,28 @@ def run_simulation():
 
     state.simulation_running = False
 
+class ReusableThreadingHTTPServer(ThreadingHTTPServer):
+    allow_reuse_address = True
+
+    def server_bind(self):
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if hasattr(socket, "SO_REUSEPORT"):
+            try:
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            except Exception:
+                pass
+        super().server_bind()
+
 def start_server(port: int = 3000):
-    ThreadingHTTPServer.allow_reuse_address = True
-    server = ThreadingHTTPServer(("0.0.0.0", port), GSIHTTPRequestHandler)
-    print(f"[AegisPlus] Сервер запущен на http://127.0.0.1:{port}")
-    server.serve_forever()
+    try:
+        server = ReusableThreadingHTTPServer(("0.0.0.0", port), GSIHTTPRequestHandler)
+        print(f"[AegisPlus] Сервер запущен на http://127.0.0.1:{port}")
+        server.serve_forever()
+    except OSError as e:
+        if e.errno == 98:
+            print(f"[AegisPlus] Порт {port} уже занят (фоновый сервер уже активен)")
+        else:
+            raise
 
 if __name__ == "__main__":
     start_server(3000)

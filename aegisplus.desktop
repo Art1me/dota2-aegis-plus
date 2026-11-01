@@ -4,9 +4,23 @@ Type=Application
 Name=AegisPlus
 GenericName=Dota 2 Pro Overlay
 Comment=Персональный Dota Plus и Live Overlay для Dota 2
-Exec=/home/aruchimo/projects/dota2-aegis-plus/toggle_overlay.sh
+Exec=/home/aruchimo/projects/dota2-aegis-plus/toggle_overlay.sh show
+Path=/home/aruchimo/projects/dota2-aegis-plus
 Icon=aegisplus
 Terminal=false
 Categories=Game;Utility;
 Keywords=dota;dota2;overlay;aegis;plus;stats;analytics;
 StartupNotify=false
+Actions=Toggle;Close;Quit;
+
+[Desktop Action Toggle]
+Name=Переключить оверлей (Super + O)
+Exec=/home/aruchimo/projects/dota2-aegis-plus/toggle_overlay.sh toggle
+
+[Desktop Action Close]
+Name=Скрыть оверлей (Esc)
+Exec=/home/aruchimo/projects/dota2-aegis-plus/toggle_overlay.sh close
+
+[Desktop Action Quit]
+Name=Закрыть и выключить AegisPlus (Super + Shift + O)
+Exec=/home/aruchimo/projects/dota2-aegis-plus/toggle_overlay.sh quit

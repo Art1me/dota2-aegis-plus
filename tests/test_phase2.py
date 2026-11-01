@@ -213,6 +213,32 @@ class TestPhase2Features(unittest.TestCase):
             self.assertIn("glyph", state_data["radar"])
             self.assertTrue(state_data["radar"]["glyph"]["is_on_cooldown"])
 
+            # 4. POST /api/overlay/toggle, /api/overlay/close, /api/overlay/open
+            conn.request("POST", "/api/overlay/toggle")
+            res_toggle = conn.getresponse()
+            self.assertEqual(res_toggle.status, 200)
+            data_toggle = json.loads(res_toggle.read().decode())
+            self.assertFalse(data_toggle["overlay_open"])
+
+            conn.request("POST", "/api/overlay/open")
+            res_open = conn.getresponse()
+            self.assertEqual(res_open.status, 200)
+            data_open = json.loads(res_open.read().decode())
+            self.assertTrue(data_open["overlay_open"])
+
+            conn.request("POST", "/api/overlay/close")
+            res_close = conn.getresponse()
+            self.assertEqual(res_close.status, 200)
+            data_close = json.loads(res_close.read().decode())
+            self.assertFalse(data_close["overlay_open"])
+
+            # 5. POST /api/quit
+            conn.request("POST", "/api/quit")
+            res_quit = conn.getresponse()
+            self.assertEqual(res_quit.status, 200)
+            data_quit = json.loads(res_quit.read().decode())
+            self.assertEqual(data_quit["status"], "quitting")
+
             conn.close()
         finally:
             server.shutdown()

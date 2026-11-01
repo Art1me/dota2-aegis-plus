@@ -8,8 +8,18 @@ echo "=========================================================="
 echo "🛡️  AegisPlus - Профессиональный Dota 2 Overlay Assistant"
 echo "=========================================================="
 
-# Clean up any lingering background instance of overlay
-pkill -f "python3.*overlay_window.py" 2>/dev/null || true
+PID_FILE="/tmp/aegisplus.pid"
+if [ -f "$PID_FILE" ]; then
+    OLD_PID=$(cat "$PID_FILE" 2>/dev/null || true)
+    if [ -n "$OLD_PID" ]; then
+        kill -9 "$OLD_PID" 2>/dev/null || true
+    fi
+    rm -f "$PID_FILE"
+fi
+
+pkill -f "overlay_window\.py" 2>/dev/null || true
+fuser -k 3000/tcp 2>/dev/null || true
+sleep 0.2
 
 # Check and install GSI config
 export PYTHONPATH="$DIR:$PYTHONPATH"
@@ -22,6 +32,8 @@ for lib in /usr/lib64/libgtk4-layer-shell.so /usr/lib/libgtk4-layer-shell.so /us
         break
     fi
 done
+
+export PYTHONUNBUFFERED=1
 
 echo "🚀 Запуск AegisPlus..."
 echo "👉 Оверлей: прозрачное окно поверх экрана"
