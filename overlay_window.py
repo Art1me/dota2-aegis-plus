@@ -117,7 +117,21 @@ class OverlayApplication(Gtk.Application):
             ucm.register_script_message_handler("overlay")
             ucm.connect("script-message-received::overlay", self.on_script_message)
             
-            # Transparent background
+            # Transparent background for GTK4 Window and WebKit
+            css_provider = Gtk.CssProvider()
+            css_provider.load_from_data(b"""
+            window, window.background, .background, webkitwebview {
+                background: none;
+                background-image: none;
+                background-color: transparent;
+            }
+            """)
+            Gtk.StyleContext.add_provider_for_display(
+                Gdk.Display.get_default(),
+                css_provider,
+                Gtk.STYLE_PROVIDER_PRIORITY_USER
+            )
+
             rgba = Gdk.RGBA()
             rgba.parse("rgba(0,0,0,0)")
             self.webview.set_background_color(rgba)
