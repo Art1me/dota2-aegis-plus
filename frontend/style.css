@@ -41,6 +41,26 @@ body {
   border-radius: 10px;
 }
 
+/* Steam Overlay Backdrop (blurred dark backdrop when overlay is open) */
+.steam-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(15, 23, 42, 0.5) 0%, rgba(2, 6, 23, 0.78) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1;
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.steam-overlay-backdrop.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* Layout HUD Wrapper */
 .hud-container {
   display: flex;
@@ -50,10 +70,59 @@ body {
   padding: 8px 14px;
   position: relative;
   pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.hud-container.steam-hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .interactive {
   pointer-events: auto !important;
+}
+
+/* Steam Overlay Quick Close & Hotkey Cluster */
+.steam-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+}
+
+.hotkey-pill {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  letter-spacing: 0.5px;
+}
+
+.btn-close-overlay {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid var(--color-red);
+  color: #fca5a5;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-close-overlay:hover {
+  background: rgba(239, 68, 68, 0.45);
+  color: #fff;
+  transform: scale(1.08);
 }
 
 /* Top Toolbar */

@@ -683,7 +683,60 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const btnClose = document.getElementById("btnCloseOverlay");
+  if (btnClose) {
+    btnClose.addEventListener("click", () => {
+      window.closeOverlay();
+    });
+  }
+
+  const backdrop = document.getElementById("steamBackdrop");
+  if (backdrop) {
+    backdrop.addEventListener("click", () => {
+      window.closeOverlay();
+    });
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      const draftModal = document.getElementById("draftOverlay");
+      if (draftModal && !draftModal.classList.contains("hidden")) {
+        draftModal.classList.add("hidden");
+        return;
+      }
+      window.closeOverlay();
+    }
+  });
+
   document.getElementById("btnClickthrough").addEventListener("click", () => {
     window.toggleClickthrough();
   });
 });
+
+// Steam Overlay State Controller
+let isSteamOverlayOpen = true;
+
+window.closeOverlay = function() {
+  window.setOverlayOpen(false);
+};
+
+window.setOverlayOpen = function(open) {
+  isSteamOverlayOpen = Boolean(open);
+  const hud = document.getElementById("hudContainer");
+  const backdrop = document.getElementById("steamBackdrop");
+
+  if (isSteamOverlayOpen) {
+    if (hud) hud.classList.remove("steam-hidden");
+    if (backdrop) backdrop.classList.remove("hidden");
+  } else {
+    if (hud) hud.classList.add("steam-hidden");
+    if (backdrop) backdrop.classList.add("hidden");
+  }
+
+  // Notify WebKit host
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.overlay) {
+    window.webkit.messageHandlers.overlay.postMessage({
+      action: isSteamOverlayOpen ? "open_overlay" : "close_overlay"
+    });
+  }
+};

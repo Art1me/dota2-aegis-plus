@@ -46,6 +46,7 @@ class OverlayApplication(Gtk.Application):
         super().__init__(application_id=APP_ID, flags=Gio.ApplicationFlags.FLAGS_NONE)
         self.window = None
         self.webview = None
+        self.overlay_open = True
         self.is_locked = False
 
     def do_activate(self):
@@ -125,13 +126,21 @@ class OverlayApplication(Gtk.Application):
             GLib.timeout_add(500, self.check_backend_sync)
 
         self.window.present()
+        GLib.timeout_add(100, lambda: self.apply_overlay_state(self.overlay_open))
 
     def on_script_message(self, ucm, js_result):
-        """Receives lock/unlock message from web frontend."""
+        """Receives messages from web frontend."""
         try:
             val = js_result.to_json(0)
             data = json.loads(val)
-            if data.get("action") == "set_lock":
+            action = data.get("action")
+            if action == "close_overlay":
+                self.overlay_open = False
+                self.apply_overlay_state(False)
+            elif action == "open_overlay":
+                self.overlay_open = True
+                self.apply_overlay_state(True)
+            elif action == "set_lock":
                 locked = bool(data.get("locked"))
                 self.is_locked = locked
                 self.apply_lock_state(self.is_locked)
@@ -139,13 +148,13 @@ class OverlayApplication(Gtk.Application):
             print(f"[AegisPlus] Ошибка обработки WebKit сообщения: {e}")
 
     def on_sigusr1(self):
-        """Toggles Lock/Menu click-through on SIGUSR1 signal (system hotkey)."""
-        self.is_locked = not self.is_locked
-        print(f"[AegisPlus] Получен сигнал SIGUSR1: переключение режима Лок = {self.is_locked}")
-        self.apply_lock_state(self.is_locked)
+        """Toggles Steam-style overlay on/off on SIGUSR1 signal (global hotkey Super+O)."""
+        self.overlay_open = not self.overlay_open
+        print(f"[AegisPlus] Горячая клавиша: переключение оверлея = {self.overlay_open}")
+        self.apply_overlay_state(self.overlay_open)
 
         if self.webview:
-            js = f"if (window.setLockState) window.setLockState({str(self.is_locked).lower()});"
+            js = f"if (window.setOverlayOpen) window.setOverlayOpen({str(self.overlay_open).lower()});"
             self.webview.evaluate_javascript(js, -1, None, None, None, None, None)
 
         return GLib.SOURCE_CONTINUE
@@ -157,13 +166,12 @@ class OverlayApplication(Gtk.Application):
             self.apply_lock_state(self.is_locked)
         return GLib.SOURCE_CONTINUE
 
-    def apply_lock_state(self, locked: bool):
+    def apply_overlay_state(self, open_state: bool):
         """
-        In Locked mode:
-        Sets input region to only the 'Меню / Лок' button coordinates (cairo.Region),
-        passing all other clicks directly through to Dota 2!
-        In Unlocked mode:
-        Sets input region to None (full window clickable).
+        When open_state is True:
+        Input region is None (full window clickable, fully interactive overlay).
+        When open_state is False:
+        Input region is empty cairo.Region() (100% click-through directly to Dota 2).
         """
         if not self.window:
             return
@@ -172,13 +180,24 @@ class OverlayApplication(Gtk.Application):
         if not surface:
             return
 
+        if open_state:
+            surface.set_input_region(None)
+            print("[AegisPlus] Оверлей открыт (режим Steam Overlay): управление активно")
+        else:
+            empty_region = cairo.Region()
+            surface.set_input_region(empty_region)
+            print("[AegisPlus] Оверлей закрыт: 100% сквозной экран, клики передаются в Dota 2")
+
+    def apply_lock_state(self, locked: bool):
+        if not self.window:
+            return
+        surface = self.window.get_surface()
+        if not surface:
+            return
         if locked:
-            # Strictly safe coordinates under Dota 2 settings gear (x=8, y=52, w=110, h=32)
-            # Avoids overlapping Radiant hero portraits or any in-game HUD elements
-            rect = cairo.RectangleInt(8, 52, 110, 32)
-            region = cairo.Region(rect)
-            surface.set_input_region(region)
-            print("[AegisPlus] Режим «Лок» включен: 100% сквозной экран, кликабелен только бейдж (8, 52, 110, 32)")
+            empty_region = cairo.Region()
+            surface.set_input_region(empty_region)
+            print("[AegisPlus] Режим «Лок» включен: 100% сквозной экран")
         else:
             surface.set_input_region(None)
             print("[AegisPlus] Режим «Меню» включен: оверлей интерактивен")

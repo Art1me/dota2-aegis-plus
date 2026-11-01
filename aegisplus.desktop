@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AegisPlus
+GenericName=Dota 2 Pro Overlay
+Comment=Персональный Dota Plus и Live Overlay для Dota 2
+Exec=/home/aruchimo/projects/dota2-aegis-plus/toggle_overlay.sh
+Icon=aegisplus
+Terminal=false
+Categories=Game;Utility;
+Keywords=dota;dota2;overlay;aegis;plus;stats;analytics;
+StartupNotify=false

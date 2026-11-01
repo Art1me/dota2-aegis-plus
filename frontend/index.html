@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Steam Overlay Backdrop (blurred dark backdrop when overlay is open) -->
+  <div class="steam-overlay-backdrop hidden" id="steamBackdrop"></div>
+
   <div class="hud-container" id="hudContainer">
     
     <!-- Top Bar Controls & Radar -->
@@ -89,6 +92,12 @@
           <button class="radar-action-btn" id="btnRoshKilled" title="Рошан убит (копирует тайминг в буфер)">⚔️ Рошан</button>
           <button class="radar-action-btn" id="btnGlyphUsed" title="Глиф врага использован (КД 300с)">🛡️ Глиф</button>
         </div>
+      </div>
+
+      <!-- Steam Overlay Quick Exit (Top Right) -->
+      <div class="steam-control glass interactive">
+        <span class="hotkey-pill" title="Нажмите Super + O или Esc для возврата в игру">⌨️ Super + O / Esc</span>
+        <button class="btn-close-overlay" id="btnCloseOverlay" title="Закрыть оверлей и вернуться в игру (Esc)">✕</button>
       </div>
     </header>
 
