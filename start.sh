@@ -8,6 +8,9 @@ echo "=========================================================="
 echo "🛡️  AegisPlus - Профессиональный Dota 2 Overlay Assistant"
 echo "=========================================================="
 
+# Clean up any lingering background instance of overlay
+pkill -f "python3.*overlay_window.py" 2>/dev/null || true
+
 # Check and install GSI config
 export PYTHONPATH="$DIR:$PYTHONPATH"
 python3 "$DIR/backend/config_manager.py"

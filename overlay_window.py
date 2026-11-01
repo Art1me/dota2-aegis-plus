@@ -52,8 +52,38 @@ class OverlayApplication(Gtk.Application):
         if not self.window:
             self.window = Gtk.ApplicationWindow(application=self)
             self.window.set_title("AegisPlus Dota 2 Overlay")
-            self.window.set_default_size(1920, 1080)
-            self.window.set_decorated(False)
+
+            # Wayland Layer Shell support (Hyprland / Sway / wlroots)
+            layer_shell_active = False
+            if HAS_LAYER_SHELL:
+                try:
+                    if Gtk4LayerShell.is_supported():
+                        # Initialize layer shell before modifying toplevel geometry
+                        Gtk4LayerShell.init_for_window(self.window)
+                        Gtk4LayerShell.set_namespace(self.window, "aegis-overlay")
+                        Gtk4LayerShell.set_layer(self.window, Gtk4LayerShell.Layer.OVERLAY)
+                        Gtk4LayerShell.set_keyboard_mode(self.window, Gtk4LayerShell.KeyboardMode.NONE)
+                        Gtk4LayerShell.set_exclusive_zone(self.window, -1)
+                        Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.TOP, True)
+                        Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.BOTTOM, True)
+                        Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.LEFT, True)
+                        Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.RIGHT, True)
+
+                        disp = Gdk.Display.get_default()
+                        if disp:
+                            mons = disp.get_monitors()
+                            if mons.get_n_items() > 0:
+                                Gtk4LayerShell.set_monitor(self.window, mons.get_item(0))
+
+                        layer_shell_active = True
+                        print("[AegisPlus] Wayland Layer Shell (OVERLAY) успешно активирован на основном мониторе")
+                except Exception as e:
+                    print(f"[AegisPlus] Layer Shell запущен с предупреждением: {e}")
+
+            if not layer_shell_active:
+                self.window.set_default_size(1920, 1080)
+                self.window.set_decorated(False)
+                print("[AegisPlus] Запуск в режиме независимого прозрачного окна")
 
             # Apply CSS for transparent background
             css_provider = Gtk.CssProvider()
@@ -68,26 +98,6 @@ class OverlayApplication(Gtk.Application):
                 css_provider,
                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
             )
-
-            # Wayland Layer Shell support (Hyprland / Sway / wlroots)
-            layer_shell_active = False
-            if HAS_LAYER_SHELL:
-                try:
-                    if Gtk4LayerShell.is_supported():
-                        Gtk4LayerShell.init_for_window(self.window)
-                        Gtk4LayerShell.set_layer(self.window, Gtk4LayerShell.Layer.OVERLAY)
-                        Gtk4LayerShell.set_keyboard_mode(self.window, Gtk4LayerShell.KeyboardMode.NONE)
-                        Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.TOP, True)
-                        Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.BOTTOM, True)
-                        Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.LEFT, True)
-                        Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.RIGHT, True)
-                        layer_shell_active = True
-                        print("[AegisPlus] Wayland Layer Shell (OVERLAY) успешно активирован")
-                except Exception as e:
-                    print(f"[AegisPlus] Layer Shell запущен с предупреждением: {e}")
-
-            if not layer_shell_active:
-                print("[AegisPlus] Запуск в режиме независимого прозрачного окна")
 
             # Setup WebKit UserContentManager to receive click-through toggle from JS
             self.webview = WebKit.WebView()
