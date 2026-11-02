@@ -16,6 +16,19 @@ from gi.repository import GLib
 
 from backend.analytics_engine import AnalyticsEngine
 from backend.config_manager import ConfigManager
+from backend.qr_generator import SimpleQRCode
+
+def get_local_ip() -> str:
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+    return ip
+
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
@@ -436,7 +449,44 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.wfile.write(b'{"status":"simulation_started"}')
             return
 
-        # 7. API: Overlay legacy toggles
+        # 7. API: Roshan Manual Controls (Mobile & Companion)
+        elif parsed.path == "/api/roshan/manual_kill":
+            try:
+                clock = int(state.raw_gsi.get("map", {}).get("clock_time", 0) or 0)
+            except (ValueError, TypeError):
+                clock = 0
+            if not clock and getattr(state, "simulation_time", 0):
+                clock = state.simulation_time
+            state.engine.record_roshan_killed(clock)
+            state.roshan_death_time = clock
+            state.last_roshan_state = "dead"
+            if state.raw_gsi:
+                state.process_gsi_payload(state.raw_gsi)
+            else:
+                state.notify_subscribers()
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok", "roshan_death_time": clock}).encode("utf-8"))
+            return
+
+        elif parsed.path == "/api/roshan/reset":
+            state.engine.roshan_death_time = None
+            state.roshan_death_time = None
+            state.last_roshan_state = "alive"
+            if state.raw_gsi:
+                state.process_gsi_payload(state.raw_gsi)
+            else:
+                state.notify_subscribers()
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok", "roshan_state": "alive"}).encode("utf-8"))
+            return
+
+        # 8. API: Overlay legacy toggles
         elif parsed.path == "/api/overlay/toggle":
             state.overlay_open = not getattr(state, "overlay_open", True)
             if overlay_app:
@@ -665,15 +715,31 @@ class ReusableThreadingHTTPServer(ThreadingHTTPServer):
 
 
 def start_server(port: int = 3000):
+    local_ip = get_local_ip()
+    mobile_url = f"http://{local_ip}:{port}"
+    localhost_url = f"http://127.0.0.1:{port}"
+    qr_ascii = SimpleQRCode.to_terminal_string(mobile_url)
+
+    print("\n" + "=" * 62)
+    print("🛡️   AegisPlus Pro: Dota 2 Mobile Companion & Game Server")
+    print("=" * 62)
+    print(f"👉 Локально на ПК:      {localhost_url}")
+    print(f"👉 Steam In-Game HUD:   {localhost_url}/?mode=hud")
+    print(f"👉 С телефона по Wi-Fi: {mobile_url}")
+    print("-" * 62)
+    print("📱 Отсканируйте QR-код камерой телефона (в одной Wi-Fi сети):")
+    print(qr_ascii)
+    print("=" * 62 + "\n")
+
     try:
-        server = ReusableThreadingHTTPServer(("127.0.0.1", port), GSIHTTPRequestHandler)
-        print(f"[AegisPlus GSI] Сервер запущен на http://127.0.0.1:{port}")
+        server = ReusableThreadingHTTPServer(("0.0.0.0", port), GSIHTTPRequestHandler)
         server.serve_forever()
     except OSError as e:
         if e.errno == 98:
             print(f"[AegisPlus GSI] Порт {port} уже занят (сервер уже работает)")
         else:
             raise
+
 
 
 if __name__ == "__main__":

@@ -1169,3 +1169,566 @@ select option {
   color: #fff !important;
 }
 
+/* ==========================================================================
+   STEAM IN-GAME HUD MODE (?mode=hud)
+   ========================================================================== */
+body.mode-hud-only {
+  background: transparent !important;
+}
+
+body.mode-hud-only #mobileCompanion {
+  display: none !important;
+}
+
+body.mode-hud-only #steamBackdrop {
+  display: none !important;
+}
+
+body.mode-hud-only .controls-cluster,
+body.mode-hud-only .steam-control,
+body.mode-hud-only .left-hud,
+body.mode-hud-only #menuCommandCenter,
+body.mode-hud-only #draftOverlay {
+  display: none !important;
+}
+
+body.mode-hud-only .top-bar {
+  justify-content: center !important;
+  padding: 6px 12px !important;
+  pointer-events: none !important;
+}
+
+body.mode-hud-only #macroRadar {
+  pointer-events: auto !important;
+  background: rgba(11, 15, 25, 0.88) !important;
+  border: 1px solid rgba(0, 255, 136, 0.5) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+}
+
+body.mode-hud-only .right-hud {
+  position: fixed !important;
+  top: 70px !important;
+  right: 14px !important;
+  transform: scale(0.9) !important;
+  transform-origin: top right !important;
+  pointer-events: auto !important;
+}
+
+/* ==========================================================================
+   MOBILE COMPANION STYLES (Smartphones & Tablets via Wi-Fi)
+   ========================================================================== */
+#mobileCompanion {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  html, body {
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    background: #080c14 !important;
+    background-color: #080c14 !important;
+  }
+
+  #hudContainer, #steamBackdrop {
+    display: none !important;
+  }
+
+  #mobileCompanion {
+    display: flex !important;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 76px;
+    background: #080c14;
+    color: #f1f5f9;
+  }
+}
+
+/* Mobile Header */
+.mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+
+.mobile-app-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-shield {
+  font-size: 22px;
+}
+
+.brand-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-weight: 800;
+  font-size: 13px;
+  color: #00ff88;
+  letter-spacing: 0.5px;
+}
+
+.mobile-connection-pill {
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.mobile-header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mobile-match-clock {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+.mobile-score-wrap {
+  display: flex;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.score-rad { color: #10b981; }
+.score-vs { color: #64748b; }
+.score-dire { color: #ef4444; }
+
+.mobile-haptic-btn {
+  background: rgba(0, 255, 136, 0.15);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  color: #00ff88;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Hero Strip */
+.mobile-hero-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  margin: 8px 12px 0 12px;
+  border-radius: 10px;
+  background: rgba(22, 30, 48, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mobile-hero-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-hero-name {
+  font-weight: 800;
+  font-size: 13px;
+  color: #fff;
+}
+
+.mobile-hero-lvl {
+  font-size: 10px;
+  color: #60a5fa;
+  font-weight: 700;
+}
+
+.mobile-hero-stats {
+  display: flex;
+  gap: 6px;
+}
+
+.mobile-stat-badge {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.mobile-stat-badge.gold { color: #fbbf24; }
+.mobile-stat-badge.gpm { color: #34d399; }
+
+/* Content Pages */
+.mobile-content-pages {
+  flex: 1;
+  padding: 10px 12px;
+}
+
+.mobile-page {
+  display: none;
+}
+
+.mobile-page.active {
+  display: block;
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Giant Roshan Card */
+.mobile-roshan-card {
+  padding: 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(20, 28, 45, 0.95), rgba(13, 19, 32, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  margin-bottom: 14px;
+}
+
+.mobile-rosh-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.mobile-card-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+}
+
+.mobile-rosh-status-pill {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.mobile-rosh-status-pill.alive {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.mobile-rosh-status-pill.aegis {
+  background: rgba(251, 191, 36, 0.25);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  animation: pulse-ring 1.5s infinite;
+}
+
+.mobile-rosh-status-pill.respawn {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.6);
+  animation: pulse-ring 1s infinite;
+}
+
+.mobile-rosh-main-display {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.mobile-rosh-time {
+  font-size: 38px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+  color: #fff;
+}
+
+.mobile-rosh-phase {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.mobile-rosh-progress-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.mobile-rosh-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #fbbf24, #ef4444);
+  transition: width 0.3s ease;
+}
+
+.mobile-rosh-window-times {
+  display: flex;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+}
+
+.rosh-detail-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.detail-label {
+  font-size: 9px;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.detail-val {
+  font-size: 12px;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.mobile-rosh-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-giant-roshan {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 10px;
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.btn-giant-roshan:active {
+  transform: scale(0.97);
+}
+
+.btn-giant-roshan small {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+.btn-secondary-roshan {
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Runes Grid */
+.mobile-runes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mobile-rune-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(20, 28, 45, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  transition: border-color 0.3s;
+}
+
+.mobile-rune-card.soon-alert {
+  border-color: #fbbf24;
+  animation: pulse-ring 1s infinite;
+}
+
+.rune-icon-wrap {
+  font-size: 24px;
+}
+
+.rune-text-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.rune-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.rune-countdown {
+  font-size: 17px;
+  font-weight: 900;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.mobile-sim-btn {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: #94a3b8;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* General Mobile Cards */
+.mobile-card {
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(20, 28, 45, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 12px;
+}
+
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.mobile-badge {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.mobile-badge.positive {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.mobile-bb-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+.mobile-bb-status {
+  font-size: 14px;
+  font-weight: 800;
+  color: #10b981;
+}
+
+.mobile-bb-note {
+  font-size: 10px;
+  color: #94a3b8;
+  display: block;
+}
+
+.mobile-bb-cost {
+  font-size: 16px;
+  font-weight: 900;
+  color: #fbbf24;
+}
+
+.mobile-metric-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 12px;
+}
+
+.glyph-col {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.btn-micro-glyph {
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Bottom Navigation Bar */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  display: flex;
+  background: rgba(11, 15, 25, 0.96);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  z-index: 200;
+}
+
+.nav-tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding-bottom: 4px;
+}
+
+.nav-tab-btn.active {
+  color: #00ff88;
+}
+
+.nav-tab-icon {
+  font-size: 18px;
+}
+
+.nav-tab-label {
+  font-size: 10px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+

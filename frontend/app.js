@@ -125,7 +125,11 @@ function renderUI(data) {
     statusText.innerText = data.status || "Ожидание Dota 2";
   }
 
+  // Update Mobile Companion UI
+  renderMobileUI(data);
+
   // Update sync settings if received
+
   if (data.settings) {
     if (data.settings.rank) {
       const rankVal = data.settings.rank;
@@ -684,11 +688,330 @@ function setupCustomSelects() {
   });
 }
 
+let mobileHapticEnabled = true;
+let alertedTimerIds = new Set();
+
+function triggerHaptic(pattern = [200, 100, 200]) {
+  if (mobileHapticEnabled && navigator.vibrate) {
+    try {
+      navigator.vibrate(pattern);
+    } catch (e) {}
+  }
+}
+
+function renderMobileUI(data) {
+  const container = document.getElementById("mobileCompanion");
+  if (!container) return;
+
+  // Status & Connection
+  const mobStatus = document.getElementById("mobileStatusText");
+  if (mobStatus) {
+    mobStatus.innerText = data.connected ? (data.status || "В игре") : "Ожидание Dota 2";
+    mobStatus.style.color = data.connected ? "#10b981" : "#94a3b8";
+  }
+
+  // Clock & Scores
+  if (data.radar) {
+    const clockEl = document.getElementById("mobileMatchClock");
+    if (clockEl) clockEl.innerText = data.radar.clock_formatted || "00:00";
+    
+    // Scores
+    const radScore = document.getElementById("mobileScoreRad");
+    const direScore = document.getElementById("mobileScoreDire");
+    if (data.raw && data.raw.map) {
+      if (radScore) radScore.innerText = data.raw.map.radiant_score || 0;
+      if (direScore) direScore.innerText = data.raw.map.dire_score || 0;
+    }
+
+    // Hero stats
+    if (data.raw && data.raw.hero) {
+      const hero = data.raw.hero;
+      const hName = document.getElementById("mobileHeroName");
+      if (hName) hName.innerText = (hero.name || "Герой").replace("npc_dota_hero_", "").replace(/_/g, " ").toUpperCase();
+      const hLvl = document.getElementById("mobileHeroLvl");
+      if (hLvl) hLvl.innerText = `Ур. ${hero.level || 1}`;
+    }
+    if (data.raw && data.raw.player) {
+      const p = data.raw.player;
+      const kda = document.getElementById("mobileKDA");
+      if (kda) kda.innerText = `${p.kills || 0} / ${p.deaths || 0} / ${p.assists || 0}`;
+      const nw = document.getElementById("mobileNW");
+      if (nw) nw.innerText = `${(p.gold || 0).toLocaleString()} 💰`;
+      const gpm = document.getElementById("mobileGPM");
+      if (gpm) gpm.innerText = `${p.gpm || 0} GPM`;
+    }
+
+    // Roshan on mobile
+    const rosh = data.radar.roshan;
+    if (rosh) {
+      const pill = document.getElementById("mobileRoshStatusBadge");
+      const primaryTime = document.getElementById("mobileRoshPrimaryTime");
+      const phase = document.getElementById("mobileRoshPhase");
+      const fill = document.getElementById("mobileRoshFill");
+      const btnKill = document.getElementById("btnMobileRoshanKill");
+
+      if (rosh.state === "alive") {
+        if (pill) { pill.className = "mobile-rosh-status-pill alive"; pill.innerText = "ЖИВ"; }
+        if (primaryTime) primaryTime.innerText = "ЖИВ";
+        if (phase) phase.innerText = "Готов к битве";
+        if (fill) fill.style.width = "0%";
+        if (btnKill) {
+          btnKill.style.background = "linear-gradient(135deg, #059669, #10b981)";
+          btnKill.innerHTML = `<span>⚔️ РОШАН УБИТ</span><small>Нажмите при смерти Рошана</small>`;
+        }
+      } else {
+        const d = rosh.details || {};
+        const deathTime = rosh.death_time || 0;
+        const clock = data.radar.clock_time || 0;
+        const elapsed = clock - deathTime;
+
+        if (document.getElementById("mobileRoshAegisVal"))
+          document.getElementById("mobileRoshAegisVal").innerText = d.aegis_expires || "--:--";
+        if (document.getElementById("mobileRoshMinVal"))
+          document.getElementById("mobileRoshMinVal").innerText = d.min_respawn || "--:--";
+        if (document.getElementById("mobileRoshMaxVal"))
+          document.getElementById("mobileRoshMaxVal").innerText = d.max_respawn || "--:--";
+
+        if (elapsed < 300) {
+          const left = 300 - elapsed;
+          const m = Math.floor(left / 60);
+          const s = left % 60;
+          const timeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
+          if (pill) { pill.className = "mobile-rosh-status-pill aegis"; pill.innerText = "ЭГИДА"; }
+          if (primaryTime) primaryTime.innerText = timeStr;
+          if (phase) phase.innerText = `Эгида активна до ${d.aegis_expires}`;
+          if (fill) fill.style.width = `${Math.min(100, (elapsed / 300) * 100)}%`;
+          if (btnKill) {
+            btnKill.style.background = "linear-gradient(135deg, #b45309, #f59e0b)";
+            btnKill.innerHTML = `<span>🛡️ ЭГИДА АКТИВНА: ${timeStr}</span><small>Истекает в ${d.aegis_expires}</small>`;
+          }
+        } else if (elapsed < 480) {
+          const left = 480 - elapsed;
+          const m = Math.floor(left / 60);
+          const s = left % 60;
+          const timeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
+          if (pill) { pill.className = "mobile-rosh-status-pill respawn"; pill.innerText = "ОЖИДАНИЕ"; }
+          if (primaryTime) primaryTime.innerText = timeStr;
+          if (phase) phase.innerText = `Мин. спавн в ${d.min_respawn}`;
+          if (fill) fill.style.width = `${Math.min(100, (elapsed / 480) * 100)}%`;
+          if (btnKill) {
+            btnKill.style.background = "linear-gradient(135deg, #6d28d9, #8b5cf6)";
+            btnKill.innerHTML = `<span>⏳ ОЖИДАНИЕ СПАВНА: ${timeStr}</span><small>Окно: ${d.min_respawn} - ${d.max_respawn}</small>`;
+          }
+        } else {
+          const left = Math.max(0, 660 - elapsed);
+          const m = Math.floor(left / 60);
+          const s = left % 60;
+          const timeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
+          if (pill) { pill.className = "mobile-rosh-status-pill respawn"; pill.innerText = "СПАВН!"; }
+          if (primaryTime) primaryTime.innerText = timeStr;
+          if (phase) phase.innerText = `Может появиться сейчас! Макс: ${d.max_respawn}`;
+          if (fill) fill.style.width = "100%";
+          if (btnKill) {
+            btnKill.style.background = "linear-gradient(135deg, #b91c1c, #ef4444)";
+            btnKill.innerHTML = `<span>⚡ РОШАН МОЖЕТ БЫТЬ ЖИВ</span><small>Макс. время: ${d.max_respawn}</small>`;
+          }
+        }
+      }
+    }
+
+    // Runes & Lotus countdowns
+    (data.radar.timers || []).forEach(t => {
+      const min = Math.floor(t.seconds_left / 60);
+      const sec = t.seconds_left % 60;
+      const timeStr = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+
+      let cardId = null;
+      let timeId = null;
+      let dotId = null;
+
+      if (t.id === "wisdom") { cardId = "cardRuneWisdom"; timeId = "mobileTimeWisdom"; dotId = "dotWisdom"; }
+      else if (t.id === "bounty" || t.id === "water_rune") { cardId = "cardRuneBounty"; timeId = "mobileTimeBounty"; dotId = "dotBounty"; }
+      else if (t.id === "lotus") { cardId = "cardRuneLotus"; timeId = "mobileTimeLotus"; dotId = "dotLotus"; }
+      else if (t.id === "power_rune") { cardId = "cardRunePower"; timeId = "mobileTimePower"; dotId = "dotPower"; }
+
+      if (timeId && document.getElementById(timeId)) {
+        document.getElementById(timeId).innerText = timeStr;
+      }
+      if (cardId && document.getElementById(cardId)) {
+        const card = document.getElementById(cardId);
+        const dot = dotId ? document.getElementById(dotId) : null;
+        if (t.seconds_left <= 15) {
+          card.classList.add("soon-alert");
+          if (dot) dot.classList.remove("hidden");
+          const alertKey = `${t.id}_${Math.floor(data.radar.clock_time / 60)}`;
+          if (!alertedTimerIds.has(alertKey)) {
+            alertedTimerIds.add(alertKey);
+            triggerHaptic([200, 100, 200]);
+            playSoundCue(t.id === "wisdom" ? "critical" : "warning");
+          }
+        } else {
+          card.classList.remove("soon-alert");
+          if (dot) dot.classList.add("hidden");
+        }
+      }
+    });
+  }
+
+  // Performance & Benchmarks on mobile
+  if (data.performance) {
+    const p = data.performance;
+    const grade = document.getElementById("mobileBenchmarkGrade");
+    if (grade) {
+      grade.innerText = p.grade || "A";
+      grade.style.color = p.grade_color || "#10b981";
+    }
+    const b = p.benchmarks || {};
+    const cs = document.getElementById("mobileCS");
+    if (cs) cs.innerText = `${b.current_cs || 0} / ${b.target_cs || 0}`;
+    const nw = document.getElementById("mobileNWVal");
+    if (nw) nw.innerText = `${(b.current_nw || 0).toLocaleString()} 💰 (${b.delta_nw >= 0 ? '+' : ''}${b.delta_nw || 0})`;
+    const gpm = document.getElementById("mobileGPMVal");
+    if (gpm) gpm.innerText = `${b.current_gpm || 0} / ${b.current_xpm || 0}`;
+
+    // Buyback on mobile
+    if (p.buyback) {
+      const bb = p.buyback;
+      const bbCost = document.getElementById("mobileBBCost");
+      if (bbCost) bbCost.innerText = `${bb.cost} 💰`;
+      const bbStatus = document.getElementById("mobileBBStatus");
+      const bbSurplus = document.getElementById("mobileBBSurplus");
+      const bbNote = document.getElementById("mobileBBNote");
+
+      if (bb.status === "READY") {
+        if (bbStatus) { bbStatus.innerText = "Выкуп готов"; bbStatus.style.color = "#10b981"; }
+        if (bbSurplus) { bbSurplus.innerText = `+${bb.surplus}g резерв`; bbSurplus.className = "mobile-badge positive"; }
+        if (bbNote) bbNote.innerText = bb.death_penalty > 0 ? `Потеря при смерти: -${bb.death_penalty}g` : "Безопасно";
+      } else if (bb.status === "AT_RISK") {
+        if (bbStatus) { bbStatus.innerText = "Риск потери выкупа"; bbStatus.style.color = "#fbbf24"; }
+        if (bbSurplus) { bbSurplus.innerText = `-${Math.abs(bb.surplus_after_death)}g при смерти`; bbSurplus.className = "mobile-badge"; }
+        if (bbNote) bbNote.innerText = `Хватит сейчас, но смерть снимет ${bb.death_penalty}g!`;
+      } else if (bb.status === "COOLDOWN") {
+        if (bbStatus) { bbStatus.innerText = `Кулдаун (${bb.cooldown}с)`; bbStatus.style.color = "#c084fc"; }
+        if (bbSurplus) { bbSurplus.innerText = `КД: ${bb.cooldown}с`; bbSurplus.className = "mobile-badge"; }
+        if (bbNote) bbNote.innerText = "Выкуп на перезарядке";
+      } else {
+        if (bbStatus) { bbStatus.innerText = "Не хватает золота"; bbStatus.style.color = "#f87171"; }
+        if (bbSurplus) { bbSurplus.innerText = `Дефицит ${bb.deficit || 0}g`; bbSurplus.className = "mobile-badge"; }
+        if (bbNote) bbNote.innerText = "Нужно больше фарма";
+      }
+    }
+  }
+
+  // Items on Mobile
+  if (data.items && data.items.situational) {
+    const container = document.getElementById("mobileItemsContainer");
+    if (container) {
+      container.innerHTML = "";
+      data.items.situational.slice(0, 6).forEach(item => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "glass";
+        itemDiv.style.cssText = "display: flex; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 8px;";
+        itemDiv.innerHTML = `
+          <div style="font-size: 20px;">🗡️</div>
+          <div style="flex: 1;">
+            <div style="display: flex; justify-content: space-between;">
+              <strong style="color: #60a5fa; font-size: 13px;">${item.name || item.id}</strong>
+              <span style="font-size: 11px; color: #fbbf24; font-weight: 700;">${item.cost || 0} 💰</span>
+            </div>
+            <p style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">${item.reason || ''}</p>
+          </div>
+        `;
+        container.appendChild(itemDiv);
+      });
+    }
+  }
+}
+
 // Event Listeners on DOM Ready
 document.addEventListener("DOMContentLoaded", () => {
+  // Check Steam HUD Mode
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("mode") === "hud") {
+    document.body.classList.add("mode-hud-only");
+    document.body.classList.remove("mode-menu");
+  }
+
+  // Mobile Tabs
+  document.querySelectorAll(".nav-tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".nav-tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".mobile-page").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      const targetId = btn.getAttribute("data-target");
+      const page = document.getElementById(targetId);
+      if (page) page.classList.add("active");
+      triggerHaptic(40);
+    });
+  });
+
+  // Mobile Haptic Toggle
+  const btnHaptic = document.getElementById("btnMobileHaptic");
+  if (btnHaptic) {
+    btnHaptic.addEventListener("click", () => {
+      mobileHapticEnabled = !mobileHapticEnabled;
+      const icon = document.getElementById("mobileHapticIcon");
+      if (icon) icon.innerText = mobileHapticEnabled ? "🔔 Вкл" : "🔕 Выкл";
+      btnHaptic.style.color = mobileHapticEnabled ? "#00ff88" : "#94a3b8";
+      if (mobileHapticEnabled) triggerHaptic([100, 50, 100]);
+    });
+  }
+
+  // Mobile Roshan Controls
+  const btnMobRoshKill = document.getElementById("btnMobileRoshanKill");
+  if (btnMobRoshKill) {
+    btnMobRoshKill.addEventListener("click", () => {
+      triggerHaptic([300, 100, 300]);
+      playSoundCue("critical");
+      fetch("/api/roshan/manual_kill", { method: "POST" })
+        .then(r => r.json())
+        .then(() => {
+          showSingleToast("⚔️ Рошан убит!", "Таймер отсчета респавна запущен", "warning");
+        })
+        .catch(e => console.error("Roshan kill trigger error:", e));
+    });
+  }
+
+  const btnMobRoshReset = document.getElementById("btnMobileRoshanReset");
+  if (btnMobRoshReset) {
+    btnMobRoshReset.addEventListener("click", () => {
+      triggerHaptic(80);
+      fetch("/api/roshan/reset", { method: "POST" })
+        .then(r => r.json())
+        .then(() => {
+          showSingleToast("🛡️ Рошан", "Таймер сброшен (Рошан жив)", "info");
+        })
+        .catch(e => console.error("Roshan reset error:", e));
+    });
+  }
+
+  // Mobile Simulate
+  const btnMobSim = document.getElementById("btnMobileSimulate");
+  if (btnMobSim) {
+    btnMobSim.addEventListener("click", () => {
+      triggerHaptic(100);
+      fetch("/api/simulate", { method: "POST" }).catch(e => console.error(e));
+    });
+  }
+
+  // Mobile Glyph
+  const btnMobGlyph = document.getElementById("btnMobileGlyphTrigger");
+  if (btnMobGlyph) {
+    btnMobGlyph.addEventListener("click", () => {
+      triggerHaptic(100);
+      fetch("/api/glyph_used", { method: "POST" })
+        .then(r => r.json())
+        .then(() => {
+          showSingleToast("🛡️ Глиф врага использован!", "Таймер 300с запущен", "warning");
+        })
+        .catch(e => console.error(e));
+    });
+  }
+
   fetchHeroesList();
   initEventSource();
   setupHeroSearch();
+
   renderManualEnemySlots();
   setupCustomSelects();
 

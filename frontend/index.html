@@ -2,14 +2,251 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AegisPlus - Dota 2 Pro Overlay</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>AegisPlus - Dota 2 Pro Companion & HUD</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#080c14">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="mode-menu">
-  <!-- Steam Overlay Backdrop (blurred dark backdrop when overlay is open) -->
+  <!-- Steam Overlay Backdrop (blurred dark backdrop when overlay is open on desktop) -->
   <div class="steam-overlay-backdrop" id="steamBackdrop"></div>
 
+  <!-- ========================================================================= -->
+  <!-- MOBILE COMPANION INTERFACE (Optimized for Smartphone / Tablet by Wi-Fi)  -->
+  <!-- ========================================================================= -->
+  <div class="mobile-companion-container" id="mobileCompanion">
+    <!-- Mobile Top Header -->
+    <header class="mobile-header glass">
+      <div class="mobile-header-left">
+        <div class="mobile-app-brand">
+          <span class="brand-shield">🛡️</span>
+          <div class="brand-title-wrap">
+            <span class="brand-title">AegisPlus Mobile</span>
+            <span class="mobile-connection-pill" id="mobileStatusText">Ожидание Dota 2</span>
+          </div>
+        </div>
+      </div>
+      <div class="mobile-header-center">
+        <div class="mobile-match-clock" id="mobileMatchClock">00:00</div>
+        <div class="mobile-score-wrap">
+          <span class="score-rad" id="mobileScoreRad">0</span>
+          <span class="score-vs">:</span>
+          <span class="score-dire" id="mobileScoreDire">0</span>
+        </div>
+      </div>
+      <div class="mobile-header-right">
+        <button class="mobile-haptic-btn" id="btnMobileHaptic" title="Включить вибро и звук на телефоне">
+          <span id="mobileHapticIcon">🔔 Вкл</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Hero Strip -->
+    <div class="mobile-hero-strip glass">
+      <div class="mobile-hero-info">
+        <span class="mobile-hero-name" id="mobileHeroName">Герой не выбран</span>
+        <span class="mobile-hero-lvl" id="mobileHeroLvl">Ур. 1</span>
+      </div>
+      <div class="mobile-hero-stats">
+        <span class="mobile-stat-badge" id="mobileKDA">0 / 0 / 0</span>
+        <span class="mobile-stat-badge gold" id="mobileNW">600 💰</span>
+        <span class="mobile-stat-badge gpm" id="mobileGPM">0 GPM</span>
+      </div>
+    </div>
+
+    <!-- Mobile Scrollable Content Pages -->
+    <div class="mobile-content-pages">
+      
+      <!-- PAGE 1: TIMERS (ROSHAN & RUNES) -->
+      <section class="mobile-page active" id="pageTimers">
+        <!-- Giant Interactive Roshan Card -->
+        <div class="mobile-roshan-card glass">
+          <div class="mobile-rosh-header">
+            <span class="mobile-card-title">⚔️ ТАЙМИНГ РОШАНА</span>
+            <span class="mobile-rosh-status-pill alive" id="mobileRoshStatusBadge">ЖИВ</span>
+          </div>
+
+          <div class="mobile-rosh-main-display">
+            <div class="mobile-rosh-time" id="mobileRoshPrimaryTime">--:--</div>
+            <div class="mobile-rosh-phase" id="mobileRoshPhase">Ожидание первого боя</div>
+          </div>
+
+          <div class="mobile-rosh-progress-bar">
+            <div class="mobile-rosh-fill" id="mobileRoshFill" style="width: 0%;"></div>
+          </div>
+
+          <div class="mobile-rosh-window-times" id="mobileRoshWindowDetails">
+            <div class="rosh-detail-col">
+              <span class="detail-label">Эгида (5м)</span>
+              <span class="detail-val" id="mobileRoshAegisVal">--:--</span>
+            </div>
+            <div class="rosh-detail-col">
+              <span class="detail-label">Мин. спавн (8м)</span>
+              <span class="detail-val" id="mobileRoshMinVal">--:--</span>
+            </div>
+            <div class="rosh-detail-col">
+              <span class="detail-label">Макс. спавн (11м)</span>
+              <span class="detail-val" id="mobileRoshMaxVal">--:--</span>
+            </div>
+          </div>
+
+          <div class="mobile-rosh-buttons">
+            <button class="btn-giant-roshan" id="btnMobileRoshanKill">
+              <span>⚔️ РОШАН УБИТ</span>
+              <small>Нажмите при смерти Рошана</small>
+            </button>
+            <button class="btn-secondary-roshan" id="btnMobileRoshanReset" title="Сбросить статус Рошана (жив)">
+              <span>↺ Сброс</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Rune & Lotus Timers Grid -->
+        <div class="mobile-runes-grid">
+          <!-- Wisdom Rune (7m) -->
+          <div class="mobile-rune-card glass" id="cardRuneWisdom">
+            <div class="rune-icon-wrap">🌟</div>
+            <div class="rune-text-wrap">
+              <span class="rune-title">Руна мудрости (7 мин)</span>
+              <span class="rune-countdown" id="mobileTimeWisdom">07:00</span>
+            </div>
+            <div class="rune-alert-dot hidden" id="dotWisdom"></div>
+          </div>
+
+          <!-- Bounty Rune (3m) -->
+          <div class="mobile-rune-card glass" id="cardRuneBounty">
+            <div class="rune-icon-wrap">💰</div>
+            <div class="rune-text-wrap">
+              <span class="rune-title">Руна богатства (3 мин)</span>
+              <span class="rune-countdown" id="mobileTimeBounty">03:00</span>
+            </div>
+            <div class="rune-alert-dot hidden" id="dotBounty"></div>
+          </div>
+
+          <!-- Lotus Pool (3m) -->
+          <div class="mobile-rune-card glass" id="cardRuneLotus">
+            <div class="rune-icon-wrap">🌸</div>
+            <div class="rune-text-wrap">
+              <span class="rune-title">Пруд лотосов (3 мин)</span>
+              <span class="rune-countdown" id="mobileTimeLotus">03:00</span>
+            </div>
+            <div class="rune-alert-dot hidden" id="dotLotus"></div>
+          </div>
+
+          <!-- Power Runes (2m after 6:00) -->
+          <div class="mobile-rune-card glass" id="cardRunePower">
+            <div class="rune-icon-wrap">⚡</div>
+            <div class="rune-text-wrap">
+              <span class="rune-title">Активная руна мида (2 мин)</span>
+              <span class="rune-countdown" id="mobileTimePower">06:00</span>
+            </div>
+            <div class="rune-alert-dot hidden" id="dotPower"></div>
+          </div>
+        </div>
+
+        <!-- Quick Demo / Simulation Trigger -->
+        <div style="text-align: center; margin: 12px 0;">
+          <button class="mobile-sim-btn glass" id="btnMobileSimulate">▶ Запустить демо симуляцию матча</button>
+        </div>
+      </section>
+
+      <!-- PAGE 2: STATS & BUYBACK -->
+      <section class="mobile-page" id="pageStats">
+        <!-- Buyback Status -->
+        <div class="mobile-card glass">
+          <div class="mobile-card-header">
+            <span class="mobile-card-title">🪙 Статус выкупа</span>
+            <span class="mobile-badge" id="mobileBBSurplus">+0g</span>
+          </div>
+          <div class="mobile-bb-box" id="mobileBBBox">
+            <div class="mobile-bb-left">
+              <span class="mobile-bb-status" id="mobileBBStatus">Выкуп готов</span>
+              <span class="mobile-bb-note" id="mobileBBNote">Риск потери при смерти</span>
+            </div>
+            <div class="mobile-bb-right">
+              <span class="mobile-bb-cost" id="mobileBBCost">240 💰</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Benchmarks -->
+        <div class="mobile-card glass">
+          <div class="mobile-card-header">
+            <span class="mobile-card-title">📊 Бенчмарк темпа ранга</span>
+            <span class="mobile-badge positive" id="mobileBenchmarkGrade">A</span>
+          </div>
+          <div class="mobile-metric-row">
+            <span>Крипстат (LH / DN):</span>
+            <span class="metric-val" id="mobileCS">0 / 0</span>
+          </div>
+          <div class="mobile-metric-row">
+            <span>Нетворс:</span>
+            <span class="metric-val" id="mobileNWVal">600 💰</span>
+          </div>
+          <div class="mobile-metric-row">
+            <span>Темп GPM / XPM:</span>
+            <span class="metric-val" id="mobileGPMVal">0 / 0</span>
+          </div>
+        </div>
+
+        <!-- Fortification Glyphs -->
+        <div class="mobile-card glass">
+          <div class="mobile-card-header">
+            <span class="mobile-card-title">🛡️ Глиф укрепления строений</span>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 6px;">
+            <div class="glyph-col">
+              <span>Союзный:</span>
+              <strong id="mobileGlyphAlly" style="color: #00ff88;">ГОТОВ</strong>
+            </div>
+            <div class="glyph-col">
+              <span>Вражеский:</span>
+              <strong id="mobileGlyphEnemy" style="color: #60a5fa;">ГОТОВ</strong>
+              <button class="btn-micro-glyph" id="btnMobileGlyphTrigger">Использован</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE 3: ITEMS & DRAFT -->
+      <section class="mobile-page" id="pageItems">
+        <div class="mobile-card glass">
+          <div class="mobile-card-header">
+            <span class="mobile-card-title">💡 Рекомендации сборок</span>
+            <span class="mobile-badge">Ситуативные</span>
+          </div>
+          <div id="mobileItemsContainer" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav glass">
+      <button class="nav-tab-btn active" data-target="pageTimers">
+        <span class="nav-tab-icon">⏱️</span>
+        <span class="nav-tab-label">Таймеры</span>
+      </button>
+      <button class="nav-tab-btn" data-target="pageStats">
+        <span class="nav-tab-icon">📊</span>
+        <span class="nav-tab-label">Матч & Выкуп</span>
+      </button>
+      <button class="nav-tab-btn" data-target="pageItems">
+        <span class="nav-tab-icon">💡</span>
+        <span class="nav-tab-label">Сборки</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- DESKTOP OVERLAY & STEAM HUD BAR                                          -->
+  <!-- ========================================================================= -->
   <div class="hud-container" id="hudContainer">
     
     <!-- Top Bar Controls & Radar -->
@@ -117,8 +354,8 @@
         </div>
 
         <div class="radar-actions">
-          <button class="radar-action-btn" id="btnRoshKilled" title="Рошан убит (копирует тайминг в буфер)">⚔️ Рошан</button>
-          <button class="radar-action-btn" id="btnGlyphUsed" title="Глиф врага использован (КД 300с)">🛡️ Глиф</button>
+          <button class="radar-action-btn" id="btnRoshKilled" title="Рошан убит">⚔️ Рошан</button>
+          <button class="radar-action-btn" id="btnGlyphUsed" title="Глиф врага использован">🛡️ Глиф</button>
         </div>
       </div>
 
@@ -187,7 +424,7 @@
               <div class="tile-icon">⚔️</div>
               <div class="tile-content">
                 <h3>Тайминги Рошана и Глифа</h3>
-                <p>Быстрая фиксация убийства Рошана (копирует тайминг в буфер) и запуск КД глифа.</p>
+                <p>Быстрая фиксация убийства Рошана и запуск отсчета респавна.</p>
                 <div style="display: flex; gap: 8px; margin-top: 6px;">
                   <button class="cmd-btn" id="btnCenterRosh">⚔️ Рошан убит</button>
                   <button class="cmd-btn" id="btnCenterGlyph">🛡️ Глиф врага</button>
@@ -196,11 +433,11 @@
             </div>
 
             <div class="command-tile">
-              <div class="tile-icon">⌨️</div>
+              <div class="tile-icon">📱</div>
               <div class="tile-content">
-                <h3>Управление и Горячие клавиши</h3>
-                <p><kbd>Super + O</kbd> — переключение HUD / Меню<br><kbd>Esc</kbd> — возврат к сквозному HUD в игре<br><kbd>Super + Shift + O</kbd> — полное выключение</p>
-                <button class="cmd-btn cmd-btn-danger" id="btnCenterQuit" style="margin-top: 6px;">⏻ Выйти из AegisPlus</button>
+                <h3>Мобильный компаньон</h3>
+                <p>Откройте эту страницу на телефоне или в оверлее Steam (Shift+Tab -> Закрепить окно).</p>
+                <a href="/?mode=hud" target="_blank" class="cmd-btn" style="text-decoration: none; text-align: center; display: inline-block;">Открыть режим Steam HUD (?mode=hud)</a>
               </div>
             </div>
           </div>
@@ -291,7 +528,7 @@
           <!-- 5 slots rendered via JS -->
         </div>
         <div class="hero-search-wrapper" id="heroSearchWrapper">
-          <input type="text" id="heroSearchInput" placeholder="🔍 Введите имя героя врага (напр. Bristle, PA, Morphling, Pudge)..." autocomplete="off" />
+          <input type="text" id="heroSearchInput" placeholder="🔍 Введите имя героя врага..." autocomplete="off" />
           <div class="hero-dropdown hidden" id="heroDropdown"></div>
         </div>
       </div>
@@ -307,18 +544,6 @@
       <!-- Counter Pick Grid -->
       <div class="recommendations-grid" id="draftRecGrid">
         <!-- Populated via JS -->
-      </div>
-
-      <!-- Recommended Bans & Team Gaps -->
-      <div style="display: flex; gap: 10px; margin-top: 6px;">
-        <div style="flex: 1; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
-          <span style="font-size: 11px; font-weight: 700; color: #f87171;">🚫 Рекомендуемые баны:</span>
-          <div id="banList" style="font-size: 11px; color: #cbd5e1; margin-top: 4px;"></div>
-        </div>
-        <div style="flex: 1; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
-          <span style="font-size: 11px; font-weight: 700; color: #fbbf24;">⚠️ Проблемы сетапа:</span>
-          <div id="gapsList" style="font-size: 11px; color: #cbd5e1; margin-top: 4px;"></div>
-        </div>
       </div>
     </div>
 
