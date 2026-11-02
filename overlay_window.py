@@ -79,8 +79,9 @@ class OverlayApplication(Gtk.Application):
             self.window.set_title("AegisPlus Dota 2 Overlay")
 
             # 1. Wayland Layer Shell support (Hyprland / Sway / wlroots)
+            use_layer_shell = (os.environ.get("AEGIS_NO_LAYERSHELL") != "1") and HAS_LAYER_SHELL
             layer_shell_active = False
-            if HAS_LAYER_SHELL:
+            if use_layer_shell:
                 try:
                     if Gtk4LayerShell.is_supported():
                         # Initialize layer shell BEFORE window is shown / mapped
@@ -99,10 +100,10 @@ class OverlayApplication(Gtk.Application):
                 except Exception as e:
                     print(f"[AegisPlus] Layer Shell запущен с предупреждением: {e}")
 
+            self.window.set_default_size(1920, 1080)
             if not layer_shell_active:
-                self.window.set_default_size(1920, 1080)
                 self.window.set_decorated(False)
-                print("[AegisPlus] Запуск в режиме независимого прозрачного окна")
+                print("[AegisPlus] Запуск в режиме независимого прозрачного плавающего окна")
 
             # 2. Transparent background for GTK4 Window and WebKit
             css_provider = Gtk.CssProvider()
@@ -120,6 +121,9 @@ class OverlayApplication(Gtk.Application):
             )
 
             self.webview = WebKit.WebView()
+            self.webview.set_hexpand(True)
+            self.webview.set_vexpand(True)
+            self.webview.set_size_request(1920, 1080)
             settings = self.webview.get_settings()
             settings.set_enable_write_console_messages_to_stdout(True)
             settings.set_enable_developer_extras(True)

@@ -143,8 +143,8 @@ class ConfigManager:
     @classmethod
     def setup_hyprland_config(cls) -> bool:
         """
-        Ensures Hyprland has noanim & noblur layer rules for aegis-overlay and keybinds
-        pointing to the current toggle_overlay.sh absolute path.
+        Ensures Hyprland has keybinds for Super+O pointing to the current toggle_overlay.sh.
+        Does NOT inject layerrule (noanim/noblur) which causes syntax errors in Hyprland.
         """
         hypr_conf = Path.home() / ".config" / "hypr" / "hyprland.conf"
         if not hypr_conf.exists():
@@ -152,31 +152,32 @@ class ConfigManager:
 
         toggle_script = (Path(__file__).parent.parent / "toggle_overlay.sh").resolve()
         block_header = "# --- AegisPlus Overlay ---"
-        aegis_block = (
+        clean_block = (
             f"\n{block_header}\n"
-            f"layerrule = noanim, aegis-overlay\n"
-            f"layerrule = noblur, aegis-overlay\n"
             f"bind = SUPER, O, exec, {toggle_script}\n"
             f"bind = SUPER SHIFT, O, exec, {toggle_script} quit\n"
         )
 
         try:
             content = hypr_conf.read_text(encoding="utf-8", errors="ignore")
+            # First remove any stale noanim/noblur lines
+            cleaned_lines = [line for line in content.splitlines() if "noanim" not in line and "noblur" not in line]
+            content = "\n".join(cleaned_lines)
+
+            # Check if block exists
             if block_header in content:
                 pattern = re.compile(
                     r"# --- AegisPlus Overlay ---.*?(?=\n\S|\n# [^\-]|\Z)",
                     re.DOTALL
                 )
-                updated_content = pattern.sub(aegis_block.strip(), content)
-                if updated_content != content:
-                    hypr_conf.write_text(updated_content, encoding="utf-8")
+                updated_content = pattern.sub(clean_block.strip(), content)
+                if updated_content.strip() != content.strip():
+                    hypr_conf.write_text(updated_content.strip() + "\n", encoding="utf-8")
                     subprocess.run(["hyprctl", "reload"], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    print("[AegisPlus Config] Конфигурация Hyprland обновлена и перезагружена.")
             else:
-                with open(hypr_conf, "a", encoding="utf-8") as f:
-                    f.write(aegis_block)
+                with open(hypr_conf, "w", encoding="utf-8") as f:
+                    f.write(content.strip() + clean_block)
                 subprocess.run(["hyprctl", "reload"], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                print("[AegisPlus Config] Правила слоя и бинды AegisPlus добавлены в hyprland.conf.")
             return True
         except Exception as e:
             print(f"[AegisPlus Config] Ошибка настройки Hyprland: {e}")
