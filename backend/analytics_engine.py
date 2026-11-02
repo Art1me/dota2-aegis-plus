@@ -1575,7 +1575,7 @@ class AnalyticsEngine:
             slot_status_text = "Готов к покупке целиком!"
         else:
             eta_str = f" (~{max(1, eta_seconds // 60)} мин)" if eta_seconds else ""
-            slot_status_text = f"Осталось накопить: {gold_needed:,} 💰{eta_str}".replace(",", " ")
+            slot_status_text = f"Осталось: {gold_needed:,} 💰{eta_str}".replace(",", " ")
 
         img_url = f"https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/{clean_name}.png"
 

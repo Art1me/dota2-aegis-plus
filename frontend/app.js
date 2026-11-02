@@ -11,8 +11,9 @@ let manualEnemyHeroes = [];
 let activeToasts = new Map(); // id -> { elem, expireAt, baseText, secondsLeft }
 
 let currentMobileItemStage = "starting";
-let currentDesktopItemStage = "core";
+let currentDesktopItemStage = "early_game";
 let currentDesktopBuildView = "items";
+let desktopStageManuallySelected = false;
 let lastStackAlertPlayedMin = -1;
 
 function triggerHaptic(pattern = 50) {
@@ -209,44 +210,72 @@ function renderUI(data) {
     }
   }
 
-  // 1. Clock & Day/Night (Proper Russian Declension)
+  // 1. Clock & Day/Night (Compact indicator without duplicate clock)
   if (data.radar) {
-    document.getElementById("clockDisplay").innerText = data.radar.clock_formatted || "00:00";
-    document.getElementById("dayNightSub").innerText = data.radar.day_night_title || "День";
+    const clockSec = (data.match_info && data.match_info.clock_time !== undefined) 
+      ? data.match_info.clock_time 
+      : (data.radar.clock_seconds !== undefined ? data.radar.clock_seconds : 0);
+
+    const isDay = clockSec >= 0 ? ((clockSec % 600) < 300) : true;
+    const remSec = clockSec >= 0 ? (300 - (clockSec % 300)) : 0;
+    const m = Math.floor(remSec / 60);
+    const s = remSec % 60;
+    const dayNightText = `${isDay ? '☀️ День' : '🌙 Ночь'} (${m}:${s < 10 ? '0' : ''}${s})`;
+
+    const dnEl = document.getElementById("dayNightSub");
+    if (dnEl) dnEl.innerText = dayNightText;
 
     renderTimerChips(data.radar.timers || [], data.radar.roshan, data.radar.glyph);
     renderAlerts(data.radar.active_alerts || []);
   }
 
-  // 2. Performance & 4 Buyback Statuses
+  // 2. Performance & Integrated Buyback Status
   if (data.performance) {
     const perf = data.performance;
+    const clockSec = (data.match_info && data.match_info.clock_time !== undefined) 
+      ? data.match_info.clock_time 
+      : (data.radar ? data.radar.clock_seconds : 0);
+
     const gradeBadge = document.getElementById("gradeBadge");
     const gradeLetter = document.getElementById("gradeLetter");
     const gradeLabel = document.getElementById("gradeLabel");
 
-    gradeLetter.innerText = perf.grade;
-    gradeLabel.innerText = perf.grade_label;
-    gradeBadge.style.background = perf.grade_color + "22";
-    gradeBadge.style.color = perf.grade_color;
+    if (gradeLetter) gradeLetter.innerText = perf.grade;
+    if (gradeLabel) gradeLabel.innerText = perf.grade_label;
+    if (gradeBadge) {
+      gradeBadge.style.background = perf.grade_color + "22";
+      gradeBadge.style.color = perf.grade_color;
+    }
 
     const b = perf.benchmarks;
-    document.getElementById("metricCS").innerText = `${b.current_cs} / ${b.target_cs}`;
+
+    // 1) CS (LH / DN) - Hide after 12:00 minute (720s)
+    const csRow = document.getElementById("desktopCSRow");
+    if (csRow) {
+      csRow.style.display = clockSec < 720 ? "flex" : "none";
+    }
+    const metricCS = document.getElementById("metricCS");
+    if (metricCS) metricCS.innerText = `${b.current_cs} / ${b.current_denies || 0}`;
     updateDeltaBadge("deltaCSBadge", b.cs_arrow || "▲", (b.delta_cs >= 0 ? "+" : "") + b.delta_cs, b.cs_status === "ahead");
 
-    document.getElementById("metricNW").innerText = `${b.current_nw.toLocaleString()} 💰`;
+    // 2) Net Worth + Delta
+    const metricNW = document.getElementById("metricNW");
+    if (metricNW) metricNW.innerText = `${b.current_nw.toLocaleString()} 💰`;
     updateDeltaBadge("deltaNWBadge", b.nw_arrow || "▲", (b.delta_nw >= 0 ? "+" : "") + b.delta_nw.toLocaleString() + "g", b.nw_status === "ahead");
 
-    document.getElementById("metricGPM").innerText = `${b.current_gpm} / ${b.current_xpm}`;
+    // 3) GPM + Rolling 3-min GPM
+    const metricGPM = document.getElementById("metricGPM");
+    if (metricGPM) metricGPM.innerText = `${b.current_gpm} GPM`;
     updateDeltaBadge("deltaGPMBadge", b.gpm_arrow || "▲", (b.delta_gpm >= 0 ? "+" : "") + b.delta_gpm, b.gpm_status === "ahead");
-
-    // Render Desktop KDA Plan vs Actual Grid & Plan Verdict
-    renderKDABenchmarks(b, "desktop");
 
     const rollingGPMEl = document.getElementById("metricRollingGPM");
     if (rollingGPMEl) {
-      rollingGPMEl.innerText = `3м: ${b.rolling_gpm !== undefined ? b.rolling_gpm : b.current_gpm} GPM`;
+      const rGpm = (perf.tempo_summary && perf.tempo_summary.rolling_gpm !== undefined) 
+        ? perf.tempo_summary.rolling_gpm 
+        : (b.rolling_gpm !== undefined ? b.rolling_gpm : b.current_gpm);
+      rollingGPMEl.innerText = `3м: ${rGpm} GPM`;
     }
+
     const highTempoEl = document.getElementById("highTempoBadge");
     if (highTempoEl) {
       if (b.is_high_tempo) {
@@ -256,46 +285,56 @@ function renderUI(data) {
       }
     }
 
-    // Buyback (4 Statuses: READY, AT_RISK, DEFICIT, COOLDOWN)
+    // Integrated Buyback (Compact single row when READY before 20:00, prominent warning when DEFICIT, AT_RISK or 20:00+)
     if (perf.buyback) {
       const bb = perf.buyback;
-      const bbStatusBox = document.getElementById("bbStatusBox");
+      const bbCompactRow = document.getElementById("desktopBBCompactRow");
+      const bbWarningBox = document.getElementById("desktopBBWarningBox");
       const bbStatusText = document.getElementById("bbStatusText");
       const bbCost = document.getElementById("bbCost");
-      const bbSurplusLabel = document.getElementById("bbSurplusLabel");
-      const bbRiskNote = document.getElementById("bbRiskNote");
+      const bbBadge = document.getElementById("desktopBBBadge");
+      const bbCostWarn = document.getElementById("desktopBBCostWarn");
+      const bbWarningMsg = document.getElementById("desktopBBWarningMsg");
 
-      bbCost.innerText = `${bb.cost} 💰`;
+      const isLateGame = clockSec >= 1200; // 20:00+
+      const isDeficit = bb.status === "DEFICIT" || (bb.deficit && bb.deficit > 0);
+      const isAtRisk = bb.status === "AT_RISK";
+      const isCooldown = bb.status === "COOLDOWN";
 
-      if (bb.status === "READY") {
-        bbStatusBox.style.borderColor = "var(--color-green)";
-        bbStatusText.style.color = "var(--color-green)";
-        bbStatusText.innerText = "Выкуп готов";
-        bbSurplusLabel.innerText = `+${bb.surplus}g резерв`;
-        bbSurplusLabel.style.color = "var(--color-green)";
-        bbRiskNote.innerText = bb.death_penalty > 0 ? `Потеря при смерти: -${bb.death_penalty}g` : "";
-      } else if (bb.status === "AT_RISK") {
-        bbStatusBox.style.borderColor = "var(--color-yellow)";
-        bbStatusText.style.color = "var(--color-yellow)";
-        bbStatusText.innerText = "Риск потери выкупа";
-        bbSurplusLabel.innerText = `-${Math.abs(bb.surplus_after_death)}g при смерти`;
-        bbSurplusLabel.style.color = "var(--color-yellow)";
-        bbRiskNote.innerText = `Хватает сейчас, но смерть отнимет ${bb.death_penalty}g!`;
-      } else if (bb.status === "COOLDOWN") {
-        bbStatusBox.style.borderColor = "var(--color-purple)";
-        bbStatusText.style.color = "var(--color-purple)";
-        bbStatusText.innerText = `КД выкупа (${bb.cooldown}с)`;
-        bbSurplusLabel.innerText = `КД: ${bb.cooldown}с`;
-        bbSurplusLabel.style.color = "var(--color-purple)";
-        bbRiskNote.innerText = "";
+      if (bbCost) bbCost.innerText = `${bb.cost} 💰`;
+      if (bbCostWarn) bbCostWarn.innerText = `${bb.cost} 💰`;
+
+      if (isDeficit || isAtRisk || isCooldown || (isLateGame && bb.status !== "READY")) {
+        // Expand prominent warning banner
+        if (bbCompactRow) bbCompactRow.classList.add("hidden");
+        if (bbWarningBox) {
+          bbWarningBox.classList.remove("hidden");
+          if (isCooldown) {
+            if (bbBadge) bbBadge.innerText = `⏳ КД (${bb.cooldown}с)`;
+            if (bbWarningMsg) bbWarningMsg.innerText = "Выкуп на перезарядке!";
+          } else if (isAtRisk) {
+            if (bbBadge) bbBadge.innerText = "⚠️ РИСК СМЕРТИ";
+            if (bbWarningMsg) bbWarningMsg.innerText = `Хватит сейчас, но смерть снимет -${bb.death_penalty}g! Не умирай!`;
+          } else {
+            if (bbBadge) bbBadge.innerText = "⚠️ НЕТ ВЫКУПА!";
+            if (bbWarningMsg) bbWarningMsg.innerText = `Дефицит: ${bb.deficit || Math.abs(bb.surplus)}g. Не умирай!`;
+          }
+        }
       } else {
-        // DEFICIT
-        bbStatusBox.style.borderColor = "var(--color-red)";
-        bbStatusText.style.color = "var(--color-red)";
-        bbStatusText.innerText = "Не хватает золота";
-        bbSurplusLabel.innerText = `${bb.surplus}g дефицит`;
-        bbSurplusLabel.style.color = "var(--color-red)";
-        bbRiskNote.innerText = "";
+        // Sleek compact row
+        if (bbWarningBox) bbWarningBox.classList.add("hidden");
+        if (bbCompactRow) {
+          bbCompactRow.classList.remove("hidden");
+          if (bbStatusText) {
+            if (bb.status === "READY") {
+              bbStatusText.className = "desktop-bb-status-pill ready";
+              bbStatusText.innerText = `ГОТОВ (+${bb.surplus}g)`;
+            } else {
+              bbStatusText.className = "desktop-bb-status-pill";
+              bbStatusText.innerText = bb.status;
+            }
+          }
+        }
       }
     }
   }
@@ -332,14 +371,18 @@ function renderUI(data) {
 
 function renderTimerChips(timers, roshan, glyph) {
   const container = document.getElementById("timerChips");
+  if (!container) return;
   container.innerHTML = "";
 
-  timers.forEach(t => {
+  // Filter timers: only show upcoming objectives within 4 minutes (<= 240s)
+  const activeTimers = (timers || []).filter(t => t.seconds_left <= 240);
+
+  activeTimers.forEach(t => {
     const chip = document.createElement("div");
     chip.className = "timer-chip";
-    if (t.seconds_left <= 20) {
-      chip.classList.add("urgent");
-    } else if (t.seconds_left <= 45) {
+    if (t.seconds_left <= 30) {
+      chip.classList.add("urgent-pulse"); // Bright gold/green pulsating animation (<30s)
+    } else if (t.seconds_left <= 60) {
       chip.classList.add("warning");
     }
 
@@ -1355,6 +1398,20 @@ function renderNetWorthGraph(history, benchmarks, targetElemId, svgW, svgH) {
 }
 
 function renderItemProgression(itemBuild, situationalItems) {
+  // Auto-select desktop tab based on match clock (if user hasn't manually selected)
+  if (!desktopStageManuallySelected && latestData) {
+    const clock = (latestData.match_info && latestData.match_info.clock_time !== undefined) 
+      ? latestData.match_info.clock_time 
+      : (latestData.radar ? latestData.radar.clock_seconds : 0);
+    const targetStage = clock < 600 ? "early_game" : "core";
+    if (currentDesktopItemStage !== targetStage) {
+      currentDesktopItemStage = targetStage;
+      document.querySelectorAll("#desktopItemStages .item-stage-tab").forEach(t => {
+        t.classList.toggle("active", t.getAttribute("data-dstage") === targetStage);
+      });
+    }
+  }
+
   // 1. Mobile Item Stage Rendering
   const mContainer = document.getElementById("mobileItemsContainer");
   if (mContainer) {
@@ -1519,17 +1576,13 @@ function renderNextItem(nextItem) {
 
   const dCompText = document.getElementById("desktopNextItemComponentText");
   if (dCompText) {
-    dCompText.innerText = nextItem.next_component || "Копите золото";
-  }
-
-  const dETA = document.getElementById("desktopNextItemETA");
-  if (dETA) {
     if (nextItem.can_buy_now) {
-      dETA.innerText = "Готов к покупке!";
-      dETA.style.color = "#10b981";
+      dCompText.innerText = "✅ Готов к покупке!";
+      dCompText.style.color = "#10b981";
     } else {
-      dETA.innerText = `Осталось: ${(nextItem.gold_needed || 0).toLocaleString()}g`;
-      dETA.style.color = "var(--text-muted)";
+      const etaStr = nextItem.eta_seconds ? ` (~${(nextItem.eta_seconds / 60).toFixed(1)} мин)` : "";
+      dCompText.innerText = `Осталось: ${(nextItem.gold_needed || 0).toLocaleString()} 💰${etaStr}`;
+      dCompText.style.color = "#f8fafc";
     }
   }
 }
@@ -1756,6 +1809,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Desktop Item Stage Tabs
   document.querySelectorAll("#desktopItemStages .item-stage-tab").forEach(tab => {
     tab.addEventListener("click", () => {
+      desktopStageManuallySelected = true;
       document.querySelectorAll("#desktopItemStages .item-stage-tab").forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
       currentDesktopItemStage = tab.getAttribute("data-dstage");

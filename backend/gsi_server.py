@@ -697,6 +697,15 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b'{"status":"ok"}')
 
+    def end_headers(self):
+        # Prevent caching of frontend assets (HTML, CSS, JS) so HUD updates immediately
+        req_path = getattr(self, "path", "") or ""
+        if any(req_path.endswith(ext) or ext in req_path for ext in [".html", ".css", ".js", "/"]):
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
+        super().end_headers()
+
     def do_OPTIONS(self):
         self.send_response(HTTPStatus.OK)
         self.send_header("Access-Control-Allow-Origin", "*")

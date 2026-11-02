@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#080c14">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2.3">
 </head>
 <body class="mode-menu">
   <!-- Steam Overlay Backdrop (blurred dark backdrop when overlay is open on desktop) -->
@@ -570,28 +570,12 @@
 
       <!-- Macro Radar (Top Center) -->
       <div class="macro-radar glass interactive" id="macroRadar">
-        <div class="clock-display">
-          <span class="clock-time" id="clockDisplay">00:00</span>
-          <span class="clock-sub" id="dayNightSub">День</span>
+        <div class="clock-display" style="border-right: none; padding: 0 6px;">
+          <span class="clock-sub" id="dayNightSub" style="font-size: 11px; font-weight: 800; color: #facc15; white-space: nowrap;">☀️ День (4:49)</span>
         </div>
 
         <div class="timer-chips" id="timerChips">
-          <div class="timer-chip">
-            <span>🌸 Лотос:</span>
-            <span class="chip-time">03:00</span>
-          </div>
-          <div class="timer-chip">
-            <span>🌟 Мудрость:</span>
-            <span class="chip-time">07:00</span>
-          </div>
-          <div class="timer-chip">
-            <span>⚡ Руна:</span>
-            <span class="chip-time">06:00</span>
-          </div>
-          <div class="timer-chip">
-            <span>🛡️ Рошан:</span>
-            <span class="chip-time">Жив</span>
-          </div>
+          <!-- Populated dynamically with upcoming timers (<= 4 min) -->
         </div>
 
         <div class="radar-actions">
@@ -641,18 +625,35 @@
                 <div class="next-item-progress-track" style="height: 4px; margin: 2px 0;">
                   <div class="next-item-progress-fill" id="desktopNextItemProgressFill" style="width: 29%;"></div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--text-muted);">
-                  <span id="desktopNextItemComponentText" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%;">🛒 Cornucopia (1200g) ✅</span>
-                  <span id="desktopNextItemETA">Осталось: 2 900g</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 9.5px;">
+                  <span id="desktopNextItemComponentText" style="font-weight: 700; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Осталось: 2 900 💰 (~4.5 мин)</span>
                 </div>
               </div>
             </div>
 
+            <!-- Compact Enemy Damage Breakdown inside Left Panel -->
+            <div class="compact-damage-bar" id="desktopDamageCard">
+              <div class="damage-bar-track" style="height: 4px; margin: 4px 0 2px 0;">
+                <div class="damage-segment phys" id="desktopDmgPhysBar" style="width: 50%;"></div>
+                <div class="damage-segment magic" id="desktopDmgMagicBar" style="width: 42%;"></div>
+                <div class="damage-segment pure" id="desktopDmgPureBar" style="width: 8%;"></div>
+              </div>
+              <div class="damage-legend-mini">
+                <span style="color: #f97316;">Физ: <strong id="desktopDmgPhysPct">50%</strong></span>
+                <span style="color: #475569;">|</span>
+                <span style="color: #38bdf8;">Маг: <strong id="desktopDmgMagicPct">42%</strong></span>
+                <span style="color: #475569;">|</span>
+                <span style="color: #c084fc;">Чистый: <strong id="desktopDmgPurePct">8%</strong></span>
+              </div>
+              <div class="damage-advice-mini" id="desktopDamageAdvice">Расчёт защиты...</div>
+            </div>
+
+            <!-- Chronological Item Stage Tabs -->
             <div class="item-stages-tabs" id="desktopItemStages" style="margin-top: 6px;">
-              <button class="item-stage-tab active" data-dstage="core">Ядро</button>
-              <button class="item-stage-tab" data-dstage="situational">Контр-пик</button>
               <button class="item-stage-tab" data-dstage="starting">Старт</button>
-              <button class="item-stage-tab" data-dstage="early_game">Ранняя</button>
+              <button class="item-stage-tab active" data-dstage="early_game">Ранняя</button>
+              <button class="item-stage-tab" data-dstage="core">Ядро</button>
+              <button class="item-stage-tab" data-dstage="situational">Контр-пик</button>
               <button class="item-stage-tab" data-dstage="luxury">Лейт</button>
             </div>
             <div id="itemsContainer" class="items-stage-grid" style="margin-top: 6px;">
@@ -742,122 +743,52 @@
             </div>
           </div>
 
-          <!-- Overall Plan Progress Verdict -->
-          <div class="plan-verdict-pill ahead" id="desktopPlanVerdict">
-            <span id="desktopPlanVerdictText">В графике плана (+4 из 5)</span>
-            <span id="desktopPlanVerdictArrow">▲ В плюсе</span>
-          </div>
-
-          <!-- KDA Plan vs Actual Grid -->
-          <div class="kda-benchmark-grid" id="desktopKDAGrid">
-            <div class="kda-sub-box">
-              <span class="kda-sub-label">KDA</span>
-              <span class="kda-sub-val" id="desktopKdaVal">0.0</span>
-              <span class="kda-sub-plan" id="desktopKdaPlan">пл. 3.5</span>
-              <span class="delta-arrow-badge ahead" id="desktopKdaDeltaBadge">▲ +0.0</span>
-            </div>
-            <div class="kda-sub-box">
-              <span class="kda-sub-label">Kills (K)</span>
-              <span class="kda-sub-val" id="desktopKillsVal" style="color: #60a5fa;">0</span>
-              <span class="kda-sub-plan" id="desktopKillsPlan">пл. 0</span>
-              <span class="delta-arrow-badge ahead" id="desktopKillsDeltaBadge">▲ +0</span>
-            </div>
-            <div class="kda-sub-box">
-              <span class="kda-sub-label">Deaths (D)</span>
-              <span class="kda-sub-val" id="desktopDeathsVal" style="color: #f87171;">0</span>
-              <span class="kda-sub-plan" id="desktopDeathsPlan">пл. 0</span>
-              <span class="delta-arrow-badge ahead" id="desktopDeathsDeltaBadge">▲ -0</span>
-            </div>
-            <div class="kda-sub-box">
-              <span class="kda-sub-label">Assists (A)</span>
-              <span class="kda-sub-val" id="desktopAssistsVal" style="color: #a78bfa;">0</span>
-              <span class="kda-sub-plan" id="desktopAssistsPlan">пл. 0</span>
-              <span class="delta-arrow-badge ahead" id="desktopAssistsDeltaBadge">▲ +0</span>
-            </div>
-          </div>
-
-          <div class="metric-row">
-            <span class="metric-name">Крипстат (LH / DN):</span>
+          <!-- 1. CS (LH / DN) - Laning stage only (< 12:00) -->
+          <div class="metric-row" id="desktopCSRow">
+            <span class="metric-name">🌾 Крипстат (LH / DN):</span>
             <div class="metric-value-wrap">
               <span class="metric-val" id="metricCS">0 / 0</span>
               <span class="delta-arrow-badge ahead" id="deltaCSBadge">▲ +0</span>
             </div>
           </div>
 
-          <div class="metric-row">
-            <span class="metric-name">Нетворс:</span>
+          <!-- 2. Net Worth + Delta -->
+          <div class="metric-row" id="desktopNWRow">
+            <span class="metric-name">💰 Нетворс:</span>
             <div class="metric-value-wrap">
               <span class="metric-val" id="metricNW">600 💰</span>
-              <span class="delta-arrow-badge ahead" id="deltaNWBadge">▲ +0</span>
+              <span class="delta-arrow-badge ahead" id="deltaNWBadge">▲ +0g</span>
             </div>
           </div>
 
-          <div class="metric-row">
-            <span class="metric-name">Темп GPM / XPM:</span>
+          <!-- 3. Tempo GPM + 3m GPM -->
+          <div class="metric-row" id="desktopGPMRow">
+            <span class="metric-name">⚡ Темп GPM:</span>
             <div class="metric-value-wrap" style="align-items: flex-end;">
-              <span class="metric-val" id="metricGPM">0 / 0</span>
+              <span class="metric-val" id="metricGPM">0 GPM</span>
               <span class="delta-arrow-badge ahead" id="deltaGPMBadge">▲ +0</span>
-              <span class="metric-sub" id="metricRollingGPM" style="font-size: 10px; color: var(--text-muted);">3м: 0</span>
+              <span class="metric-sub" id="metricRollingGPM" style="font-size: 10px; color: var(--text-muted);">3м: 0 GPM</span>
             </div>
           </div>
           <div id="highTempoBadge" class="high-tempo-badge hidden">🔥 Темп выше нормы</div>
 
-          <!-- Desktop SVG Net Worth Progression Chart -->
-          <div class="nw-graph-container" id="desktopNWGraphContainer">
-            <div class="nw-graph-header">
-              <span style="color: #e5c158; font-size: 10px;">📈 Кривая Net Worth за матч</span>
-              <div class="nw-graph-legend">
-                <span style="color: #e5c158;">● Вы</span>
-                <span style="color: #38bdf8;">-- Ранг</span>
+          <!-- Integrated Compact / Expandable Buyback Section -->
+          <div class="desktop-bb-section" id="desktopBBSection">
+            <!-- Compact row: Active when READY before 20:00 -->
+            <div class="desktop-bb-compact-row" id="desktopBBCompactRow">
+              <span class="desktop-bb-title">🪙 Выкуп:</span>
+              <span class="desktop-bb-status-pill ready" id="bbStatusText">ГОТОВ (+1 240g)</span>
+              <span class="desktop-bb-cost" id="bbCost">240 💰</span>
+            </div>
+
+            <!-- Prominent Warning Banner: Active if DEFICIT, AT_RISK or late game 20:00+ -->
+            <div class="desktop-bb-warning-box hidden" id="desktopBBWarningBox">
+              <div class="bb-warning-header">
+                <span class="bb-warning-badge" id="desktopBBBadge">⚠️ ОПАСНОСТЬ</span>
+                <span class="bb-warning-cost" id="desktopBBCostWarn">240 💰</span>
               </div>
+              <div class="bb-warning-msg" id="desktopBBWarningMsg">НЕТ ВЫКУПА! Не умирай!</div>
             </div>
-            <svg class="nw-graph-svg" id="desktopNWSvg" viewBox="0 0 320 100">
-              <defs>
-                <linearGradient id="desktopNwGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#e5c158" stop-opacity="0.35" />
-                  <stop offset="100%" stop-color="#e5c158" stop-opacity="0.0" />
-                </linearGradient>
-              </defs>
-              <g id="desktopNWSvgContent"></g>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Damage Breakdown Card -->
-        <div class="hud-card glass interactive" id="desktopDamageCard">
-          <div class="card-header">
-            <span class="card-title">🛡️ Расчёт урона врагов</span>
-            <span class="selector-label" id="desktopDamageBadge" style="color: #e5c158;">Dota Plus</span>
-          </div>
-          <div class="damage-breakdown-card">
-            <div class="damage-bar-track">
-              <div class="damage-segment phys" id="desktopDmgPhysBar" style="width: 50%;"></div>
-              <div class="damage-segment magic" id="desktopDmgMagicBar" style="width: 42%;"></div>
-              <div class="damage-segment pure" id="desktopDmgPureBar" style="width: 8%;"></div>
-            </div>
-            <div class="damage-legend" style="font-size: 10px;">
-              <span style="color: #f97316;">Физ: <strong id="desktopDmgPhysPct">50%</strong></span>
-              <span style="color: #38bdf8;">Маг: <strong id="desktopDmgMagicPct">42%</strong></span>
-              <span style="color: #c084fc;">Чистый: <strong id="desktopDmgPurePct">8%</strong></span>
-            </div>
-            <div class="damage-advice-box" id="desktopDamageAdvice" style="font-size: 10px;">
-              Расчёт защиты от сетапа врага...
-            </div>
-          </div>
-        </div>
-
-        <!-- Buyback Card with 4 statuses & death loss indicator -->
-        <div class="hud-card glass interactive" id="buybackCard">
-          <div class="card-header">
-            <span class="card-title">🪙 Статус выкупа</span>
-            <span class="selector-label" id="bbSurplusLabel">+0g</span>
-          </div>
-          <div class="buyback-status-box" id="bbStatusBox">
-            <div style="display: flex; flex-direction: column;">
-              <span class="bb-title" id="bbStatusText">Выкуп готов</span>
-              <span style="font-size: 10px; color: var(--text-muted);" id="bbRiskNote"></span>
-            </div>
-            <span class="bb-cost" id="bbCost">240 💰</span>
           </div>
         </div>
       </aside>
@@ -913,6 +844,6 @@
 
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=2.3"></script>
 </body>
 </html>
