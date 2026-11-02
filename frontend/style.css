@@ -2595,4 +2595,347 @@ body.mode-hud-only .right-hud {
   }
 }
 
+/* ==========================================================================
+   ERGONOMIC V2.2 STYLES: DYNAMIC PHASES, ULTIMATES, TTS, TEMPO
+   ========================================================================== */
+
+/* Header controls: WakeLock & TTS Voice */
+.wake-lock-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.wake-lock-badge.active {
+  background: rgba(234, 179, 8, 0.15);
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #facc15;
+}
+
+.mobile-voice-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-voice-btn.active {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #38bdf8;
+}
+
+/* Dynamic Phase Badges */
+.phase-pill {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.phase-pill.laning {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.phase-pill.midgame {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.phase-pill.late {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+/* Late-Game Buyback Danger Alert Banner */
+.bb-danger-banner {
+  margin: 6px 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.9), rgba(153, 27, 27, 0.95));
+  border: 2px solid #ef4444;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+  animation: pulse-danger 1s infinite alternate ease-in-out;
+}
+
+@keyframes pulse-danger {
+  0% { transform: scale(1); box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+  100% { transform: scale(1.015); box-shadow: 0 0 24px rgba(239, 68, 68, 0.9); }
+}
+
+.danger-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.danger-banner-badge {
+  background: #000;
+  color: #ff3333;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+.danger-banner-msg {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* 1-Tap Big Ultimates Cooldown Cluster */
+.mobile-ultimates-cluster {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(18, 24, 38, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 12px;
+}
+
+.ultimates-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ultimates-subnote {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.ultimates-touch-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.ultimate-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  touch-action: manipulation;
+  transition: all 0.15s ease;
+}
+
+.ultimate-btn:active {
+  transform: scale(0.97);
+}
+
+.ultimate-btn.ready {
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.ultimate-btn.on-cd {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.ultimate-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.ultimate-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  text-align: left;
+}
+
+.ultimate-hero {
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.ultimate-spell {
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.ultimate-timer {
+  font-size: 14px;
+  font-weight: 900;
+  color: #4ade80;
+}
+
+.ultimate-btn.on-cd .ultimate-timer {
+  color: #f87171;
+}
+
+/* Midgame stack alert toggle */
+.midgame-stack-toggle-row {
+  margin: 6px 0 10px 0;
+  text-align: center;
+}
+
+.btn-micro-toggle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-micro-toggle.active {
+  background: rgba(234, 179, 8, 0.15);
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #facc15;
+}
+
+/* Tempo & Farm Minimalist Cards */
+.tempo-metrics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tempo-metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tempo-metric-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tempo-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.tempo-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: #f1f5f9;
+  display: block;
+}
+
+.tempo-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.tempo-metric-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tempo-fact {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* Skill Priority Formula */
+.skill-priority-formula {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 8px;
+}
+
+.priority-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.priority-text {
+  font-size: 14px;
+  font-weight: 900;
+  color: #38bdf8;
+  letter-spacing: 0.5px;
+}
+
+/* Near-Talent Popover Card */
+.talent-popover-card {
+  padding: 10px 12px;
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(245, 158, 11, 0.1));
+  border: 1px solid rgba(234, 179, 8, 0.5);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  animation: fade-in 0.25s ease-out;
+}
+
+.talent-popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.talent-popover-badge {
+  font-size: 10px;
+  font-weight: 900;
+  color: #facc15;
+  text-transform: uppercase;
+}
+
+.talent-popover-wr {
+  font-size: 10px;
+  font-weight: 800;
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.talent-popover-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.talents-tree-toggle-row {
+  margin-top: 6px;
+  text-align: center;
+}
+
 

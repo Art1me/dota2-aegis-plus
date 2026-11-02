@@ -39,40 +39,37 @@
         </div>
       </div>
       <div class="mobile-header-right">
-        <button class="mobile-haptic-btn" id="btnMobileHaptic" title="Включить вибро и звук на телефоне">
-          <span id="mobileHapticIcon">🔔 Вкл</span>
+        <span class="wake-lock-badge" id="wakeLockBadge" title="Экран телефона удерживается активным">🔆 Экран</span>
+        <button class="mobile-voice-btn active" id="btnVoiceToggle" title="Озвучивать важные тайминги голосом">
+          <span id="voiceToggleIcon">🗣️ Голос</span>
+        </button>
+        <button class="mobile-haptic-btn" id="btnMobileHaptic" title="Включить вибро-отклик">
+          <span id="mobileHapticIcon">🔔</span>
         </button>
       </div>
     </header>
 
-    <!-- Dota Plus Live Win Probability Bar -->
-    <div class="dota-plus-win-meter glass">
-      <div class="win-meter-header">
-        <span class="win-meter-title">⚡ DOTA PLUS ВЕРОЯТНОСТЬ ПОБЕДЫ</span>
-        <span class="win-meter-lead" id="winMeterLead">Равные шансы</span>
-      </div>
-      <div class="win-meter-bar-track">
-        <div class="win-meter-fill-rad" id="winMeterFillRad" style="width: 50%;"></div>
-        <div class="win-meter-divider" id="winMeterDivider" style="left: 50%;"></div>
-        <div class="win-meter-fill-dire" id="winMeterFillDire" style="width: 50%;"></div>
-      </div>
-      <div class="win-meter-labels">
-        <span class="win-label-rad" id="winLabelRad">Radiant 50%</span>
-        <span class="win-label-dire" id="winLabelDire">Dire 50%</span>
+    <!-- Late-Game Buyback Danger Alert Banner -->
+    <div class="bb-danger-banner hidden" id="mobileBBDangerBanner">
+      <div class="danger-banner-content">
+        <span class="danger-banner-badge">⚠️ ОПАСНОСТЬ</span>
+        <span class="danger-banner-msg" id="mobileBBDangerText">НЕТ БАЙБЕКА! НЕ УМИРАЙ!</span>
       </div>
     </div>
 
-    <!-- Mobile Hero Strip -->
+    <!-- Mobile Hero Strip with Dynamic Phase & 3 Key Metrics -->
     <div class="mobile-hero-strip glass">
-
       <div class="mobile-hero-info">
-        <span class="mobile-hero-name" id="mobileHeroName">Герой не выбран</span>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span class="mobile-hero-name" id="mobileHeroName">Герой не выбран</span>
+          <span class="phase-pill laning" id="mobilePhaseBadge">🌿 Лайнинг</span>
+        </div>
         <span class="mobile-hero-lvl" id="mobileHeroLvl">Ур. 1</span>
       </div>
       <div class="mobile-hero-stats">
-        <span class="mobile-stat-badge" id="mobileKDA">0 / 0 / 0</span>
-        <span class="mobile-stat-badge gold" id="mobileNW">600 💰</span>
-        <span class="mobile-stat-badge gpm" id="mobileGPM">0 GPM</span>
+        <span class="mobile-stat-badge gold" id="mobileNWDeltaBadge">▲ +0g</span>
+        <span class="mobile-stat-badge gpm" id="mobileGPMBadge">0 GPM</span>
+        <span class="mobile-stat-badge cs" id="mobileCSBadge">0 / 0</span>
       </div>
     </div>
 
@@ -135,8 +132,29 @@
           <span id="mobileCampStackSec" style="font-size: 16px; font-weight: 900; color: #fff;">53s</span>
         </div>
 
+        <!-- 1-Tap Big Ultimates Cooldown Tracker -->
+        <div class="mobile-ultimates-cluster glass" id="mobileUltimatesCluster">
+          <div class="ultimates-header">
+            <span class="mobile-card-title">⚡ УЛЬТИМЕЙТЫ ВРАГОВ (1-ТАП КД)</span>
+            <span class="ultimates-subnote">Нажмите при прожатии врагом</span>
+          </div>
+          <div class="ultimates-touch-grid" id="mobileUltimatesGrid">
+            <!-- Dynamically populated buttons for enemy heroes with big ultimates -->
+          </div>
+        </div>
+
         <!-- Rune & Lotus Timers Grid -->
         <div class="mobile-runes-grid">
+          <!-- Water Rune (2m, 4m) - hidden after laning -->
+          <div class="mobile-rune-card glass" id="cardRuneWater">
+            <div class="rune-icon-wrap">💧</div>
+            <div class="rune-text-wrap">
+              <span class="rune-title">Водные руны (02:00 / 04:00)</span>
+              <span class="rune-countdown" id="mobileTimeWater">02:00</span>
+            </div>
+            <div class="rune-alert-dot hidden" id="dotWater"></div>
+          </div>
+
           <!-- Wisdom Rune (7m) -->
           <div class="mobile-rune-card glass" id="cardRuneWisdom">
             <div class="rune-icon-wrap">🌟</div>
@@ -188,6 +206,13 @@
           </div>
         </div>
 
+        <!-- Midgame stack alerts toggle -->
+        <div class="midgame-stack-toggle-row">
+          <button class="btn-micro-toggle glass" id="btnToggleMidgameStack" title="Включить/выключить напоминания о стаках в мидгейме">
+            <span id="midgameStackToggleText">🔔 Стак леса в мидгейме: ВЫКЛ</span>
+          </button>
+        </div>
+
         <!-- Quick Demo / Simulation Trigger -->
         <div style="text-align: center; margin: 12px 0;">
           <button class="mobile-sim-btn glass" id="btnMobileSimulate">▶ Запустить демо симуляцию матча</button>
@@ -213,75 +238,58 @@
           </div>
         </div>
 
-        <!-- Benchmarks & KDA Minimalist Table -->
-        <div class="mobile-card glass">
+        <!-- Core Tempo Benchmarks (3 Key Glance Metrics Only) -->
+        <div class="mobile-card glass tempo-stats-card">
           <div class="mobile-card-header">
-            <span class="mobile-card-title">📊 Статистика & Бенчмарки</span>
+            <span class="mobile-card-title">⚡ ТЕМП И ФАРМ</span>
             <span class="mobile-badge positive" id="mobileBenchmarkGrade">Ранг: A</span>
           </div>
 
-          <!-- Overall Plan Progress Verdict -->
-          <div class="plan-verdict-pill ahead" id="mobilePlanVerdict">
-            <span id="mobilePlanVerdictText">В графике плана (+5 из 8)</span>
-            <span id="mobilePlanVerdictArrow">▲ В плюсе</span>
-          </div>
+          <div class="tempo-metrics-list">
+            <!-- 1. Net Worth Delta relative to rank benchmark -->
+            <div class="tempo-metric-row">
+              <div class="tempo-metric-label">
+                <span class="tempo-icon gold">💰</span>
+                <div>
+                  <span class="tempo-name">Дельта Net Worth</span>
+                  <span class="tempo-sub" id="tempoNWBenchmark">Эталон: 0g</span>
+                </div>
+              </div>
+              <div class="tempo-metric-value">
+                <span class="tempo-fact" id="tempoNWFact">0g</span>
+                <span class="delta-arrow-badge ahead" id="tempoNWDeltaBadge">▲ +0g</span>
+              </div>
+            </div>
 
-          <!-- Sleek Minimalist Statistics Table -->
-          <div class="stats-table-wrap">
-            <table class="stats-mini-table">
-              <thead>
-                <tr>
-                  <th style="text-align: left;">Метрика</th>
-                  <th style="text-align: right;">Факт</th>
-                  <th style="text-align: right;">План</th>
-                  <th style="text-align: center;">Темп</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="stat-col-name"><span class="stat-dot gold"></span>KDA Ratio</td>
-                  <td class="stat-col-fact" id="mobileKdaVal">0.0</td>
-                  <td class="stat-col-plan" id="mobileKdaPlan">3.5</td>
-                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileKdaDeltaBadge">▲ +0.0</span></td>
-                </tr>
-                <tr>
-                  <td class="stat-col-name"><span class="stat-dot blue"></span>Убийства (K)</td>
-                  <td class="stat-col-fact" id="mobileKillsVal" style="color: #60a5fa;">0</td>
-                  <td class="stat-col-plan" id="mobileKillsPlan">0</td>
-                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileKillsDeltaBadge">▲ +0</span></td>
-                </tr>
-                <tr>
-                  <td class="stat-col-name"><span class="stat-dot red"></span>Смерти (D)</td>
-                  <td class="stat-col-fact" id="mobileDeathsVal" style="color: #f87171;">0</td>
-                  <td class="stat-col-plan" id="mobileDeathsPlan">0</td>
-                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileDeathsDeltaBadge">▲ -0</span></td>
-                </tr>
-                <tr>
-                  <td class="stat-col-name"><span class="stat-dot purple"></span>Ассисты (A)</td>
-                  <td class="stat-col-fact" id="mobileAssistsVal" style="color: #c084fc;">0</td>
-                  <td class="stat-col-plan" id="mobileAssistsPlan">0</td>
-                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileAssistsDeltaBadge">▲ +0</span></td>
-                </tr>
-                <tr>
-                  <td class="stat-col-name"><span class="stat-dot green"></span>Крипстат (CS)</td>
-                  <td class="stat-col-fact" id="mobileCS">0 / 0</td>
-                  <td class="stat-col-plan" id="mobileTargetCS">0</td>
-                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileDeltaCSBadge">▲ +0</span></td>
-                </tr>
-                <tr>
-                  <td class="stat-col-name"><span class="stat-dot gold"></span>Net Worth</td>
-                  <td class="stat-col-fact" id="mobileNWVal">600 💰</td>
-                  <td class="stat-col-plan" id="mobileTargetNW">600</td>
-                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileDeltaNWBadge">▲ +0</span></td>
-                </tr>
-                <tr>
-                  <td class="stat-col-name"><span class="stat-dot yellow"></span>GPM / XPM</td>
-                  <td class="stat-col-fact" id="mobileGPMVal">0 / 0</td>
-                  <td class="stat-col-plan" id="mobileTargetGPM">0 / 0</td>
-                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileDeltaGPMBadge">▲ +0</span></td>
-                </tr>
-              </tbody>
-            </table>
+            <!-- 2. Rolling 3-min GPM -->
+            <div class="tempo-metric-row">
+              <div class="tempo-metric-label">
+                <span class="tempo-icon yellow">⚡</span>
+                <div>
+                  <span class="tempo-name">Rolling 3m GPM (Темп)</span>
+                  <span class="tempo-sub" id="tempoGPMBenchmark">Норма: 0 GPM</span>
+                </div>
+              </div>
+              <div class="tempo-metric-value">
+                <span class="tempo-fact" id="tempoGPMFact">0 GPM</span>
+                <span class="delta-arrow-badge ahead" id="tempoGPMDeltaBadge">▲ +0</span>
+              </div>
+            </div>
+
+            <!-- 3. CS (LH / DN) - Laning Stage Only (< 10:00) -->
+            <div class="tempo-metric-row" id="tempoCSRow">
+              <div class="tempo-metric-label">
+                <span class="tempo-icon green">🌾</span>
+                <div>
+                  <span class="tempo-name">Крипстат (CS Лайнинг)</span>
+                  <span class="tempo-sub" id="tempoCSBenchmark">Норма: 0 LH</span>
+                </div>
+              </div>
+              <div class="tempo-metric-value">
+                <span class="tempo-fact" id="tempoCSFact">0 / 0</span>
+                <span class="delta-arrow-badge ahead" id="tempoCSDeltaBadge">▲ +0</span>
+              </div>
+            </div>
           </div>
 
           <!-- Collapsible Net Worth Graph Toggle -->
@@ -387,26 +395,13 @@
                   <span class="next-item-cost" id="mobileNextItemCost">4 100 💰</span>
                 </div>
                 <div class="next-item-gold-row">
-                  <span class="next-item-gold-status" id="mobileNextItemGoldStatus">1 200 / 4 100 💰</span>
                   <span class="next-item-gold-eta" id="mobileNextItemETA">Осталось: 2 900g (~4 мин)</span>
                 </div>
               </div>
             </div>
 
-            <!-- Live Gold Progress Bar -->
-            <div class="next-item-progress-track">
-              <div class="next-item-progress-fill" id="mobileNextItemProgressFill" style="width: 29%;"></div>
-              <span class="next-item-progress-label" id="mobileNextItemProgressPct">29%</span>
-            </div>
-
-            <!-- Step-by-step next component recommendation -->
-            <div class="next-item-component-bar" id="mobileNextItemComponentBar">
-              <span class="next-comp-icon">🛒</span>
-              <span id="mobileNextItemComponentText">Cornucopia (1200g) ✅ Готов к покупке!</span>
-            </div>
-
             <div class="next-item-reason" id="mobileNextItemReason">
-              Основной предмет для ускорения фарма и зачистки леса
+              Основной предмет для ускорения фарма и урона в тимфайте
             </div>
           </div>
         </div>
@@ -435,18 +430,36 @@
         <!-- Ability Progression & Talents -->
         <div class="mobile-card glass" id="mobileAbilityCard">
           <div class="mobile-card-header">
-            <span class="mobile-card-title">⚡ Прокачка способностей & Таланты</span>
+            <span class="mobile-card-title">⚡ Прокачка способностей</span>
             <span class="mobile-badge positive" id="mobileNextSkillBadge">Next: Q</span>
           </div>
 
           <div class="ability-build-card">
-            <span style="font-size: 11px; color: var(--text-muted);">Рекомендуемый порядок прокачки (1-25 ур.):</span>
-            <div class="ability-sequence-wrap" id="mobileAbilitySequence">
-              <!-- Populated via JS -->
+            <!-- Sleek Priority Formula instead of 25 tiny icons -->
+            <div class="skill-priority-formula" id="mobileSkillPriorityFormula">
+              <span class="priority-label">Приоритет:</span>
+              <span class="priority-text" id="mobileSkillPriorityText">Max Q ➔ W ➔ E</span>
             </div>
 
-            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Древо талантов и винрейты:</span>
-            <div class="talents-tree-container" id="mobileTalentsTree">
+            <!-- Near-Talent Popover Card (Displayed ONLY at levels 9-10, 14-15, 19-20, 24-25) -->
+            <div class="talent-popover-card hidden" id="mobileTalentCard">
+              <div class="talent-popover-header">
+                <span class="talent-popover-badge" id="mobileTalentTierBadge">🎯 ТАЛАНТ 10 УРОВНЯ</span>
+                <span class="talent-popover-wr" id="mobileTalentWRBadge">54.8% WR</span>
+              </div>
+              <div class="talent-popover-body">
+                <span class="talent-popover-name" id="mobileTalentName">+15 к скорости атаки</span>
+              </div>
+            </div>
+
+            <!-- Full Talent Tree (Collapsible) -->
+            <div class="talents-tree-toggle-row">
+              <button class="btn-micro-toggle glass" id="btnToggleTalentTree">
+                <span>🌲 Полное дерево талантов</span>
+                <span id="talentTreeToggleArrow">▾</span>
+              </button>
+            </div>
+            <div class="talents-tree-container hidden" id="mobileTalentsTree">
               <!-- Populated via JS -->
             </div>
           </div>

@@ -138,7 +138,7 @@ class AppState:
             "recommended_items": [],
             "damage_breakdown": self.engine.calculate_damage_breakdown(self.manual_enemy_heroes),
             "item_build": self.engine.get_item_progression("npc_dota_hero_juggernaut", self.selected_role),
-            "ability_build": self.engine.get_ability_build("npc_dota_hero_juggernaut"),
+            "ability_build": self.engine.get_ability_build("npc_dota_hero_juggernaut", hero_level=1),
             "next_item": self.engine.get_next_recommended_item(
                 "npc_dota_hero_juggernaut",
                 self.selected_role,
@@ -148,6 +148,9 @@ class AppState:
                 enemy_heroes=self.manual_enemy_heroes,
                 current_gpm=0
             ),
+            "dynamic_phase": self.engine.get_game_phase(0),
+            "tracked_ultimates": self.engine.get_tracked_ultimates(self.manual_enemy_heroes, 0),
+            "stack_alerts_midgame_enabled": self.engine.stack_alerts_enabled_midgame,
             "nw_history": []
         }
 
@@ -313,9 +316,10 @@ class AppState:
 
         # Full Dota Plus analytics suite:
         hero_raw_name = str(hero_data.get("name", "") or "")
+        hero_level = safe_int(hero_data.get("level"), 1)
         damage_breakdown = self.engine.calculate_damage_breakdown(effective_enemy_heroes)
         item_build = self.engine.get_item_progression(hero_raw_name or "npc_dota_hero_juggernaut", self.selected_role)
-        ability_build = self.engine.get_ability_build(hero_raw_name or "npc_dota_hero_juggernaut")
+        ability_build = self.engine.get_ability_build(hero_raw_name or "npc_dota_hero_juggernaut", hero_level=hero_level)
         next_item = self.engine.get_next_recommended_item(
             hero_identifier=hero_raw_name or "npc_dota_hero_juggernaut",
             role=self.selected_role,
@@ -325,6 +329,8 @@ class AppState:
             enemy_heroes=effective_enemy_heroes,
             current_gpm=current_gpm
         )
+        game_phase_meta = self.engine.get_game_phase(clock_time)
+        tracked_ultimates = self.engine.get_tracked_ultimates(effective_enemy_heroes, clock_time)
 
         # Record timeline history (Net Worth progression graph)
         if clock_time >= 0:
@@ -387,6 +393,9 @@ class AppState:
             "item_build": item_build,
             "ability_build": ability_build,
             "next_item": next_item,
+            "dynamic_phase": game_phase_meta,
+            "tracked_ultimates": tracked_ultimates,
+            "stack_alerts_midgame_enabled": self.engine.stack_alerts_enabled_midgame,
             "nw_history": list(self.timeline_history)
         }
 
@@ -539,6 +548,52 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "glyph_recorded", "seconds_left": left}).encode("utf-8"))
+            except Exception as e:
+                self.send_response(HTTPStatus.INTERNAL_SERVER_ERROR)
+                self.end_headers()
+                self.wfile.write(str(e).encode())
+            return
+
+        # 5.1. API: Big Ultimate Used Tracker
+        elif parsed.path == "/api/ultimate_used":
+            try:
+                content_len = int(self.headers.get("Content-Length", 0))
+                body = self.rfile.read(content_len).decode("utf-8") if content_len > 0 else "{}"
+                data = json.loads(body) if body else {}
+                hero = data.get("hero")
+                clock_time = int(state.raw_gsi.get("map", {}).get("clock_time", 0)) if state.raw_gsi else 0
+                res = state.engine.record_ultimate_used(hero, clock_time)
+                if state.raw_gsi:
+                    state.process_gsi_payload(state.raw_gsi)
+                else:
+                    state.cached_analysis["tracked_ultimates"] = state.engine.get_tracked_ultimates(state.manual_enemy_heroes, clock_time)
+                    state.notify_subscribers()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "ultimate_recorded", "result": res}).encode("utf-8"))
+            except Exception as e:
+                self.send_response(HTTPStatus.INTERNAL_SERVER_ERROR)
+                self.end_headers()
+                self.wfile.write(str(e).encode())
+            return
+
+        # 5.2. API: Toggle midgame stack alerts
+        elif parsed.path == "/api/toggle_midgame_stacks":
+            try:
+                state.engine.stack_alerts_enabled_midgame = not state.engine.stack_alerts_enabled_midgame
+                clock_time = int(state.raw_gsi.get("map", {}).get("clock_time", 0)) if state.raw_gsi else 0
+                if state.raw_gsi:
+                    state.process_gsi_payload(state.raw_gsi)
+                else:
+                    state.cached_analysis["stack_alerts_midgame_enabled"] = state.engine.stack_alerts_enabled_midgame
+                    state.notify_subscribers()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "toggled", "enabled": state.engine.stack_alerts_enabled_midgame}).encode("utf-8"))
             except Exception as e:
                 self.send_response(HTTPStatus.INTERNAL_SERVER_ERROR)
                 self.end_headers()

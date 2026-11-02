@@ -66,17 +66,51 @@ function playSoundCue(type) {
   }
 }
 
-function speakAlert(text) {
-  if (!audioEnabled || !('speechSynthesis' in window)) return;
+// Russian Voice TTS & Screen WakeLock Controller
+let voiceTtsEnabled = true;
+const spokenCuesDebounce = new Map();
+let screenWakeLock = null;
+
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      screenWakeLock = await navigator.wakeLock.request('screen');
+      const badge = document.getElementById("wakeLockBadge");
+      if (badge) badge.classList.add("active");
+      screenWakeLock.addEventListener('release', () => {
+        if (badge) badge.classList.remove("active");
+      });
+    } catch (err) {
+      console.log("WakeLock error:", err);
+    }
+  }
+}
+
+function speakVoiceAlert(text, key, minIntervalMs = 60000) {
+  if (!voiceTtsEnabled || !('speechSynthesis' in window) || !text) return;
+  const now = Date.now();
+  if (key && spokenCuesDebounce.has(key)) {
+    const lastSpoken = spokenCuesDebounce.get(key);
+    if (now - lastSpoken < minIntervalMs) return;
+  }
+  if (key) spokenCuesDebounce.set(key, now);
+
   try {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ru-RU';
-    utterance.rate = 1.1;
-    utterance.volume = 0.8;
+    utterance.rate = 1.15;
+    utterance.volume = 0.95;
+    const voices = window.speechSynthesis.getVoices();
+    const ruVoice = voices.find(v => v.lang.startsWith('ru') || v.lang.includes('RU'));
+    if (ruVoice) utterance.voice = ruVoice;
     window.speechSynthesis.speak(utterance);
   } catch (e) {
-    console.warn("Speech synthesis error", e);
+    console.warn("Speech synthesis error:", e);
   }
+}
+
+function speakAlert(text) {
+  speakVoiceAlert(text, "legacy_" + text, 30000);
 }
 
 function copyToClipboard(text) {
@@ -721,9 +755,93 @@ function setupCustomSelects() {
   });
 }
 
+function renderTrackedUltimates(ultimates) {
+  const container = document.getElementById("mobileUltimatesCluster");
+  const grid = document.getElementById("mobileUltimatesGrid");
+  if (!container || !grid) return;
+
+  if (!ultimates || ultimates.length === 0) {
+    container.classList.add("hidden");
+    return;
+  }
+  container.classList.remove("hidden");
+  grid.innerHTML = "";
+
+  ultimates.forEach(u => {
+    const btn = document.createElement("button");
+    const onCd = u.on_cooldown;
+    btn.className = `ultimate-btn ${onCd ? 'on-cd' : 'ready'}`;
+    btn.innerHTML = `
+      <span class="ultimate-icon">${u.symbol || '⚡'}</span>
+      <div class="ultimate-info">
+        <span class="ultimate-hero">${u.hero}</span>
+        <span class="ultimate-spell">${u.ability} (${u.cooldown}с)</span>
+      </div>
+      <span class="ultimate-timer">${onCd ? u.remaining_seconds + 'с' : 'ГОТОВ'}</span>
+    `;
+
+    btn.addEventListener("click", () => {
+      triggerHaptic([150, 50, 150]);
+      playSoundCue("warning");
+      fetch("/api/ultimate_used", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hero: u.hero_key })
+      }).then(() => {
+        showSingleToast("⚡ Кулдаун ультимейта", `${u.hero} — ${u.ability} (${u.cooldown}с)`, "warning");
+        speakVoiceAlert(`${u.hero} нажал ультимейт`, "ult_" + u.hero_key, 20000);
+      }).catch(e => console.error("Ultimate used error:", e));
+    });
+
+    grid.appendChild(btn);
+  });
+}
+
 function renderMobileUI(data) {
   const container = document.getElementById("mobileCompanion");
   if (!container) return;
+
+  // Dynamic Phase Management
+  const phaseMeta = data.dynamic_phase || { phase: 'laning', show_cs: true, show_water_runes: true, allow_camp_stacks: true };
+  const phaseBadge = document.getElementById("mobilePhaseBadge");
+  if (phaseBadge) {
+    if (phaseMeta.phase === 'laning') {
+      phaseBadge.className = "phase-pill laning";
+      phaseBadge.innerText = "🌿 Лайнинг";
+    } else if (phaseMeta.phase === 'midgame') {
+      phaseBadge.className = "phase-pill midgame";
+      phaseBadge.innerText = "⚔️ Мидгейм";
+    } else {
+      phaseBadge.className = "phase-pill late";
+      phaseBadge.innerText = "🔥 Лейт";
+    }
+  }
+
+  // Late-Game Buyback Danger Alert Banner
+  const bbDangerBanner = document.getElementById("mobileBBDangerBanner");
+  const bbDangerText = document.getElementById("mobileBBDangerText");
+  const dangerMeta = (data.performance && data.performance.buyback && data.performance.buyback.danger_banner) || {};
+  if (dangerMeta.is_danger && phaseMeta.phase === 'late') {
+    if (bbDangerBanner) bbDangerBanner.classList.remove("hidden");
+    if (bbDangerText) bbDangerText.innerText = dangerMeta.text || "НЕТ БАЙБЕКА! НЕ УМИРАЙ!";
+    if (dangerMeta.tts) {
+      speakVoiceAlert(dangerMeta.tts, "bb_danger_alert", 45000);
+    }
+  } else {
+    if (bbDangerBanner) bbDangerBanner.classList.add("hidden");
+  }
+
+  // 1-Tap Tracked Ultimates
+  renderTrackedUltimates(data.tracked_ultimates || []);
+
+  // Midgame Stack Alerts Preference Button
+  const midgameStackBtn = document.getElementById("btnToggleMidgameStack");
+  const midgameStackText = document.getElementById("midgameStackToggleText");
+  if (midgameStackBtn && midgameStackText) {
+    const isMidgameEnabled = !!data.stack_alerts_midgame_enabled;
+    midgameStackBtn.className = isMidgameEnabled ? "btn-micro-toggle glass active" : "btn-micro-toggle glass";
+    midgameStackText.innerText = `🔔 Стак леса в мидгейме: ${isMidgameEnabled ? 'ВКЛ' : 'ВЫКЛ'}`;
+  }
 
   // Status & Connection
   const mobStatus = document.getElementById("mobileStatusText");
@@ -746,40 +864,7 @@ function renderMobileUI(data) {
     if (radScore) radScore.innerText = rScoreVal;
     if (direScore) direScore.innerText = dScoreVal;
 
-    // Dota Plus Live Win Probability Bar calculation
-    const diff = rScoreVal - dScoreVal;
-    let radWinChance = 50 + diff * 2.5;
-    radWinChance = Math.max(15, Math.min(85, Math.round(radWinChance)));
-    const direWinChance = 100 - radWinChance;
-
-    const fillRad = document.getElementById("winMeterFillRad");
-    const fillDire = document.getElementById("winMeterFillDire");
-    const divMeter = document.getElementById("winMeterDivider");
-    const labelRad = document.getElementById("winLabelRad");
-    const labelDire = document.getElementById("winLabelDire");
-    const leadText = document.getElementById("winMeterLead");
-
-    if (fillRad) fillRad.style.width = `${radWinChance}%`;
-    if (fillDire) fillDire.style.width = `${direWinChance}%`;
-    if (divMeter) divMeter.style.left = `${radWinChance}%`;
-    if (labelRad) labelRad.innerText = `Radiant ${radWinChance}%`;
-    if (labelDire) labelDire.innerText = `Dire ${direWinChance}%`;
-
-    if (leadText) {
-      if (Math.abs(diff) <= 1) {
-        leadText.innerText = "Равные шансы";
-        leadText.style.color = "#e5c158";
-      } else if (diff > 1) {
-        leadText.innerText = `Преимущество Radiant (+${diff})`;
-        leadText.style.color = "#10b981";
-      } else {
-        leadText.innerText = `Преимущество Dire (+${Math.abs(diff)})`;
-        leadText.style.color = "#ef4444";
-      }
-    }
-
-
-    // Hero stats
+    // Hero Header strip info
     const p = data.player || (data.raw && data.raw.player) || {};
     const heroRaw = p.hero_name || (data.raw && data.raw.hero && data.raw.hero.name) || "";
     const hName = document.getElementById("mobileHeroName");
@@ -790,17 +875,31 @@ function renderMobileUI(data) {
     const hLvl = document.getElementById("mobileHeroLvl");
     if (hLvl) hLvl.innerText = `Ур. ${p.hero_level || (data.raw && data.raw.hero && data.raw.hero.level) || 1}`;
 
-    const kda = document.getElementById("mobileKDA");
-    if (kda) {
-      const b = (data.performance && data.performance.benchmarks) || {};
-      const arrowIcon = b.kda_arrow || "▲";
-      const arrowColor = b.kda_status === "ahead" ? "#10b981" : "#ef4444";
-      kda.innerHTML = `${p.kills || 0} / ${p.deaths || 0} / ${p.assists || 0} <span style="color: ${arrowColor}; font-weight: 800; font-size: 10px;">${arrowIcon} ${b.current_kda !== undefined ? b.current_kda.toFixed(1) : '0.0'}</span> <span style="font-size: 9px; color: #94a3b8;">(пл: ${b.target_kills || 0}/${b.target_deaths || 0})</span>`;
+    // 3 Key Tempo Badges in Header Strip
+    const tempoSummary = (data.performance && data.performance.tempo_summary) || {};
+    const nwDeltaBadge = document.getElementById("mobileNWDeltaBadge");
+    if (nwDeltaBadge) {
+      const deltaVal = tempoSummary.nw_delta !== undefined ? tempoSummary.nw_delta : 0;
+      const isAhead = deltaVal >= 0;
+      nwDeltaBadge.innerText = tempoSummary.nw_delta_formatted || `${isAhead ? '▲ +' : '▼ '}${deltaVal}g`;
+      nwDeltaBadge.style.color = isAhead ? "#10b981" : "#ef4444";
     }
-    const nw = document.getElementById("mobileNW");
-    if (nw) nw.innerText = `${(p.gold || 0).toLocaleString()} 💰`;
-    const gpm = document.getElementById("mobileGPM");
-    if (gpm) gpm.innerText = `${p.gpm || 0} GPM`;
+
+    const gpmBadge = document.getElementById("mobileGPMBadge");
+    if (gpmBadge) {
+      const rollGpm = tempoSummary.rolling_gpm !== undefined ? tempoSummary.rolling_gpm : (p.gpm || 0);
+      gpmBadge.innerText = `${rollGpm} GPM`;
+    }
+
+    const csBadge = document.getElementById("mobileCSBadge");
+    if (csBadge) {
+      if (phaseMeta.show_cs) {
+        csBadge.style.display = "inline-block";
+        csBadge.innerText = `${p.last_hits || 0} / ${p.denies || 0} CS`;
+      } else {
+        csBadge.style.display = "none";
+      }
+    }
 
     // Roshan on mobile
     const rosh = data.radar.roshan;
@@ -832,6 +931,11 @@ function renderMobileUI(data) {
           document.getElementById("mobileRoshMinVal").innerText = d.min_respawn || "--:--";
         if (document.getElementById("mobileRoshMaxVal"))
           document.getElementById("mobileRoshMaxVal").innerText = d.max_respawn || "--:--";
+
+        // Voice alert for Aegis 30s expiry
+        if (d.aegis_warn_30) {
+          speakVoiceAlert(d.aegis_warn_30.tts || "Аегис закончится через тридцать секунд", "aegis_warn_30", 120000);
+        }
 
         if (elapsed < 300) {
           const left = 300 - elapsed;
@@ -876,23 +980,36 @@ function renderMobileUI(data) {
       }
     }
 
-    // Camp Stacking Alert (:48 to :55 sec of each minute with mobile vibration)
+    // Camp Stacking Alert (:48 to :55 sec of each minute with mobile vibration & voice)
     const clock = (data.match_info && data.match_info.clock_time !== undefined) ? data.match_info.clock_time : (data.radar ? data.radar.clock_seconds : 0);
     if (clock > 0) {
       const secInMin = clock % 60;
+      const curMin = Math.floor(clock / 60);
+      const isAllowedByPhase = phaseMeta.allow_camp_stacks || data.stack_alerts_midgame_enabled;
       const stackBanner = document.getElementById("mobileCampStackBanner");
       const stackSec = document.getElementById("mobileCampStackSec");
-      if (secInMin >= 48 && secInMin <= 55) {
+
+      if (isAllowedByPhase && secInMin >= 48 && secInMin <= 55) {
         if (stackBanner) stackBanner.classList.remove("hidden");
         if (stackSec) stackSec.innerText = `${secInMin}s`;
-        const curMin = Math.floor(clock / 60);
-        if (secInMin === 52 && lastStackAlertPlayedMin !== curMin) {
+        if (secInMin === 48 && lastStackAlertPlayedMin !== curMin) {
           lastStackAlertPlayedMin = curMin;
           triggerHaptic([200, 100, 200]);
           playSoundCue("warning");
+          speakVoiceAlert("Стакни лес", "stack_voice_" + curMin, 60000);
         }
       } else {
         if (stackBanner) stackBanner.classList.add("hidden");
+      }
+    }
+
+    // Water Rune card visibility
+    const cardWater = document.getElementById("cardRuneWater");
+    if (cardWater) {
+      if (phaseMeta.show_water_runes) {
+        cardWater.classList.remove("hidden");
+      } else {
+        cardWater.classList.add("hidden");
       }
     }
 
@@ -907,7 +1024,8 @@ function renderMobileUI(data) {
       let dotId = null;
 
       if (t.id === "wisdom") { cardId = "cardRuneWisdom"; timeId = "mobileTimeWisdom"; dotId = "dotWisdom"; }
-      else if (t.id === "bounty" || t.id === "water_rune") { cardId = "cardRuneBounty"; timeId = "mobileTimeBounty"; dotId = "dotBounty"; }
+      else if (t.id === "water_rune") { cardId = "cardRuneWater"; timeId = "mobileTimeWater"; dotId = "dotWater"; }
+      else if (t.id === "bounty") { cardId = "cardRuneBounty"; timeId = "mobileTimeBounty"; dotId = "dotBounty"; }
       else if (t.id === "lotus") { cardId = "cardRuneLotus"; timeId = "mobileTimeLotus"; dotId = "dotLotus"; }
       else if (t.id === "power_rune") { cardId = "cardRunePower"; timeId = "mobileTimePower"; dotId = "dotPower"; }
       else if (t.id === "tormentor") { cardId = "cardRuneTormentor"; timeId = "mobileTimeTormentor"; dotId = "dotTormentor"; }
@@ -918,14 +1036,19 @@ function renderMobileUI(data) {
       if (cardId && document.getElementById(cardId)) {
         const card = document.getElementById(cardId);
         const dot = dotId ? document.getElementById(dotId) : null;
-        if (t.seconds_left <= 15) {
+        if (t.seconds_left <= 20) {
           card.classList.add("soon-alert");
           if (dot) dot.classList.remove("hidden");
+
+          // Voice and sound alerts for timers
           const alertKey = `${t.id}_${Math.floor(data.radar.clock_time / 60)}`;
           if (!alertedTimerIds.has(alertKey)) {
             alertedTimerIds.add(alertKey);
             triggerHaptic([200, 100, 200]);
-            playSoundCue(t.id === "wisdom" ? "critical" : "warning");
+            playSoundCue(t.id === "wisdom" || t.id === "tormentor" ? "critical" : "warning");
+            if (t.tts) {
+              speakVoiceAlert(t.tts, alertKey, 60000);
+            }
           }
         } else {
           card.classList.remove("soon-alert");
@@ -935,7 +1058,7 @@ function renderMobileUI(data) {
     });
   }
 
-  // Performance & Benchmarks on mobile
+  // Performance & Benchmarks on mobile (3 Core Tempo Metrics Only)
   if (data.performance) {
     const p = data.performance;
     const grade = document.getElementById("mobileBenchmarkGrade");
@@ -943,26 +1066,53 @@ function renderMobileUI(data) {
       grade.innerText = p.grade || "A";
       grade.style.color = p.grade_color || "#10b981";
     }
+
     const b = p.benchmarks || {};
-    renderKDABenchmarks(b, "mobile");
+    const tempo = p.tempo_summary || {};
 
-    const cs = document.getElementById("mobileCS");
-    if (cs) cs.innerText = `${b.current_cs || 0} / ${b.current_denies || 0}`;
-    const targetCS = document.getElementById("mobileTargetCS");
-    if (targetCS) targetCS.innerText = `${b.target_cs || 0}`;
-    updateDeltaBadge("mobileDeltaCSBadge", b.cs_arrow || "▲", (b.delta_cs >= 0 ? "+" : "") + (b.delta_cs || 0), b.cs_status === "ahead");
+    // 1. Net Worth Delta
+    const nwFact = document.getElementById("tempoNWFact");
+    if (nwFact) nwFact.innerText = `${(b.current_nw || 0).toLocaleString()}g`;
+    const nwBench = document.getElementById("tempoNWBenchmark");
+    if (nwBench) nwBench.innerText = `Эталон: ${(b.target_nw || 0).toLocaleString()}g`;
+    const nwDeltaBadge = document.getElementById("tempoNWDeltaBadge");
+    if (nwDeltaBadge) {
+      const isAhead = (b.delta_nw || 0) >= 0;
+      nwDeltaBadge.className = `delta-arrow-badge ${isAhead ? 'ahead' : 'behind'}`;
+      nwDeltaBadge.innerHTML = tempo.nw_delta_formatted || `${isAhead ? '▲ +' : '▼ '}${b.delta_nw || 0}g`;
+    }
 
-    const nw = document.getElementById("mobileNWVal");
-    if (nw) nw.innerText = `${(b.current_nw || 0).toLocaleString()} 💰`;
-    const targetNW = document.getElementById("mobileTargetNW");
-    if (targetNW) targetNW.innerText = `${(b.target_nw || 0).toLocaleString()}`;
-    updateDeltaBadge("mobileDeltaNWBadge", b.nw_arrow || "▲", (b.delta_nw >= 0 ? "+" : "") + ((b.delta_nw || 0).toLocaleString()) + "g", b.nw_status === "ahead");
+    // 2. Rolling 3-min GPM
+    const gpmFact = document.getElementById("tempoGPMFact");
+    if (gpmFact) gpmFact.innerText = `${tempo.rolling_gpm !== undefined ? tempo.rolling_gpm : (b.current_gpm || 0)} GPM`;
+    const gpmBench = document.getElementById("tempoGPMBenchmark");
+    if (gpmBench) gpmBench.innerText = `Норма: ${b.target_gpm || 0} GPM`;
+    const gpmDeltaBadge = document.getElementById("tempoGPMDeltaBadge");
+    if (gpmDeltaBadge) {
+      const isAhead = (b.delta_gpm || 0) >= 0;
+      gpmDeltaBadge.className = `delta-arrow-badge ${isAhead ? 'ahead' : 'behind'}`;
+      gpmDeltaBadge.innerHTML = `<span class="metric-delta-arrow">${b.gpm_arrow || '▲'}</span> ${(b.delta_gpm >= 0 ? '+' : '') + (b.delta_gpm || 0)}`;
+    }
 
-    const gpm = document.getElementById("mobileGPMVal");
-    if (gpm) gpm.innerText = `${b.current_gpm || 0} / ${b.current_xpm || 0}`;
-    const targetGPM = document.getElementById("mobileTargetGPM");
-    if (targetGPM) targetGPM.innerText = `${b.target_gpm || 0} / ${b.target_xpm || 0}`;
-    updateDeltaBadge("mobileDeltaGPMBadge", b.gpm_arrow || "▲", (b.delta_gpm >= 0 ? "+" : "") + (b.delta_gpm || 0), b.gpm_status === "ahead");
+    // 3. CS (LH / DN) - Shown only on laning stage
+    const csRow = document.getElementById("tempoCSRow");
+    if (csRow) {
+      if (phaseMeta.show_cs) {
+        csRow.style.display = "flex";
+        const csFact = document.getElementById("tempoCSFact");
+        if (csFact) csFact.innerText = `${b.current_cs || 0} / ${b.current_denies || 0}`;
+        const csBench = document.getElementById("tempoCSBenchmark");
+        if (csBench) csBench.innerText = `Норма: ${b.target_cs || 0} LH`;
+        const csDeltaBadge = document.getElementById("tempoCSDeltaBadge");
+        if (csDeltaBadge) {
+          const isAhead = (b.delta_cs || 0) >= 0;
+          csDeltaBadge.className = `delta-arrow-badge ${isAhead ? 'ahead' : 'behind'}`;
+          csDeltaBadge.innerHTML = `<span class="metric-delta-arrow">${b.cs_arrow || '▲'}</span> ${(b.delta_cs >= 0 ? '+' : '') + (b.delta_cs || 0)}`;
+        }
+      } else {
+        csRow.style.display = "none";
+      }
+    }
 
     // Buyback on mobile
     if (p.buyback) {
@@ -1001,6 +1151,11 @@ function renderMobileUI(data) {
   // Items on Mobile
   renderItemProgression(data.item_build, data.recommended_items);
 
+  // Ability Build & Talents on Mobile
+  if (data.ability_build) {
+    const heroLvl = (data.player && data.player.hero_level) || 1;
+    renderAbilityBuild(data.ability_build, heroLvl);
+  }
 }
 
 
@@ -1387,7 +1542,30 @@ function renderAbilityBuild(abilityBuild, heroLevel) {
   const nextStep = seq.find(s => s.lvl === (heroLevel + 1)) || seq[seq.length - 1];
   const nextBadge = document.getElementById("mobileNextSkillBadge");
   if (nextBadge && nextStep) {
-    nextBadge.innerText = `След.: ${nextStep.key} (${nextStep.lvl} ур.)`;
+    nextBadge.innerText = `Next: ${nextStep.key} (${nextStep.lvl} ур.)`;
+  }
+
+  // 1. Sleek Skill Priority Formula
+  const priorityText = document.getElementById("mobileSkillPriorityText");
+  if (priorityText) {
+    priorityText.innerText = abilityBuild.skill_priority || "Max Q ➔ W ➔ E";
+  }
+
+  // 2. Near-Talent Popover Card (levels 9-10, 14-15, 19-20, 24-25)
+  const talentCard = document.getElementById("mobileTalentCard");
+  const talentTierBadge = document.getElementById("mobileTalentTierBadge");
+  const talentWRBadge = document.getElementById("mobileTalentWRBadge");
+  const talentName = document.getElementById("mobileTalentName");
+
+  if (talentCard) {
+    if (abilityBuild.show_talent && abilityBuild.active_talent) {
+      talentCard.classList.remove("hidden");
+      if (talentTierBadge) talentTierBadge.innerText = `🎯 ТАЛАНТ ${abilityBuild.active_tier} УРОВНЯ`;
+      if (talentWRBadge) talentWRBadge.innerText = `${abilityBuild.active_talent.winrate || 54}% WR`;
+      if (talentName) talentName.innerText = abilityBuild.active_talent.name || "";
+    } else {
+      talentCard.classList.add("hidden");
+    }
   }
 
   function renderSeqTo(elemId) {
@@ -1433,7 +1611,6 @@ function renderAbilityBuild(abilityBuild, heroLevel) {
     });
   }
 
-  renderSeqTo("mobileAbilitySequence");
   renderTalentsTo("mobileTalentsTree");
 
   renderSeqTo("desktopAbilitySequence");
@@ -1460,12 +1637,63 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.remove("mode-menu");
   }
 
-  // Auto-refresh when window or tab regains focus
+  // Request screen wake lock to keep phone display on
+  requestWakeLock();
+
+  // Auto-refresh and re-acquire wake lock when window or tab regains focus
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
+      requestWakeLock();
       fetchLatestState();
     }
   });
+
+  // Mobile Voice TTS Toggle
+  const btnVoice = document.getElementById("btnVoiceToggle");
+  if (btnVoice) {
+    btnVoice.addEventListener("click", () => {
+      voiceTtsEnabled = !voiceTtsEnabled;
+      btnVoice.classList.toggle("active", voiceTtsEnabled);
+      const icon = document.getElementById("voiceToggleIcon");
+      if (icon) icon.innerText = voiceTtsEnabled ? "🗣️ Голос" : "🔇 Голос";
+      triggerHaptic(35);
+      if (voiceTtsEnabled) {
+        speakVoiceAlert("Голосовые подсказки включены", "tts_on", 1000);
+      }
+    });
+  }
+
+  // Mobile Toggle Midgame Stacks
+  const btnMidgameStack = document.getElementById("btnToggleMidgameStack");
+  if (btnMidgameStack) {
+    btnMidgameStack.addEventListener("click", () => {
+      triggerHaptic(40);
+      fetch("/api/toggle_midgame_stacks", { method: "POST" })
+        .then(r => r.json())
+        .then(d => {
+          showSingleToast("🌾 Напоминания о стаках", d.enabled ? "Включены для мидгейма" : "Отключены для мидгейма", "info");
+        })
+        .catch(e => console.error("Toggle midgame stack error:", e));
+    });
+  }
+
+  // Mobile Toggle Talent Tree Full View
+  const btnToggleTalents = document.getElementById("btnToggleTalentTree");
+  const mobileTalentsTree = document.getElementById("mobileTalentsTree");
+  const talentTreeToggleArrow = document.getElementById("talentTreeToggleArrow");
+  if (btnToggleTalents && mobileTalentsTree) {
+    btnToggleTalents.addEventListener("click", () => {
+      const isHidden = mobileTalentsTree.classList.contains("hidden");
+      if (isHidden) {
+        mobileTalentsTree.classList.remove("hidden");
+        if (talentTreeToggleArrow) talentTreeToggleArrow.innerText = "▴";
+      } else {
+        mobileTalentsTree.classList.add("hidden");
+        if (talentTreeToggleArrow) talentTreeToggleArrow.innerText = "▾";
+      }
+      triggerHaptic(25);
+    });
+  }
 
   window.addEventListener("focus", () => {
     fetchLatestState();

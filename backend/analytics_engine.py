@@ -12,6 +12,66 @@ except ImportError:
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 
+# Big Game-Changing Ultimates Database
+BIG_ULTIMATES: Dict[str, Dict[str, Any]] = {
+    "npc_dota_hero_enigma": {
+        "hero": "Enigma",
+        "ability": "Black Hole",
+        "cooldown": 180,
+        "icon": "enigma_black_hole",
+        "symbol": "🌀"
+    },
+    "npc_dota_hero_tidehunter": {
+        "hero": "Tidehunter",
+        "ability": "Ravage",
+        "cooldown": 150,
+        "icon": "tidehunter_ravage",
+        "symbol": "🌊"
+    },
+    "npc_dota_hero_faceless_void": {
+        "hero": "Faceless Void",
+        "ability": "Chronosphere",
+        "cooldown": 160,
+        "icon": "faceless_void_chronosphere",
+        "symbol": "⏱️"
+    },
+    "npc_dota_hero_magnataur": {
+        "hero": "Magnus",
+        "ability": "Reverse Polarity",
+        "cooldown": 130,
+        "icon": "magnataur_reverse_polarity",
+        "symbol": "🧲"
+    },
+    "npc_dota_hero_silencer": {
+        "hero": "Silencer",
+        "ability": "Global Silence",
+        "cooldown": 130,
+        "icon": "silencer_global_silence",
+        "symbol": "🤫"
+    },
+    "npc_dota_hero_warlock": {
+        "hero": "Warlock",
+        "ability": "Chaotic Offering",
+        "cooldown": 160,
+        "icon": "warlock_rain_of_chaos",
+        "symbol": "👹"
+    },
+    "npc_dota_hero_doom_bringer": {
+        "hero": "Doom",
+        "ability": "Doom",
+        "cooldown": 140,
+        "icon": "doom_bringer_doom",
+        "symbol": "🔥"
+    },
+    "npc_dota_hero_mars": {
+        "hero": "Mars",
+        "ability": "Arena of Blood",
+        "cooldown": 95,
+        "icon": "mars_arena_of_blood",
+        "symbol": "🛡️"
+    }
+}
+
 class AnalyticsEngine:
     def __init__(self):
         self.heroes_data: Dict[str, Any] = {}
@@ -34,6 +94,12 @@ class AnalyticsEngine:
 
         # Rolling 3-min GPM buffer: [(clock_time, net_worth), ...]
         self.nw_history: List[Tuple[int, int]] = []
+
+        # Big Ultimates cooldown tracker: {hero_key: expiry_clock_time}
+        self.ultimate_cooldowns: Dict[str, int] = {}
+
+        # User preference: stack alerts enabled in mid/late game
+        self.stack_alerts_enabled_midgame: bool = False
 
     def _load_datasets(self):
         heroes_path = DATA_DIR / "heroes.json"
@@ -134,6 +200,108 @@ class AnalyticsEngine:
         """Starts 300s enemy Glyph cooldown."""
         self.glyph_cooldown_start = clock_time
         return 300
+
+    # ==========================================
+    # 1.1 BIG ENEMY ULTIMATES & GAME PHASES
+    # ==========================================
+    def record_ultimate_used(self, hero_identifier: str, clock_time: int) -> Optional[Dict[str, Any]]:
+        """
+        Marks an enemy ultimate as used at clock_time and starts its cooldown countdown.
+        """
+        hero_obj = self.get_hero_by_identifier(hero_identifier)
+        hero_name = hero_obj.get("name", "") if hero_obj else str(hero_identifier or "")
+
+        matched_key = None
+        for k in BIG_ULTIMATES:
+            if k == hero_name or k.replace("npc_dota_hero_", "") == hero_name.replace("npc_dota_hero_", ""):
+                matched_key = k
+                break
+
+        if not matched_key:
+            return None
+
+        meta = BIG_ULTIMATES[matched_key]
+        cd = meta["cooldown"]
+        ready_time = clock_time + cd
+        self.ultimate_cooldowns[matched_key] = ready_time
+
+        return {
+            "hero_key": matched_key,
+            "hero": meta["hero"],
+            "ability": meta["ability"],
+            "cooldown": cd,
+            "ready_time": ready_time,
+            "ready_at": self.format_clock(ready_time)
+        }
+
+    def get_tracked_ultimates(self, enemy_heroes: List[Any], clock_time: int) -> List[Dict[str, Any]]:
+        """
+        Returns list of trackable big enemy ultimates present in the enemy lineup.
+        """
+        tracked = []
+        if not enemy_heroes:
+            return tracked
+
+        for eh in enemy_heroes:
+            if not eh:
+                continue
+            e_obj = self.get_hero_by_identifier(eh)
+            h_name = e_obj.get("name", "") if e_obj else str(eh)
+
+            for k, meta in BIG_ULTIMATES.items():
+                if k == h_name or k.replace("npc_dota_hero_", "") == h_name.replace("npc_dota_hero_", ""):
+                    ready_time = self.ultimate_cooldowns.get(k, 0)
+                    rem = max(0, ready_time - clock_time)
+                    is_on_cd = (rem > 0)
+                    tracked.append({
+                        "hero_key": k,
+                        "hero": meta["hero"],
+                        "ability": meta["ability"],
+                        "cooldown": meta["cooldown"],
+                        "symbol": meta["symbol"],
+                        "icon": meta["icon"],
+                        "is_on_cooldown": is_on_cd,
+                        "on_cooldown": is_on_cd,
+                        "remaining_seconds": rem,
+                        "ready_at": self.format_clock(ready_time) if is_on_cd else "ГОТОВ"
+                    })
+                    break
+        return tracked
+
+    def get_game_phase(self, clock_time: int) -> Dict[str, Any]:
+        """
+        Evaluates match clock_time and returns dynamic game phase:
+        - Laning (00:00 - 10:00 / 600s)
+        - Midgame (10:00 - 22:00 / 1320s)
+        - Late Game (22:00+ / 1320s+)
+        """
+        if clock_time < 600:
+            return {
+                "phase": "laning",
+                "label": "Лайнинг (0-10 мин)",
+                "badge": "🌿 Лайнинг",
+                "show_cs": True,
+                "show_water_runes": clock_time < 270,
+                "allow_camp_stacks": True
+            }
+        elif clock_time < 1320:
+            return {
+                "phase": "midgame",
+                "label": "Мидгейм (10-22 мин)",
+                "badge": "⚔️ Мидгейм",
+                "show_cs": False,
+                "show_water_runes": False,
+                "allow_camp_stacks": clock_time < 960 or self.stack_alerts_enabled_midgame
+            }
+        else:
+            return {
+                "phase": "late",
+                "label": "Лейтгейм (22+ мин)",
+                "badge": "🔥 Лейтгейм",
+                "show_cs": False,
+                "show_water_runes": False,
+                "allow_camp_stacks": self.stack_alerts_enabled_midgame
+            }
 
     # ==========================================
     # 2. ENEMY POWER SPIKE WARNINGS
@@ -495,6 +663,33 @@ class AnalyticsEngine:
             status_text = f"Дефицит {deficit} 💰"
             can_buyback = False
 
+        # Critical late-game danger banner (20:00+ and not safely buyback-ready)
+        is_danger_bb = (clock_time >= 1200) and (status in ["AT_RISK", "DEFICIT"])
+        danger_needed = abs(surplus_after_death) if status == "AT_RISK" else (bb_cost - current_gold)
+        danger_banner = {
+            "is_danger": is_danger_bb,
+            "needed_gold": danger_needed,
+            "text": f"⚠️ ОПАСНОСТЬ: ДО БАЙБЕКА +{danger_needed}g (НЕ УМИРАЙ!)" if is_danger_bb else "",
+            "tts": "Внимание, не хватает на байбек после смерти" if is_danger_bb else ""
+        }
+
+        # Ergonomic 3-metric tempo summary for instant 0.5s reading
+        tempo_summary = {
+            "delta_nw": delta_nw,
+            "delta_nw_str": f"{'+' if delta_nw >= 0 else ''}{delta_nw:,}g".replace(",", " "),
+            "nw_arrow": "▲" if nw_ahead else "▼",
+            "nw_status": "ahead" if nw_ahead else "behind",
+            "rolling_gpm": rolling_gpm,
+            "target_gpm": target_gpm,
+            "delta_gpm": rolling_gpm - target_gpm,
+            "gpm_arrow": "▲" if (rolling_gpm >= target_gpm) else "▼",
+            "gpm_status": "ahead" if (rolling_gpm >= target_gpm) else "behind",
+            "current_cs": current_cs,
+            "current_denies": current_denies,
+            "target_cs": target_cs,
+            "show_cs": (clock_time < 600)  # Laning stage only (0:00 - 10:00)
+        }
+
         return {
             "minute": minute,
             "clock_formatted": self.format_clock(clock_time),
@@ -504,6 +699,7 @@ class AnalyticsEngine:
             "grade_label": grade_label,
             "grade_color": grade_color,
             "score_pct": round(score_pct, 1),
+            "tempo_summary": tempo_summary,
             "benchmarks": {
                 "target_cs": target_cs,
                 "current_cs": current_cs,
@@ -570,7 +766,8 @@ class AnalyticsEngine:
                 "status_text": status_text,
                 "can_buyback": can_buyback,
                 "surplus": surplus,
-                "surplus_after_death": surplus_after_death
+                "surplus_after_death": surplus_after_death,
+                "danger_banner": danger_banner
             }
         }
 
@@ -807,7 +1004,8 @@ class AnalyticsEngine:
                 "title": "РУНА МУДРОСТИ (EXP)",
                 "text": f"Руна Мудрости через {sec_to_wisdom}с! Займите позицию у края карты",
                 "severity": "critical",
-                "sound": "wisdom_soon"
+                "sound": "wisdom_soon",
+                "tts": "Руна мудрости через двадцать секунд" if sec_to_wisdom <= 25 else None
             })
 
         # 4. Power Runes (every 120s from 6:00 = 360s)
@@ -849,18 +1047,21 @@ class AnalyticsEngine:
                     "title": "ТЕРЗАТЕЛЬ (20:00)",
                     "text": "Через 1 минуту спавнится Терзатель! Соберитесь командой за Шардом",
                     "severity": "warning",
-                    "sound": "tormentor_soon"
+                    "sound": "tormentor_soon",
+                    "tts": "Терзатель через двадцать секунд" if sec_to_tormentor <= 25 else None
                 })
 
-        # 6. Stacking Alert (:48 to :55 of each minute)
+        # 6. Stacking Alert (:48 to :55 of each minute, silenced after 16:00 unless toggled)
         sec_in_min = clock_time % 60
-        if 48 <= sec_in_min <= 54:
+        allow_stack = (clock_time < 960) or self.stack_alerts_enabled_midgame
+        if allow_stack and 48 <= sec_in_min <= 54:
             alerts.append({
                 "id": "stack_camps",
                 "title": "ТАЙМИНГ СТАКА",
                 "text": f"Секунда {sec_in_min}s! Ударьте лесной кемп и уводите крипов для стака!",
                 "severity": "warning" if is_support else "info",
-                "sound": "stack_alert"
+                "sound": "stack_alert",
+                "tts": "Стакни лес"
             })
 
         # 7. Day / Night Cycle (Day -> Bottom/Radiant pit, Night -> Top/Dire pit)
@@ -895,7 +1096,8 @@ class AnalyticsEngine:
                         "title": "АЕГИС СКОРО ИСТЕКАЕТ",
                         "text": f"Аегис исчезнет через {aegis_left}с! Готовьтесь к аккуратной позиции",
                         "severity": "warning",
-                        "sound": "lotus_soon"
+                        "sound": "lotus_soon",
+                        "tts": "Аегис закончится через тридцать секунд"
                     })
                 elif aegis_left <= 10:
                     alerts.append({
@@ -903,7 +1105,8 @@ class AnalyticsEngine:
                         "title": "АЕГИС: ПОСЛЕДНИЕ СЕКУНДЫ!",
                         "text": f"Аегис пропадёт через {aegis_left}с!",
                         "severity": "critical",
-                        "sound": "wisdom_soon"
+                        "sound": "wisdom_soon",
+                        "tts": "Аегис закончится через десять секунд"
                     })
             else:
                 self.aegis_expired = True
@@ -1294,6 +1497,36 @@ class AnalyticsEngine:
         urgency = "normal"
         stage_label = "Ядро"
 
+        CORE_REASONS = {
+            "item_bfury": "⚔️ Battle Fury — ускорение фарма и зачистка лесных стаков",
+            "item_manta": "⚡ Manta Style — сброс дебаффов и сплитпуш иллюзиями",
+            "item_blink": "🌪️ Blink Dagger — ключевая инициация и позиционка в драке",
+            "item_blade_mail": "🛡️ Blade Mail — возврат урона и выживаемость при фокусе",
+            "item_desolator": "💀 Desolator — срез брони и быстрый снос строений",
+            "item_diffusal_blade": "⚡ Diffusal Blade — выжигание маны и контроль мобильности",
+            "item_basher": "🔨 Skull Basher — пробитие неуязвимости к магии станом",
+            "item_abyssal_blade": "🔨 Abyssal Blade — гарантированный контроль сквозь BKB",
+            "item_butterfly": "🦋 Butterfly — уклонение и колоссальный физ. урон",
+            "item_satanic": "🩸 Satanic — выживаемость и мгновенный отжор в драке",
+            "item_skadi": "❄️ Eye of Skadi — срез лечения врага и замедление",
+            "item_shivas_guard": "❄️ Shiva's Guard — аура замедления и защита от физ. урона",
+            "item_heart": "❤️ Heart of Tarrasque — максимальная плотность и реген здоровья",
+            "item_glimmer_cape": "✨ Glimmer Cape — невидимость и маг. барьер для спасения",
+            "item_force_staff": "💨 Force Staff — разрыв дистанции и спасение союзников",
+            "item_aether_lens": "🔮 Aether Lens — дальность применения способностей",
+            "item_octarine_core": "⏱️ Octarine Core — срез перезарядки всех скиллов и предметов",
+            "item_pipe": "🛡️ Pipe of Insight — командный барьер от магического прокаста",
+            "item_crimson_guard": "🛡️ Crimson Guard — командный блок физического урона",
+            "item_lotus_orb": "🌸 Lotus Orb — сброс дебаффов и отражение таргетных заклинаний",
+            "item_heavens_halberd": "🗡️ Heaven's Halberd — обезоруживание вражеского керри",
+            "item_witch_blade": "🧙 Witch Blade — замедление и периодический урон от интеллекта",
+            "item_spirit_vessel": "🏺 Spirit Vessel — срез вампиризма и процентный урон",
+            "item_urn_of_shadows": "🏺 Urn of Shadows — ранний урон и лечение после киллов",
+            "item_phase_boots": "👢 Phase Boots — урон и скорость бега сквозь крипов",
+            "item_power_treads": "👢 Power Treads — переключение статов и скорость атаки",
+            "item_arcane_boots": "👢 Arcane Boots — манапул для себя и команды"
+        }
+
         if urgent_target:
             chosen_id, chosen_reason = urgent_target
             urgency = "urgent"
@@ -1307,19 +1540,19 @@ class AnalyticsEngine:
             if clock_time < 360 and early_candidates:
                 chosen_id = early_candidates[0]
                 stage_label = "Ранняя игра"
-                chosen_reason = "Стартовый разгон: статы и скорость передвижения на линии"
+                chosen_reason = CORE_REASONS.get(chosen_id, "Стартовый разгон: статы и скорость передвижения на линии")
             elif core_candidates:
                 chosen_id = core_candidates[0]
                 stage_label = "Ядро"
-                chosen_reason = "Ключевой артефакт билда для максимизации боевой эффективности"
+                chosen_reason = CORE_REASONS.get(chosen_id, "Ключевой артефакт билда для боевой эффективности")
             elif luxury_candidates:
                 chosen_id = luxury_candidates[0]
                 stage_label = "Лейт / Роскошь"
-                chosen_reason = "Финальное усиление для победы в поздней стадии"
+                chosen_reason = CORE_REASONS.get(chosen_id, "Финальное усиление для победы в поздней стадии")
             elif early_candidates:
                 chosen_id = early_candidates[0]
                 stage_label = "Ранняя игра"
-                chosen_reason = "Добор ранних статов и расходников"
+                chosen_reason = CORE_REASONS.get(chosen_id, "Добор ранних статов и расходников")
             else:
                 chosen_id = "item_moon_shard" if "item_moon_shard" not in owned else "item_rapier"
                 stage_label = "Ультра-лейт"
@@ -1337,26 +1570,12 @@ class AnalyticsEngine:
             gps = current_gpm / 60.0
             eta_seconds = int(gold_needed / gps)
 
-        # 5. Determine the next step-by-step component to buy
-        comps = ITEM_COMPONENTS.get(chosen_id, [])
-        next_comp_text = ""
-        comp_affordable = False
-        if comps:
-            affordable_comps = [c for c in comps if c[1] <= current_gold]
-            if affordable_comps:
-                best_comp = max(affordable_comps, key=lambda c: c[1])
-                next_comp_text = f"{best_comp[0]} ({best_comp[1]}g) ✅ Готов к покупке!"
-                comp_affordable = True
-            else:
-                cheapest_comp = min(comps, key=lambda c: c[1])
-                needed_comp = cheapest_comp[1] - current_gold
-                next_comp_text = f"Копите на {cheapest_comp[0]} ({cheapest_comp[1]}g, нужно еще {needed_comp}g)"
+        # Slot completion status without micro-component spam
+        if can_buy_now:
+            slot_status_text = "Готов к покупке целиком!"
         else:
-            if can_buy_now:
-                next_comp_text = "Готов к покупке целиком!"
-                comp_affordable = True
-            else:
-                next_comp_text = f"Копите золото: осталось {gold_needed}g"
+            eta_str = f" (~{max(1, eta_seconds // 60)} мин)" if eta_seconds else ""
+            slot_status_text = f"Осталось накопить: {gold_needed:,} 💰{eta_str}".replace(",", " ")
 
         img_url = f"https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/{clean_name}.png"
 
@@ -1369,8 +1588,8 @@ class AnalyticsEngine:
             "progress_pct": progress_pct,
             "can_buy_now": can_buy_now,
             "eta_seconds": eta_seconds,
-            "next_component": next_comp_text,
-            "comp_affordable": comp_affordable,
+            "next_component": slot_status_text,
+            "comp_affordable": can_buy_now,
             "reason": chosen_reason,
             "urgency": urgency,
             "stage_label": stage_label,
@@ -1380,17 +1599,16 @@ class AnalyticsEngine:
     # ==========================================
     # 10. ABILITY & TALENT BUILD GUIDE
     # ==========================================
-    def get_ability_build(self, hero_identifier: Any) -> Dict[str, Any]:
+    def get_ability_build(self, hero_identifier: Any, hero_level: int = 1) -> Dict[str, Any]:
         """
-        Returns authentic Dota Plus ability progression order (1..30)
-        and talent recommendations (10, 15, 20, 25) with win rates.
+        Returns authentic Dota Plus ability progression, compact skill priority line,
+        and talent recommendations when approaching level 10, 15, 20, 25.
         """
         hero_obj = self.get_hero_by_identifier(hero_identifier)
         hero_name = hero_obj.get("name", "") if hero_obj else "npc_dota_hero_antimage"
         display_name = hero_obj.get("display_name", "Герой") if hero_obj else "Герой"
 
         # Standard high-winrate ability leveling sequence (1 to 25)
-        # Sequence: Q, W, Q, E, Q, R, Q, W, W, +Talent, W, R, E, E, +Talent, E, R, +Talent, +Talent
         build_sequence = [
             {"lvl": 1, "key": "Q", "type": "skill"},
             {"lvl": 2, "key": "W", "type": "skill"},
@@ -1449,7 +1667,6 @@ class AnalyticsEngine:
 
         talents = TALENT_TREES.get(hero_name)
         if not talents:
-            # Generic talent fallback with high winrates
             talents = {
                 10: {"left": "+200 к здоровью", "right": "+15 к скорости атаки", "recommended": "left", "winrate": 52.5, "pickrate": 68},
                 15: {"left": "-3с к перезарядке Q", "right": "+25 к урону", "recommended": "right", "winrate": 54.0, "pickrate": 72},
@@ -1457,9 +1674,37 @@ class AnalyticsEngine:
                 25: {"left": "+25% к вампиризму", "right": "+2 заряда ключевой способности", "recommended": "right", "winrate": 58.9, "pickrate": 83}
             }
 
+        PRIORITIES = {
+            "npc_dota_hero_antimage": "Max Q ➔ W ➔ E",
+            "npc_dota_hero_axe": "Max E ➔ Q ➔ W",
+            "npc_dota_hero_juggernaut": "Max Q ➔ E ➔ W",
+            "npc_dota_hero_phantom_assassin": "Max Q ➔ E ➔ W",
+            "npc_dota_hero_pudge": "Max W ➔ Q ➔ E",
+            "npc_dota_hero_invoker": "Exort ➔ Wex ➔ Quas",
+            "npc_dota_hero_crystal_maiden": "Max Q ➔ W ➔ E",
+            "npc_dota_hero_sniper": "Max Q ➔ E ➔ W",
+            "npc_dota_hero_faceless_void": "Max Q ➔ E ➔ W",
+            "npc_dota_hero_legion_commander": "Max Q ➔ W ➔ E",
+            "npc_dota_hero_slark": "Max Q ➔ E ➔ W",
+            "npc_dota_hero_drow_ranger": "Max E ➔ Q ➔ W",
+            "npc_dota_hero_storm_spirit": "Max Q ➔ E ➔ W",
+            "npc_dota_hero_earthshaker": "Max Q ➔ E ➔ W",
+            "npc_dota_hero_sven": "Max Q ➔ E ➔ W"
+        }
+        skill_priority = PRIORITIES.get(hero_name, "Max Q ➔ W ➔ E")
+
+        # Talent alert only near level 10, 15, 20, 25 (9-10, 14-15, 19-20, 24-25)
+        show_talent = hero_level in [9, 10, 14, 15, 19, 20, 24, 25]
+        active_tier = 10 if hero_level in [9, 10] else (15 if hero_level in [14, 15] else (20 if hero_level in [19, 20] else (25 if hero_level in [24, 25] else None)))
+        active_talent = talents.get(active_tier) if active_tier else None
+
         return {
             "hero_name": hero_name,
             "display_name": display_name,
+            "skill_priority": skill_priority,
+            "show_talent": show_talent,
+            "active_tier": active_tier,
+            "active_talent": active_talent,
             "sequence": build_sequence,
             "talents": talents
         }
