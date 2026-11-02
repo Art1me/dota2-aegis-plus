@@ -94,7 +94,7 @@ class AnalyticsEngine:
 
         # Copy to clipboard via wl-copy (Wayland) if available
         try:
-            subprocess.run(["wl-copy", chat_string], timeout=1, check=False, stderr=subprocess.DEVNULL)
+            subprocess.Popen(["wl-copy", chat_string], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception:
             pass
 
@@ -761,15 +761,22 @@ class AnalyticsEngine:
         day_night_name = "День" if is_day else "Ночь"
         next_cycle_genitive = "ночи" if is_day else "дня"
         day_night_title = f"{day_night_name} (до {next_cycle_genitive} {sec_to_cycle}с)"
-        pit_location = "Нижнее логово (Radiant)" if is_day else "Верхнее логово (Dire)"
 
-        # 8. Hybrid Roshan Tracker
+        # 8. Hybrid Roshan Tracker with future pit location calculation
         aegis_left = 0
         chat_string = ""
 
         if self.roshan_death_time is not None:
             elapsed = clock_time - self.roshan_death_time
-            chat_string = f"{self.format_clock(self.roshan_death_time + 300)} Aegis | {self.format_clock(self.roshan_death_time + 480)} - {self.format_clock(self.roshan_death_time + 660)} Roshan"
+            aegis_end = self.roshan_death_time + 300
+            rosh_min = self.roshan_death_time + 480
+            rosh_max = self.roshan_death_time + 660
+            chat_string = f"{self.format_clock(aegis_end)} Aegis | {self.format_clock(rosh_min)} - {self.format_clock(rosh_max)} Roshan"
+
+            # Future respawn pit based on 5-minute cycle parity at rosh_min (clock_time + 480)
+            respawn_time = rosh_min
+            is_day_at_respawn = ((respawn_time // 300) % 2 == 0)
+            pit_location = "Нижнее логово (Radiant)" if is_day_at_respawn else "Верхнее логово (Dire)"
 
             # Aegis (300s)
             if not self.aegis_expired and elapsed < 300:
@@ -814,6 +821,9 @@ class AnalyticsEngine:
                 rosh_window_str = "Жив"
                 self.roshan_death_time = None
         else:
+            # If alive, pit location is based on current clock time parity
+            current_is_day = ((clock_time // 300) % 2 == 0) if clock_time >= 0 else True
+            pit_location = "Нижнее логово (Radiant)" if current_is_day else "Верхнее логово (Dire)"
             rosh_status = "alive"
             rosh_window_str = "Жив"
 

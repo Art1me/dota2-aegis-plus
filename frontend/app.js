@@ -778,14 +778,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnClose = document.getElementById("btnCloseOverlay");
   if (btnClose) {
     btnClose.addEventListener("click", () => {
-      window.closeOverlay();
+      window.closeMenu();
     });
   }
 
   const btnQuit = document.getElementById("btnQuitOverlay");
   if (btnQuit) {
     btnQuit.addEventListener("click", () => {
-      window.quitApp();
+      window.shutdownApp();
     });
   }
 
@@ -796,49 +796,50 @@ document.addEventListener("DOMContentLoaded", () => {
         draftModal.classList.add("hidden");
         return;
       }
-      window.closeOverlay();
+      window.closeMenu();
     }
   });
 
-  document.getElementById("btnClickthrough").addEventListener("click", () => {
-    window.toggleClickthrough();
-  });
+  const btnClick = document.getElementById("btnClickthrough");
+  if (btnClick) {
+    btnClick.addEventListener("click", () => {
+      window.closeMenu();
+    });
+  }
 });
 
-// Steam Overlay State Controller
-let isSteamOverlayOpen = true;
-
-window.closeOverlay = function() {
-  window.setOverlayOpen(false);
-};
-
-window.quitApp = function() {
-  fetch("/api/quit", { method: "POST" })
-    .catch(() => {})
-    .finally(() => {
-      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.overlay) {
-        window.webkit.messageHandlers.overlay.postMessage({ action: "quit_app" });
-      }
-    });
-};
-
-window.setOverlayOpen = function(open) {
-  isSteamOverlayOpen = Boolean(open);
-  const hud = document.getElementById("hudContainer");
-  const backdrop = document.getElementById("steamBackdrop");
-
-  if (isSteamOverlayOpen) {
-    if (hud) hud.classList.remove("steam-hidden");
-    if (backdrop) backdrop.classList.remove("hidden");
+// UI Mode & Steam Overlay Controller
+window.setUiMode = function(isInteractive) {
+  const body = document.body;
+  const lockIcon = document.getElementById("lockIcon");
+  if (isInteractive) {
+    body.classList.remove("mode-hud");
+    body.classList.add("mode-menu");
+    if (lockIcon) lockIcon.innerText = "🔓 Меню";
   } else {
-    if (hud) hud.classList.add("steam-hidden");
-    if (backdrop) backdrop.classList.add("hidden");
-  }
-
-  // Notify WebKit host
-  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.overlay) {
-    window.webkit.messageHandlers.overlay.postMessage({
-      action: isSteamOverlayOpen ? "open_overlay" : "close_overlay"
-    });
+    body.classList.remove("mode-menu");
+    body.classList.add("mode-hud");
+    if (lockIcon) lockIcon.innerText = "🔒 В игре";
+    const draftModal = document.getElementById("draftOverlay");
+    if (draftModal) draftModal.classList.add("hidden");
   }
 };
+
+window.closeMenu = function() {
+  window.setUiMode(false);
+  fetch("/api/close_menu", { method: "POST" }).catch(() => {});
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.overlay) {
+    window.webkit.messageHandlers.overlay.postMessage({ action: "close_menu" });
+  }
+};
+
+window.shutdownApp = function() {
+  fetch("/api/shutdown", { method: "POST" }).catch(() => {});
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.overlay) {
+    window.webkit.messageHandlers.overlay.postMessage({ action: "quit_app" });
+  }
+};
+
+// Aliases for backwards compatibility
+window.closeOverlay = window.closeMenu;
+window.quitApp = window.shutdownApp;

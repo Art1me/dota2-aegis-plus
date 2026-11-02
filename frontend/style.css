@@ -40,6 +40,68 @@ html, body {
   border-radius: 10px;
 }
 
+/* =========================================================
+   TWO UI MODES: .mode-hud (combat HUD) & .mode-menu (interactive)
+   ========================================================= */
+
+/* In HUD mode (combat): show only compact stats, timers, buyback and toasts.
+   All menu buttons, controls cluster, steam controls and backdrop are hidden. */
+body.mode-hud .steam-overlay-backdrop {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.mode-hud .controls-cluster,
+body.mode-hud .steam-control,
+body.mode-hud .radar-actions,
+body.mode-hud #draftOverlay {
+  display: none !important;
+}
+
+body.mode-hud .top-bar {
+  justify-content: center !important;
+}
+
+body.mode-hud .macro-radar {
+  background: rgba(15, 23, 42, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.mode-hud .hud-card {
+  background: rgba(15, 23, 42, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* In Menu mode (interactive): full overlay controls and buttons */
+body.mode-menu .steam-overlay-backdrop {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  background: rgba(10, 15, 26, 0.45) !important;
+  backdrop-filter: blur(2px);
+  pointer-events: auto;
+}
+
+body.mode-menu .controls-cluster {
+  display: flex !important;
+}
+
+body.mode-menu .steam-control {
+  display: flex !important;
+}
+
+body.mode-menu .radar-actions {
+  display: flex !important;
+}
+
+body.mode-menu .top-bar {
+  justify-content: space-between !important;
+}
+
 /* Steam Overlay Backdrop (transparent so Dota 2 is 100% visible) */
 .steam-overlay-backdrop {
   position: fixed;

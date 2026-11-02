@@ -18,7 +18,7 @@ class TestPhase2Features(unittest.TestCase):
         self.assertEqual(res["rosh_max"], 1560) # 26:00
         self.assertEqual(res["chat_string"], "20:00 Aegis | 23:00 - 26:00 Roshan")
 
-        # Test daytime pit location (Day -> Radiant/Bottom)
+        # Test future daytime respawn pit location (respawn at 1380s -> Day -> Radiant/Bottom)
         timers_day = self.engine.get_macro_timers(clock_time=950, daytime=True, role="Carry")
         rosh_day = timers_day["roshan"]
         self.assertEqual(rosh_day["status"], "respawning")
@@ -26,9 +26,15 @@ class TestPhase2Features(unittest.TestCase):
         self.assertFalse(rosh_day["aegis_expired"])
         self.assertIn("Нижнее логово (Radiant)", rosh_day["pit_location"])
 
-        # Test nighttime pit location (Night -> Dire/Top)
-        timers_night = self.engine.get_macro_timers(clock_time=1000, daytime=False, role="Carry")
+        # Test alive nighttime pit location (Night -> Dire/Top)
+        alive_engine = AnalyticsEngine()
+        timers_night = alive_engine.get_macro_timers(clock_time=1000, daytime=False, role="Carry")
         self.assertIn("Верхнее логово (Dire)", timers_night["roshan"]["pit_location"])
+
+        # Test dead future nighttime respawn pit (death at 1200s -> respawn at 1680s -> Night -> Dire/Top)
+        alive_engine.record_roshan_killed(1200)
+        timers_dead_night = alive_engine.get_macro_timers(clock_time=1250, role="Carry")
+        self.assertIn("Верхнее логово (Dire)", timers_dead_night["roshan"]["pit_location"])
 
         # Test Aegis 30s alert (clock_time = 1175 -> 25s left)
         timers_warn = self.engine.get_macro_timers(clock_time=1175, daytime=False, role="Carry")
