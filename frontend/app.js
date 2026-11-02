@@ -1,12 +1,29 @@
 // AegisPlus Client Logic
 let audioEnabled = true;
+let mobileHapticEnabled = true;
 let activeDraftRole = "Carry";
 let isLockedClickthrough = false;
 let latestData = null;
 let lastAlertIds = new Set();
+let alertedTimerIds = new Set();
 let allHeroesList = [];
 let manualEnemyHeroes = [];
 let activeToasts = new Map(); // id -> { elem, expireAt, baseText, secondsLeft }
+
+let currentMobileItemStage = "starting";
+let currentDesktopItemStage = "core";
+let currentDesktopBuildView = "items";
+let lastStackAlertPlayedMin = -1;
+
+function triggerHaptic(pattern = 50) {
+  if (mobileHapticEnabled && navigator.vibrate) {
+    try {
+      navigator.vibrate(pattern);
+    } catch (e) {
+      // Ignore vibration error on unsupported desktop browsers
+    }
+  }
+}
 
 // Web Audio synthesizer for crisp in-game audio cues
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -249,12 +266,25 @@ function renderUI(data) {
     }
   }
 
-  // 3. Situational Items (Fixed icons & Steam CDN)
-  if (data.recommended_items) {
-    renderItems(data.recommended_items);
+  // 3. Situational Items & Full Item Stages
+  renderItemProgression(data.item_build, data.recommended_items);
+
+  // 4. Dota Plus Damage Breakdown
+  if (data.damage_breakdown) {
+    renderDamageBreakdown(data.damage_breakdown);
   }
 
-  // 4. Draft Assistant
+  // 5. Dota Plus Net Worth Graph
+  renderNetWorthGraph(data.nw_history || [], data.performance ? data.performance.benchmarks : null, "desktopNWSvgContent", 320, 100);
+  renderNetWorthGraph(data.nw_history || [], data.performance ? data.performance.benchmarks : null, "mobileNWSvgContent", 320, 120);
+
+  // 6. Dota Plus Ability & Talent Progression
+  if (data.ability_build) {
+    const lvl = (data.player && data.player.hero_level) || 1;
+    renderAbilityBuild(data.ability_build, lvl);
+  }
+
+  // 7. Draft Assistant
   if (data.draft) {
     renderDraft(data.draft);
     if (data.game_phase === "DRAFT") {
@@ -688,17 +718,6 @@ function setupCustomSelects() {
   });
 }
 
-let mobileHapticEnabled = true;
-let alertedTimerIds = new Set();
-
-function triggerHaptic(pattern = [200, 100, 200]) {
-  if (mobileHapticEnabled && navigator.vibrate) {
-    try {
-      navigator.vibrate(pattern);
-    } catch (e) {}
-  }
-}
-
 function renderMobileUI(data) {
   const container = document.getElementById("mobileCompanion");
   if (!container) return;
@@ -849,7 +868,27 @@ function renderMobileUI(data) {
       }
     }
 
-    // Runes & Lotus countdowns
+    // Camp Stacking Alert (:48 to :55 sec of each minute with mobile vibration)
+    const clock = (data.match_info && data.match_info.clock_time !== undefined) ? data.match_info.clock_time : (data.radar ? data.radar.clock_seconds : 0);
+    if (clock > 0) {
+      const secInMin = clock % 60;
+      const stackBanner = document.getElementById("mobileCampStackBanner");
+      const stackSec = document.getElementById("mobileCampStackSec");
+      if (secInMin >= 48 && secInMin <= 55) {
+        if (stackBanner) stackBanner.classList.remove("hidden");
+        if (stackSec) stackSec.innerText = `${secInMin}s`;
+        const curMin = Math.floor(clock / 60);
+        if (secInMin === 52 && lastStackAlertPlayedMin !== curMin) {
+          lastStackAlertPlayedMin = curMin;
+          triggerHaptic([200, 100, 200]);
+          playSoundCue("warning");
+        }
+      } else {
+        if (stackBanner) stackBanner.classList.add("hidden");
+      }
+    }
+
+    // Runes, Tormentor & Lotus countdowns
     (data.radar.timers || []).forEach(t => {
       const min = Math.floor(t.seconds_left / 60);
       const sec = t.seconds_left % 60;
@@ -863,6 +902,7 @@ function renderMobileUI(data) {
       else if (t.id === "bounty" || t.id === "water_rune") { cardId = "cardRuneBounty"; timeId = "mobileTimeBounty"; dotId = "dotBounty"; }
       else if (t.id === "lotus") { cardId = "cardRuneLotus"; timeId = "mobileTimeLotus"; dotId = "dotLotus"; }
       else if (t.id === "power_rune") { cardId = "cardRunePower"; timeId = "mobileTimePower"; dotId = "dotPower"; }
+      else if (t.id === "tormentor") { cardId = "cardRuneTormentor"; timeId = "mobileTimeTormentor"; dotId = "dotTormentor"; }
 
       if (timeId && document.getElementById(timeId)) {
         document.getElementById(timeId).innerText = timeStr;
@@ -933,36 +973,263 @@ function renderMobileUI(data) {
   }
 
   // Items on Mobile
-  const items = data.recommended_items || (data.items && data.items.situational) || [];
-  const itemsContainer = document.getElementById("mobileItemsContainer");
-  if (itemsContainer) {
-    if (items.length === 0) {
-      itemsContainer.innerHTML = `<span style="color: #94a3b8; font-size: 12px; text-align: center; padding: 12px; display: block;">Оптимальные предметы вычисляются по пику...</span>`;
+  renderItemProgression(data.item_build, data.recommended_items);
+
+}
+
+
+// ==========================================
+// DOTA PLUS SUITE: DAMAGE BREAKDOWN, NET WORTH GRAPH, ITEM PROGRESSION, ABILITIES
+// ==========================================
+
+function renderDamageBreakdown(dmg) {
+  if (!dmg) return;
+  const pPct = dmg.physical_pct !== undefined ? dmg.physical_pct : 50;
+  const mPct = dmg.magical_pct !== undefined ? dmg.magical_pct : 42;
+  const uPct = dmg.pure_pct !== undefined ? dmg.pure_pct : 8;
+  const adv = dmg.advice || "Анализ сетапа...";
+
+  // Mobile elements
+  const mPBar = document.getElementById("mobileDmgPhysBar");
+  const mMBar = document.getElementById("mobileDmgMagicBar");
+  const mUBar = document.getElementById("mobileDmgPureBar");
+  if (mPBar) mPBar.style.width = `${pPct}%`;
+  if (mMBar) mMBar.style.width = `${mPct}%`;
+  if (mUBar) mUBar.style.width = `${uPct}%`;
+
+  const mPPct = document.getElementById("mobileDmgPhysPct");
+  const mMPct = document.getElementById("mobileDmgMagicPct");
+  const mUPct = document.getElementById("mobileDmgPurePct");
+  if (mPPct) mPPct.innerText = `${pPct}%`;
+  if (mMPct) mMPct.innerText = `${mPct}%`;
+  if (mUPct) mUPct.innerText = `${uPct}%`;
+
+  const mAdv = document.getElementById("mobileDamageAdvice");
+  if (mAdv) mAdv.innerText = adv;
+
+  // Desktop elements
+  const dPBar = document.getElementById("desktopDmgPhysBar");
+  const dMBar = document.getElementById("desktopDmgMagicBar");
+  const dUBar = document.getElementById("desktopDmgPureBar");
+  if (dPBar) dPBar.style.width = `${pPct}%`;
+  if (dMBar) dMBar.style.width = `${mPct}%`;
+  if (dUBar) dUBar.style.width = `${uPct}%`;
+
+  const dPPct = document.getElementById("desktopDmgPhysPct");
+  const dMPct = document.getElementById("desktopDmgMagicPct");
+  const dUPct = document.getElementById("desktopDmgPurePct");
+  if (dPPct) dPPct.innerText = `${pPct}%`;
+  if (dMPct) dMPct.innerText = `${mPct}%`;
+  if (dUPct) dUPct.innerText = `${uPct}%`;
+
+  const dAdv = document.getElementById("desktopDamageAdvice");
+  if (dAdv) dAdv.innerText = adv;
+}
+
+function renderNetWorthGraph(history, benchmarks, targetElemId, svgW, svgH) {
+  const elem = document.getElementById(targetElemId);
+  if (!elem) return;
+
+  const padLeft = 24;
+  const padRight = 8;
+  const padTop = 8;
+  const padBottom = 16;
+  const plotW = svgW - padLeft - padRight;
+  const plotH = svgH - padTop - padBottom;
+
+  let points = [];
+  if (history && history.length > 0) {
+    points = history.slice();
+  } else {
+    const curNW = benchmarks ? (benchmarks.current_nw || 600) : 600;
+    const tgtNW = benchmarks ? (benchmarks.target_nw || 600) : 600;
+    points = [
+      { minute: 0, player_nw: 600, benchmark_nw: 600 },
+      { minute: 1, player_nw: curNW, benchmark_nw: tgtNW }
+    ];
+  }
+
+  let maxMin = 15;
+  let maxNW = 5000;
+  points.forEach(p => {
+    if (p.minute > maxMin) maxMin = p.minute;
+    if (p.player_nw > maxNW) maxNW = p.player_nw;
+    if (p.benchmark_nw > maxNW) maxNW = p.benchmark_nw;
+  });
+  maxMin = Math.max(10, Math.ceil(maxMin / 5) * 5);
+  maxNW = Math.max(3000, Math.ceil(maxNW / 2000) * 2000);
+
+  function getX(m) {
+    return padLeft + (m / maxMin) * plotW;
+  }
+  function getY(nw) {
+    return padTop + plotH - (Math.max(0, nw) / maxNW) * plotH;
+  }
+
+  let gridSvg = "";
+  const stepsNW = [0.25, 0.5, 0.75, 1.0];
+  stepsNW.forEach(factor => {
+    const nwVal = Math.round(maxNW * factor);
+    const y = getY(nwVal);
+    gridSvg += `<line x1="${padLeft}" y1="${y}" x2="${svgW - padRight}" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-width="1" />`;
+    gridSvg += `<text x="${padLeft - 3}" y="${y + 3}" fill="#64748b" font-size="7.5" text-anchor="end">${Math.round(nwVal / 1000)}k</text>`;
+  });
+
+  for (let m = 5; m <= maxMin; m += 5) {
+    const x = getX(m);
+    gridSvg += `<line x1="${x}" y1="${padTop}" x2="${x}" y2="${padTop + plotH}" stroke="rgba(255,255,255,0.06)" stroke-width="1" />`;
+    gridSvg += `<text x="${x}" y="${padTop + plotH + 11}" fill="#64748b" font-size="7.5" text-anchor="middle">${m}m</text>`;
+  }
+
+  const benchPointsStr = points.map(p => `${getX(p.minute)},${getY(p.benchmark_nw)}`).join(" ");
+  const benchLine = `<polyline points="${benchPointsStr}" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="3,3" opacity="0.85" />`;
+
+  const playerPointsStr = points.map(p => `${getX(p.minute)},${getY(p.player_nw)}`).join(" ");
+  const firstX = getX(points[0].minute);
+  const lastX = getX(points[points.length - 1].minute);
+  const bottomY = getY(0);
+  const areaPointsStr = `${firstX},${bottomY} ${playerPointsStr} ${lastX},${bottomY}`;
+  const gradId = targetElemId.includes("mobile") ? "mobileNwGrad" : "desktopNwGrad";
+  const playerArea = `<polygon points="${areaPointsStr}" fill="url(#${gradId})" />`;
+  const playerLine = `<polyline points="${playerPointsStr}" fill="none" stroke="#e5c158" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`;
+
+  const lastP = points[points.length - 1];
+  const lastDot = `
+    <circle cx="${getX(lastP.minute)}" cy="${getY(lastP.player_nw)}" r="3.5" fill="#e5c158" stroke="#ffffff" stroke-width="1.5" />
+    <circle cx="${getX(lastP.minute)}" cy="${getY(lastP.player_nw)}" r="6.5" fill="none" stroke="#e5c158" stroke-width="1" opacity="0.6" />
+  `;
+
+  elem.innerHTML = gridSvg + playerArea + benchLine + playerLine + lastDot;
+}
+
+function renderItemProgression(itemBuild, situationalItems) {
+  // 1. Mobile Item Stage Rendering
+  const mContainer = document.getElementById("mobileItemsContainer");
+  if (mContainer) {
+    let list = [];
+    if (currentMobileItemStage === "situational") {
+      list = situationalItems || [];
+    } else if (itemBuild && itemBuild[currentMobileItemStage]) {
+      list = itemBuild[currentMobileItemStage];
+    }
+
+    if (!list || list.length === 0) {
+      mContainer.innerHTML = `<span style="color: #94a3b8; font-size: 11px; padding: 12px; grid-column: 1/-1; text-align: center;">Оптимальные предметы определяются...</span>`;
     } else {
-      itemsContainer.innerHTML = "";
-      items.slice(0, 6).forEach(it => {
+      mContainer.innerHTML = "";
+      list.forEach(it => {
         const cleanName = (it.id || "").replace("item_", "");
         const imgUrl = it.image_url || `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/${cleanName}.png`;
-        const itemDiv = document.createElement("div");
-        itemDiv.className = "glass";
-        itemDiv.style.cssText = "display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; margin-bottom: 6px;";
-        itemDiv.innerHTML = `
-          <div style="width: 44px; height: 32px; border-radius: 6px; overflow: hidden; background: #000; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.15);">
-            <img src="${imgUrl}" alt="${it.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/branches.png'">
+        const card = document.createElement("div");
+        card.className = "item-stage-card";
+        card.innerHTML = `
+          <div class="item-stage-img-wrap">
+            <img src="${imgUrl}" alt="${it.name}" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/branches.png'">
           </div>
-          <div style="flex: 1; min-width: 0;">
-            <strong style="color: #60a5fa; font-size: 13px; display: block;">${it.name || it.id}</strong>
-            <span style="font-size: 11px; color: #cbd5e1; display: block; margin-top: 2px;">${it.advice || ''}</span>
-            ${it.reasons && it.reasons.length ? `<span style="font-size: 10px; color: #fbbf24; display: block; margin-top: 2px;">• ${it.reasons.join(', ')}</span>` : ''}
+          <div class="item-stage-info">
+            <span class="item-stage-name">${it.name || it.id}</span>
+            <span class="item-stage-cost">${it.cost ? it.cost + ' 💰' : (it.advice || '')}</span>
           </div>
         `;
-        itemsContainer.appendChild(itemDiv);
+        mContainer.appendChild(card);
       });
     }
   }
 
+  // 2. Desktop Item Stage Rendering
+  const dContainer = document.getElementById("itemsContainer");
+  if (dContainer) {
+    let dList = [];
+    if (currentDesktopItemStage === "situational") {
+      dList = situationalItems || [];
+    } else if (itemBuild && itemBuild[currentDesktopItemStage]) {
+      dList = itemBuild[currentDesktopItemStage];
+    }
+
+    if (!dList || dList.length === 0) {
+      dContainer.innerHTML = `<span style="color: #94a3b8; font-size: 11px; padding: 10px; grid-column: 1/-1; text-align: center;">Оптимальные предметы определяются...</span>`;
+    } else {
+      dContainer.innerHTML = "";
+      dList.forEach(it => {
+        const cleanName = (it.id || "").replace("item_", "");
+        const imgUrl = it.image_url || `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/${cleanName}.png`;
+        const card = document.createElement("div");
+        card.className = "item-stage-card";
+        card.innerHTML = `
+          <div class="item-stage-img-wrap">
+            <img src="${imgUrl}" alt="${it.name}" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/branches.png'">
+          </div>
+          <div class="item-stage-info">
+            <span class="item-stage-name">${it.name || it.id}</span>
+            <span class="item-stage-cost">${it.cost ? it.cost + ' 💰' : (it.advice || '')}</span>
+          </div>
+        `;
+        dContainer.appendChild(card);
+      });
+    }
+  }
 }
 
+function renderAbilityBuild(abilityBuild, heroLevel) {
+  if (!abilityBuild) return;
+  const seq = abilityBuild.sequence || [];
+  const talents = abilityBuild.talents || {};
+
+  const nextStep = seq.find(s => s.lvl === (heroLevel + 1)) || seq[seq.length - 1];
+  const nextBadge = document.getElementById("mobileNextSkillBadge");
+  if (nextBadge && nextStep) {
+    nextBadge.innerText = `След.: ${nextStep.key} (${nextStep.lvl} ур.)`;
+  }
+
+  function renderSeqTo(elemId) {
+    const elem = document.getElementById(elemId);
+    if (!elem) return;
+    elem.innerHTML = "";
+    seq.forEach(s => {
+      const isNext = s.lvl === (heroLevel + 1);
+      const isLearned = s.lvl <= heroLevel;
+      const stepDiv = document.createElement("div");
+      stepDiv.className = "ability-step";
+      stepDiv.innerHTML = `
+        <span class="ability-step-lvl">${s.lvl}</span>
+        <div class="ability-step-pill ${s.type} ${isNext ? 'next-active' : ''}" style="${isLearned ? 'opacity: 0.5;' : ''}">${s.key}</div>
+      `;
+      elem.appendChild(stepDiv);
+    });
+  }
+
+  function renderTalentsTo(elemId) {
+    const elem = document.getElementById(elemId);
+    if (!elem) return;
+    elem.innerHTML = "";
+    [25, 20, 15, 10].forEach(lvl => {
+      const t = talents[lvl];
+      if (!t) return;
+      const isLeftRec = t.recommended === "left";
+      const isRightRec = t.recommended === "right";
+      const row = document.createElement("div");
+      row.className = "talent-tier-row";
+      row.innerHTML = `
+        <div class="talent-tier-choice ${isLeftRec ? 'recommended' : ''}">
+          <span>${t.left}</span>
+          ${isLeftRec ? '<span style="color: #e5c158; font-size: 10px;">★ ' + (t.winrate || 54) + '% WR</span>' : ''}
+        </div>
+        <div class="talent-tier-circle">${lvl}</div>
+        <div class="talent-tier-choice ${isRightRec ? 'recommended' : ''}">
+          ${isRightRec ? '<span style="color: #e5c158; font-size: 10px;">★ ' + (t.winrate || 54) + '% WR</span>' : ''}
+          <span>${t.right}</span>
+        </div>
+      `;
+      elem.appendChild(row);
+    });
+  }
+
+  renderSeqTo("mobileAbilitySequence");
+  renderTalentsTo("mobileTalentsTree");
+
+  renderSeqTo("desktopAbilitySequence");
+  renderTalentsTo("desktopTalentsTree");
+}
 
 // State Pulling Fallback for Tab Switching & Window Focus
 function fetchLatestState() {
@@ -1013,6 +1280,58 @@ document.addEventListener("DOMContentLoaded", () => {
         renderMobileUI(latestData);
       }
       triggerHaptic(40);
+    });
+  });
+
+  // Mobile Item Stage Tabs
+  document.querySelectorAll("#mobileItemTabs .item-stage-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll("#mobileItemTabs .item-stage-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      currentMobileItemStage = tab.getAttribute("data-stage");
+      const badge = document.getElementById("mobileItemStageBadge");
+      if (badge) badge.innerText = tab.innerText;
+      if (latestData) {
+        renderItemProgression(latestData.item_build, latestData.recommended_items);
+      }
+      triggerHaptic(30);
+    });
+  });
+
+  // Desktop Item Stage Tabs
+  document.querySelectorAll("#desktopItemStages .item-stage-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll("#desktopItemStages .item-stage-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      currentDesktopItemStage = tab.getAttribute("data-dstage");
+      if (latestData) {
+        renderItemProgression(latestData.item_build, latestData.recommended_items);
+      }
+    });
+  });
+
+  // Desktop Left HUD View Switcher (Items vs Skills/Talents)
+  document.querySelectorAll("#desktopBuildTabs .item-stage-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll("#desktopBuildTabs .item-stage-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      const targetView = tab.getAttribute("data-targetview");
+      const itemsView = document.getElementById("desktopItemsView");
+      const skillsView = document.getElementById("desktopSkillsView");
+      if (targetView === "skills") {
+        if (itemsView) itemsView.classList.add("hidden");
+        if (skillsView) skillsView.classList.remove("hidden");
+        if (latestData && latestData.ability_build) {
+          const lvl = (latestData.player && latestData.player.hero_level) || 1;
+          renderAbilityBuild(latestData.ability_build, lvl);
+        }
+      } else {
+        if (skillsView) skillsView.classList.add("hidden");
+        if (itemsView) itemsView.classList.remove("hidden");
+        if (latestData) {
+          renderItemProgression(latestData.item_build, latestData.recommended_items);
+        }
+      }
     });
   });
 

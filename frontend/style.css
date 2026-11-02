@@ -1829,4 +1829,336 @@ body.mode-hud-only .right-hud {
   margin-top: 2px;
 }
 
+/* ========================================================================= */
+/* DOTA PLUS EXPANDED SUITE: DAMAGE BREAKDOWN, ITEM BUILDS, ABILITIES & GRAPH */
+/* ========================================================================= */
+
+/* 1. Damage Breakdown Meter */
+.damage-breakdown-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.damage-bar-track {
+  display: flex;
+  height: 12px;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.damage-segment {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.damage-segment.phys {
+  background: linear-gradient(90deg, #ea580c, #f97316);
+}
+
+.damage-segment.magic {
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+}
+
+.damage-segment.pure {
+  background: linear-gradient(90deg, #9333ea, #c084fc);
+}
+
+.damage-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.damage-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.damage-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.damage-dot.phys { background: #f97316; box-shadow: 0 0 6px #f97316; }
+.damage-dot.magic { background: #38bdf8; box-shadow: 0 0 6px #38bdf8; }
+.damage-dot.pure { background: #c084fc; box-shadow: 0 0 6px #c084fc; }
+
+.damage-advice-box {
+  background: rgba(229, 193, 88, 0.08);
+  border: 1px solid rgba(229, 193, 88, 0.25);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #f1f5f9;
+  line-height: 1.35;
+}
+
+/* 2. Net Worth Timeline Graph */
+.nw-graph-container {
+  width: 100%;
+  margin-top: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 8px;
+  position: relative;
+}
+
+.nw-graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.nw-graph-legend {
+  display: flex;
+  gap: 12px;
+  font-size: 10px;
+}
+
+.nw-graph-svg {
+  width: 100%;
+  height: 120px;
+  overflow: visible;
+}
+
+/* 3. Item Stages Tabs & Cards */
+.item-stages-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.item-stages-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.item-stage-tab {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.item-stage-tab.active {
+  background: linear-gradient(135deg, rgba(229, 193, 88, 0.25), rgba(229, 193, 88, 0.1));
+  border-color: #e5c158;
+  color: #e5c158;
+  box-shadow: 0 0 10px rgba(229, 193, 88, 0.2);
+}
+
+.items-stage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 6px;
+}
+
+.item-stage-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 6px 8px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.item-stage-card:hover {
+  border-color: rgba(229, 193, 88, 0.5);
+  transform: translateY(-1px);
+}
+
+.item-stage-img-wrap {
+  width: 38px;
+  height: 28px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #000;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.item-stage-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-stage-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item-stage-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-stage-cost {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+/* 4. Ability & Talent Progression */
+.ability-build-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ability-sequence-wrap {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 6px 2px;
+  scrollbar-width: thin;
+}
+
+.ability-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 26px;
+}
+
+.ability-step-lvl {
+  font-size: 9px;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.ability-step-pill {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.ability-step-pill.ult {
+  background: rgba(220, 38, 38, 0.3);
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+.ability-step-pill.talent {
+  background: rgba(234, 179, 8, 0.25);
+  border-color: #eab308;
+  color: #fde047;
+}
+
+.ability-step-pill.next-active {
+  background: #e5c158;
+  color: #0b0f19;
+  border-color: #fef08a;
+  box-shadow: 0 0 12px rgba(229, 193, 88, 0.8);
+  animation: pulseGold 1.5s infinite;
+}
+
+@keyframes pulseGold {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); box-shadow: 0 0 18px rgba(229, 193, 88, 1); }
+}
+
+.talents-tree-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.talent-tier-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.talent-tier-choice {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  color: #cbd5e1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.talent-tier-choice.recommended {
+  border-color: #e5c158;
+  background: rgba(229, 193, 88, 0.12);
+  color: #fef08a;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(229, 193, 88, 0.15);
+}
+
+.talent-tier-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 2px solid #e5c158;
+  color: #e5c158;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+/* 5. Camp Stacking Alert Banner */
+.camp-stack-banner {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.35));
+  border: 1px solid #f59e0b;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: pulseStack 1s infinite alternate;
+  margin-bottom: 10px;
+}
+
+@keyframes pulseStack {
+  from { opacity: 0.85; }
+  to { opacity: 1; box-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
+}
+
 

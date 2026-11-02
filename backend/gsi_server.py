@@ -98,6 +98,10 @@ class AppState:
         # Roshan tracking
         self.roshan_death_time: Optional[int] = None
         self.last_roshan_state = "alive"
+
+        # Net worth timeline history for Dota Plus progress graph
+        self.timeline_history: List[Dict[str, Any]] = []
+        self.last_recorded_minute: int = -1
         
         # Cached analysis payload
         self.cached_analysis: Dict[str, Any] = self._generate_initial_state()
@@ -131,7 +135,11 @@ class AppState:
                 hero_alive=True
             ),
             "radar": self.engine.get_macro_timers(0, role=self.selected_role),
-            "recommended_items": []
+            "recommended_items": [],
+            "damage_breakdown": self.engine.calculate_damage_breakdown(self.manual_enemy_heroes),
+            "item_build": self.engine.get_item_progression("npc_dota_hero_juggernaut", self.selected_role),
+            "ability_build": self.engine.get_ability_build("npc_dota_hero_juggernaut"),
+            "nw_history": []
         }
 
     def process_gsi_payload(self, data: Dict[str, Any]):
@@ -288,6 +296,28 @@ class AppState:
             current_player_items=player_item_list
         )
 
+        # Full Dota Plus analytics suite:
+        hero_raw_name = str(hero_data.get("name", "") or "")
+        damage_breakdown = self.engine.calculate_damage_breakdown(effective_enemy_heroes)
+        item_build = self.engine.get_item_progression(hero_raw_name or "npc_dota_hero_juggernaut", self.selected_role)
+        ability_build = self.engine.get_ability_build(hero_raw_name or "npc_dota_hero_juggernaut")
+
+        # Record timeline history (Net Worth progression graph)
+        if clock_time >= 0:
+            curr_min = clock_time // 60
+            if curr_min != self.last_recorded_minute:
+                self.last_recorded_minute = curr_min
+                self.timeline_history.append({
+                    "minute": curr_min,
+                    "clock_formatted": self.engine.format_clock(clock_time),
+                    "player_nw": net_worth,
+                    "benchmark_nw": performance_analysis["benchmarks"]["target_nw"],
+                    "player_gpm": current_gpm,
+                    "benchmark_gpm": performance_analysis["benchmarks"]["target_gpm"]
+                })
+                if len(self.timeline_history) > 90:
+                    self.timeline_history.pop(0)
+
         self.cached_analysis = {
             "connected": True,
             "status": "В игре" if phase == "IN_GAME" else ("Стадия драфта" if phase == "DRAFT" else "В лобби"),
@@ -328,7 +358,11 @@ class AppState:
             "draft": draft_analysis,
             "performance": performance_analysis,
             "radar": radar_analysis,
-            "recommended_items": item_advice
+            "recommended_items": item_advice,
+            "damage_breakdown": damage_breakdown,
+            "item_build": item_build,
+            "ability_build": ability_build,
+            "nw_history": list(self.timeline_history)
         }
 
         self.notify_subscribers()

@@ -123,6 +123,18 @@
           </div>
         </div>
 
+        <!-- Camp Stacking Alert Banner (:50 to :55 sec alert with vibration) -->
+        <div id="mobileCampStackBanner" class="camp-stack-banner hidden">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">🌾</span>
+            <div>
+              <strong style="color: #fef08a; font-size: 13px; display: block;">ТАЙМИНГ СТАКА ЛЕСА!</strong>
+              <span style="font-size: 11px; color: #fff;">Ударьте крипов на :53-:55с и уводите из кемпа</span>
+            </div>
+          </div>
+          <span id="mobileCampStackSec" style="font-size: 16px; font-weight: 900; color: #fff;">53s</span>
+        </div>
+
         <!-- Rune & Lotus Timers Grid -->
         <div class="mobile-runes-grid">
           <!-- Wisdom Rune (7m) -->
@@ -164,6 +176,16 @@
             </div>
             <div class="rune-alert-dot hidden" id="dotPower"></div>
           </div>
+
+          <!-- Tormentor (20:00 / 10m respawn) -->
+          <div class="mobile-rune-card glass" id="cardRuneTormentor" style="grid-column: span 2;">
+            <div class="rune-icon-wrap">🛡️</div>
+            <div class="rune-text-wrap">
+              <span class="rune-title">Терзатель (20:00 / Осколок Aghanim's Shard)</span>
+              <span class="rune-countdown" id="mobileTimeTormentor">20:00</span>
+            </div>
+            <div class="rune-alert-dot hidden" id="dotTormentor"></div>
+          </div>
         </div>
 
         <!-- Quick Demo / Simulation Trigger -->
@@ -191,7 +213,7 @@
           </div>
         </div>
 
-        <!-- Benchmarks -->
+        <!-- Benchmarks & Net Worth Curve Graph -->
         <div class="mobile-card glass">
           <div class="mobile-card-header">
             <span class="mobile-card-title">📊 Бенчмарк темпа ранга</span>
@@ -208,6 +230,58 @@
           <div class="mobile-metric-row">
             <span>Темп GPM / XPM:</span>
             <span class="metric-val" id="mobileGPMVal">0 / 0</span>
+          </div>
+
+          <!-- Dynamic SVG Net Worth Progression Chart -->
+          <div class="nw-graph-container" id="mobileNWGraphContainer">
+            <div class="nw-graph-header">
+              <span style="color: #e5c158;">📈 Кривая Net Worth за матч</span>
+              <div class="nw-graph-legend">
+                <span style="color: #e5c158;">● Вы</span>
+                <span style="color: #38bdf8;">-- Ранг</span>
+              </div>
+            </div>
+            <svg class="nw-graph-svg" id="mobileNWSvg" viewBox="0 0 320 120">
+              <defs>
+                <linearGradient id="mobileNwGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#e5c158" stop-opacity="0.35" />
+                  <stop offset="100%" stop-color="#e5c158" stop-opacity="0.0" />
+                </linearGradient>
+              </defs>
+              <g id="mobileNWSvgContent"></g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Damage Breakdown (Физический / Магический / Чистый) -->
+        <div class="mobile-card glass" id="mobileDamageCard">
+          <div class="mobile-card-header">
+            <span class="mobile-card-title">🛡️ Расчёт урона врагов (Dota Plus)</span>
+            <span class="mobile-badge" id="mobileDamageBadge" style="background: rgba(229,193,88,0.2); color: #e5c158;">Анализ пика</span>
+          </div>
+          <div class="damage-breakdown-card">
+            <div class="damage-bar-track">
+              <div class="damage-segment phys" id="mobileDmgPhysBar" style="width: 50%;"></div>
+              <div class="damage-segment magic" id="mobileDmgMagicBar" style="width: 42%;"></div>
+              <div class="damage-segment pure" id="mobileDmgPureBar" style="width: 8%;"></div>
+            </div>
+            <div class="damage-legend">
+              <div class="damage-legend-item">
+                <span class="damage-dot phys"></span>
+                <span>Физ: <strong id="mobileDmgPhysPct">50%</strong></span>
+              </div>
+              <div class="damage-legend-item">
+                <span class="damage-dot magic"></span>
+                <span>Маг: <strong id="mobileDmgMagicPct">42%</strong></span>
+              </div>
+              <div class="damage-legend-item">
+                <span class="damage-dot pure"></span>
+                <span>Чистый: <strong id="mobileDmgPurePct">8%</strong></span>
+              </div>
+            </div>
+            <div class="damage-advice-box" id="mobileDamageAdvice">
+              Анализ урона вражеского сетапа...
+            </div>
           </div>
         </div>
 
@@ -230,15 +304,46 @@
         </div>
       </section>
 
-      <!-- PAGE 3: ITEMS & DRAFT -->
+      <!-- PAGE 3: ITEMS & ABILITIES -->
       <section class="mobile-page" id="pageItems">
+        <!-- Full Dota Plus Item Progression -->
         <div class="mobile-card glass">
           <div class="mobile-card-header">
-            <span class="mobile-card-title">💡 Рекомендации сборок</span>
-            <span class="mobile-badge">Ситуативные</span>
+            <span class="mobile-card-title">💡 Рекомендации сборок (Dota Plus)</span>
+            <span class="mobile-badge" id="mobileItemStageBadge">Старт</span>
           </div>
-          <div id="mobileItemsContainer" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+
+          <!-- Item Stages Tabs -->
+          <div class="item-stages-tabs" id="mobileItemTabs">
+            <button class="item-stage-tab active" data-stage="starting">Старт</button>
+            <button class="item-stage-tab" data-stage="early_game">Ранняя игра</button>
+            <button class="item-stage-tab" data-stage="core">Ядро</button>
+            <button class="item-stage-tab" data-stage="luxury">Лейт / Роскошь</button>
+            <button class="item-stage-tab" data-stage="situational">Ситуативные</button>
+          </div>
+
+          <div id="mobileItemsContainer" class="items-stage-grid">
             <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Ability Progression & Talents -->
+        <div class="mobile-card glass" id="mobileAbilityCard">
+          <div class="mobile-card-header">
+            <span class="mobile-card-title">⚡ Прокачка способностей & Таланты</span>
+            <span class="mobile-badge positive" id="mobileNextSkillBadge">Next: Q</span>
+          </div>
+
+          <div class="ability-build-card">
+            <span style="font-size: 11px; color: var(--text-muted);">Рекомендуемый порядок прокачки (1-25 ур.):</span>
+            <div class="ability-sequence-wrap" id="mobileAbilitySequence">
+              <!-- Populated via JS -->
+            </div>
+
+            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Древо талантов и винрейты:</span>
+            <div class="talents-tree-container" id="mobileTalentsTree">
+              <!-- Populated via JS -->
+            </div>
           </div>
         </div>
       </section>
@@ -396,11 +501,35 @@
       <aside class="left-hud">
         <div class="hud-card glass interactive" id="itemsCard">
           <div class="card-header">
-            <span class="card-title">💡 Рекомендации сборок</span>
-            <span class="selector-label">Ситуативные</span>
+            <span class="card-title">💡 Dota Plus Сборки</span>
+            <div class="item-stages-tabs" id="desktopBuildTabs" style="margin-bottom: 0;">
+              <button class="item-stage-tab active" data-targetview="items">Предметы</button>
+              <button class="item-stage-tab" data-targetview="skills">Скиллы & Таланты</button>
+            </div>
           </div>
-          <div id="itemsContainer" style="display: flex; flex-direction: column; gap: 6px;">
-            <!-- Populated with fixed icons & steam CDN -->
+
+          <!-- Items View -->
+          <div id="desktopItemsView">
+            <div class="item-stages-tabs" id="desktopItemStages" style="margin-top: 6px;">
+              <button class="item-stage-tab active" data-dstage="core">Ядро</button>
+              <button class="item-stage-tab" data-dstage="situational">Контр-пик</button>
+              <button class="item-stage-tab" data-dstage="starting">Старт</button>
+              <button class="item-stage-tab" data-dstage="early_game">Ранняя</button>
+              <button class="item-stage-tab" data-dstage="luxury">Лейт</button>
+            </div>
+            <div id="itemsContainer" class="items-stage-grid" style="margin-top: 6px;">
+              <!-- Populated with fixed icons & steam CDN -->
+            </div>
+          </div>
+
+          <!-- Skills & Talents View -->
+          <div id="desktopSkillsView" class="hidden" style="margin-top: 6px;">
+            <div class="ability-build-card">
+              <span style="font-size: 10px; color: var(--text-muted);">Порядок прокачки скиллов:</span>
+              <div class="ability-sequence-wrap" id="desktopAbilitySequence"></div>
+              <span style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Таланты:</span>
+              <div class="talents-tree-container" id="desktopTalentsTree"></div>
+            </div>
           </div>
         </div>
       </aside>
@@ -499,6 +628,49 @@
             </div>
           </div>
           <div id="highTempoBadge" class="high-tempo-badge hidden">🔥 Темп выше нормы</div>
+
+          <!-- Desktop SVG Net Worth Progression Chart -->
+          <div class="nw-graph-container" id="desktopNWGraphContainer">
+            <div class="nw-graph-header">
+              <span style="color: #e5c158; font-size: 10px;">📈 Кривая Net Worth за матч</span>
+              <div class="nw-graph-legend">
+                <span style="color: #e5c158;">● Вы</span>
+                <span style="color: #38bdf8;">-- Ранг</span>
+              </div>
+            </div>
+            <svg class="nw-graph-svg" id="desktopNWSvg" viewBox="0 0 320 100">
+              <defs>
+                <linearGradient id="desktopNwGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#e5c158" stop-opacity="0.35" />
+                  <stop offset="100%" stop-color="#e5c158" stop-opacity="0.0" />
+                </linearGradient>
+              </defs>
+              <g id="desktopNWSvgContent"></g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Damage Breakdown Card -->
+        <div class="hud-card glass interactive" id="desktopDamageCard">
+          <div class="card-header">
+            <span class="card-title">🛡️ Расчёт урона врагов</span>
+            <span class="selector-label" id="desktopDamageBadge" style="color: #e5c158;">Dota Plus</span>
+          </div>
+          <div class="damage-breakdown-card">
+            <div class="damage-bar-track">
+              <div class="damage-segment phys" id="desktopDmgPhysBar" style="width: 50%;"></div>
+              <div class="damage-segment magic" id="desktopDmgMagicBar" style="width: 42%;"></div>
+              <div class="damage-segment pure" id="desktopDmgPureBar" style="width: 8%;"></div>
+            </div>
+            <div class="damage-legend" style="font-size: 10px;">
+              <span style="color: #f97316;">Физ: <strong id="desktopDmgPhysPct">50%</strong></span>
+              <span style="color: #38bdf8;">Маг: <strong id="desktopDmgMagicPct">42%</strong></span>
+              <span style="color: #c084fc;">Чистый: <strong id="desktopDmgPurePct">8%</strong></span>
+            </div>
+            <div class="damage-advice-box" id="desktopDamageAdvice" style="font-size: 10px;">
+              Расчёт защиты от сетапа врага...
+            </div>
+          </div>
         </div>
 
         <!-- Buyback Card with 4 statuses & death loss indicator -->
