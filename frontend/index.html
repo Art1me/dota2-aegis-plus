@@ -213,87 +213,103 @@
           </div>
         </div>
 
-        <!-- Benchmarks & Net Worth Curve Graph -->
+        <!-- Benchmarks & KDA Minimalist Table -->
         <div class="mobile-card glass">
           <div class="mobile-card-header">
-            <span class="mobile-card-title">📊 Бенчмарк темпа ранга</span>
-            <span class="mobile-badge positive" id="mobileBenchmarkGrade">A</span>
+            <span class="mobile-card-title">📊 Статистика & Бенчмарки</span>
+            <span class="mobile-badge positive" id="mobileBenchmarkGrade">Ранг: A</span>
           </div>
 
           <!-- Overall Plan Progress Verdict -->
           <div class="plan-verdict-pill ahead" id="mobilePlanVerdict">
-            <span id="mobilePlanVerdictText">В графике плана (+4 из 5)</span>
+            <span id="mobilePlanVerdictText">В графике плана (+5 из 8)</span>
             <span id="mobilePlanVerdictArrow">▲ В плюсе</span>
           </div>
 
-          <!-- KDA Plan vs Actual Grid -->
-          <div class="kda-benchmark-grid" id="mobileKDAGrid">
-            <div class="kda-sub-box">
-              <span class="kda-sub-label">KDA RATIO</span>
-              <span class="kda-sub-val" id="mobileKdaVal">0.0</span>
-              <span class="kda-sub-plan" id="mobileKdaPlan">план 3.5</span>
-              <span class="delta-arrow-badge ahead" id="mobileKdaDeltaBadge">▲ +0.0</span>
-            </div>
-            <div class="kda-sub-box">
-              <span class="kda-sub-label">Убийства (K)</span>
-              <span class="kda-sub-val" id="mobileKillsVal" style="color: #60a5fa;">0</span>
-              <span class="kda-sub-plan" id="mobileKillsPlan">план 0</span>
-              <span class="delta-arrow-badge ahead" id="mobileKillsDeltaBadge">▲ +0</span>
-            </div>
-            <div class="kda-sub-box">
-              <span class="kda-sub-label">Смерти (D)</span>
-              <span class="kda-sub-val" id="mobileDeathsVal" style="color: #f87171;">0</span>
-              <span class="kda-sub-plan" id="mobileDeathsPlan">план 0</span>
-              <span class="delta-arrow-badge ahead" id="mobileDeathsDeltaBadge">▲ -0</span>
-            </div>
-            <div class="kda-sub-box">
-              <span class="kda-sub-label">Ассисты (A)</span>
-              <span class="kda-sub-val" id="mobileAssistsVal" style="color: #a78bfa;">0</span>
-              <span class="kda-sub-plan" id="mobileAssistsPlan">план 0</span>
-              <span class="delta-arrow-badge ahead" id="mobileAssistsDeltaBadge">▲ +0</span>
-            </div>
+          <!-- Sleek Minimalist Statistics Table -->
+          <div class="stats-table-wrap">
+            <table class="stats-mini-table">
+              <thead>
+                <tr>
+                  <th style="text-align: left;">Метрика</th>
+                  <th style="text-align: right;">Факт</th>
+                  <th style="text-align: right;">План</th>
+                  <th style="text-align: center;">Темп</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="stat-col-name"><span class="stat-dot gold"></span>KDA Ratio</td>
+                  <td class="stat-col-fact" id="mobileKdaVal">0.0</td>
+                  <td class="stat-col-plan" id="mobileKdaPlan">3.5</td>
+                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileKdaDeltaBadge">▲ +0.0</span></td>
+                </tr>
+                <tr>
+                  <td class="stat-col-name"><span class="stat-dot blue"></span>Убийства (K)</td>
+                  <td class="stat-col-fact" id="mobileKillsVal" style="color: #60a5fa;">0</td>
+                  <td class="stat-col-plan" id="mobileKillsPlan">0</td>
+                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileKillsDeltaBadge">▲ +0</span></td>
+                </tr>
+                <tr>
+                  <td class="stat-col-name"><span class="stat-dot red"></span>Смерти (D)</td>
+                  <td class="stat-col-fact" id="mobileDeathsVal" style="color: #f87171;">0</td>
+                  <td class="stat-col-plan" id="mobileDeathsPlan">0</td>
+                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileDeathsDeltaBadge">▲ -0</span></td>
+                </tr>
+                <tr>
+                  <td class="stat-col-name"><span class="stat-dot purple"></span>Ассисты (A)</td>
+                  <td class="stat-col-fact" id="mobileAssistsVal" style="color: #c084fc;">0</td>
+                  <td class="stat-col-plan" id="mobileAssistsPlan">0</td>
+                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileAssistsDeltaBadge">▲ +0</span></td>
+                </tr>
+                <tr>
+                  <td class="stat-col-name"><span class="stat-dot green"></span>Крипстат (CS)</td>
+                  <td class="stat-col-fact" id="mobileCS">0 / 0</td>
+                  <td class="stat-col-plan" id="mobileTargetCS">0</td>
+                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileDeltaCSBadge">▲ +0</span></td>
+                </tr>
+                <tr>
+                  <td class="stat-col-name"><span class="stat-dot gold"></span>Net Worth</td>
+                  <td class="stat-col-fact" id="mobileNWVal">600 💰</td>
+                  <td class="stat-col-plan" id="mobileTargetNW">600</td>
+                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileDeltaNWBadge">▲ +0</span></td>
+                </tr>
+                <tr>
+                  <td class="stat-col-name"><span class="stat-dot yellow"></span>GPM / XPM</td>
+                  <td class="stat-col-fact" id="mobileGPMVal">0 / 0</td>
+                  <td class="stat-col-plan" id="mobileTargetGPM">0 / 0</td>
+                  <td class="stat-col-delta"><span class="delta-arrow-badge ahead" id="mobileDeltaGPMBadge">▲ +0</span></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
-          <div class="mobile-metric-row">
-            <span>Крипстат (LH / DN):</span>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span class="metric-val" id="mobileCS">0 / 0</span>
-              <span class="delta-arrow-badge ahead" id="mobileDeltaCSBadge">▲ +0</span>
-            </div>
-          </div>
-          <div class="mobile-metric-row">
-            <span>Нетворс:</span>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span class="metric-val" id="mobileNWVal">600 💰</span>
-              <span class="delta-arrow-badge ahead" id="mobileDeltaNWBadge">▲ +0</span>
-            </div>
-          </div>
-          <div class="mobile-metric-row">
-            <span>Темп GPM / XPM:</span>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span class="metric-val" id="mobileGPMVal">0 / 0</span>
-              <span class="delta-arrow-badge ahead" id="mobileDeltaGPMBadge">▲ +0</span>
-            </div>
-          </div>
-
-          <!-- Dynamic SVG Net Worth Progression Chart -->
-          <div class="nw-graph-container" id="mobileNWGraphContainer">
-            <div class="nw-graph-header">
-              <span style="color: #e5c158;">📈 Кривая Net Worth за матч</span>
-              <div class="nw-graph-legend">
-                <span style="color: #e5c158;">● Вы</span>
-                <span style="color: #38bdf8;">-- Ранг</span>
+          <!-- Collapsible Net Worth Graph Toggle -->
+          <div style="margin-top: 10px;">
+            <button class="mobile-graph-toggle-btn glass" id="btnToggleNWGraph">
+              <span>📈 График темпа Net Worth</span>
+              <span id="nwGraphToggleArrow">▾</span>
+            </button>
+            <div class="nw-graph-collapsible hidden" id="mobileNWGraphCollapsible">
+              <div class="nw-graph-container" id="mobileNWGraphContainer">
+                <div class="nw-graph-header">
+                  <span style="color: #e5c158; font-size: 11px;">Кривая Net Worth за матч</span>
+                  <div class="nw-graph-legend">
+                    <span style="color: #e5c158;">● Вы</span>
+                    <span style="color: #38bdf8;">-- Ранг</span>
+                  </div>
+                </div>
+                <svg class="nw-graph-svg" id="mobileNWSvg" viewBox="0 0 320 120">
+                  <defs>
+                    <linearGradient id="mobileNwGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#e5c158" stop-opacity="0.35" />
+                      <stop offset="100%" stop-color="#e5c158" stop-opacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  <g id="mobileNWSvgContent"></g>
+                </svg>
               </div>
             </div>
-            <svg class="nw-graph-svg" id="mobileNWSvg" viewBox="0 0 320 120">
-              <defs>
-                <linearGradient id="mobileNwGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#e5c158" stop-opacity="0.35" />
-                  <stop offset="100%" stop-color="#e5c158" stop-opacity="0.0" />
-                </linearGradient>
-              </defs>
-              <g id="mobileNWSvgContent"></g>
-            </svg>
           </div>
         </div>
 
@@ -350,20 +366,65 @@
 
       <!-- PAGE 3: ITEMS & ABILITIES -->
       <section class="mobile-page" id="pageItems">
+        <!-- Live Next Recommended Item Card ("Что купить прямо сейчас") -->
+        <div class="mobile-card glass next-item-card" id="mobileNextItemCard">
+          <div class="mobile-card-header">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="next-item-pulse-dot"></span>
+              <span class="mobile-card-title">КУПИТЬ ПРЯМО СЕЙЧАС</span>
+            </div>
+            <span class="mobile-badge next-item-urgency-badge" id="mobileNextItemUrgency">Ядро</span>
+          </div>
+          
+          <div class="next-item-body">
+            <div class="next-item-main-row">
+              <div class="next-item-icon-wrap" id="mobileNextItemImgWrap">
+                <img id="mobileNextItemImg" src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/bfury.png" alt="Item" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/branches.png'">
+              </div>
+              <div class="next-item-details">
+                <div class="next-item-title-row">
+                  <span class="next-item-name" id="mobileNextItemName">Battle Fury</span>
+                  <span class="next-item-cost" id="mobileNextItemCost">4 100 💰</span>
+                </div>
+                <div class="next-item-gold-row">
+                  <span class="next-item-gold-status" id="mobileNextItemGoldStatus">1 200 / 4 100 💰</span>
+                  <span class="next-item-gold-eta" id="mobileNextItemETA">Осталось: 2 900g (~4 мин)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Gold Progress Bar -->
+            <div class="next-item-progress-track">
+              <div class="next-item-progress-fill" id="mobileNextItemProgressFill" style="width: 29%;"></div>
+              <span class="next-item-progress-label" id="mobileNextItemProgressPct">29%</span>
+            </div>
+
+            <!-- Step-by-step next component recommendation -->
+            <div class="next-item-component-bar" id="mobileNextItemComponentBar">
+              <span class="next-comp-icon">🛒</span>
+              <span id="mobileNextItemComponentText">Cornucopia (1200g) ✅ Готов к покупке!</span>
+            </div>
+
+            <div class="next-item-reason" id="mobileNextItemReason">
+              Основной предмет для ускорения фарма и зачистки леса
+            </div>
+          </div>
+        </div>
+
         <!-- Full Dota Plus Item Progression -->
         <div class="mobile-card glass">
           <div class="mobile-card-header">
             <span class="mobile-card-title">💡 Рекомендации сборок (Dota Plus)</span>
-            <span class="mobile-badge" id="mobileItemStageBadge">Старт</span>
+            <span class="mobile-badge" id="mobileItemStageBadge">Ядро</span>
           </div>
 
           <!-- Item Stages Tabs -->
           <div class="item-stages-tabs" id="mobileItemTabs">
-            <button class="item-stage-tab active" data-stage="starting">Старт</button>
-            <button class="item-stage-tab" data-stage="early_game">Ранняя игра</button>
-            <button class="item-stage-tab" data-stage="core">Ядро</button>
-            <button class="item-stage-tab" data-stage="luxury">Лейт / Роскошь</button>
-            <button class="item-stage-tab" data-stage="situational">Ситуативные</button>
+            <button class="item-stage-tab" data-stage="starting">Старт</button>
+            <button class="item-stage-tab" data-stage="early_game">Ранняя</button>
+            <button class="item-stage-tab active" data-stage="core">Ядро</button>
+            <button class="item-stage-tab" data-stage="luxury">Лейт</button>
+            <button class="item-stage-tab" data-stage="situational">Контр-пик</button>
           </div>
 
           <div id="mobileItemsContainer" class="items-stage-grid">
@@ -554,6 +615,26 @@
 
           <!-- Items View -->
           <div id="desktopItemsView">
+            <!-- Desktop Next Item Recommendation Bar -->
+            <div class="desktop-next-item-bar glass" id="desktopNextItemBar">
+              <div class="next-item-icon-wrap" style="width: 38px; height: 28px; flex-shrink: 0;">
+                <img id="desktopNextItemImg" src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/bfury.png" alt="Next" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/branches.png'">
+              </div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span id="desktopNextItemName" style="font-weight: 800; font-size: 11px; color: #f8fafc;">Battle Fury</span>
+                  <span id="desktopNextItemCost" style="font-weight: 800; font-size: 10px; color: #fbbf24;">4 100 💰</span>
+                </div>
+                <div class="next-item-progress-track" style="height: 4px; margin: 2px 0;">
+                  <div class="next-item-progress-fill" id="desktopNextItemProgressFill" style="width: 29%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--text-muted);">
+                  <span id="desktopNextItemComponentText" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%;">🛒 Cornucopia (1200g) ✅</span>
+                  <span id="desktopNextItemETA">Осталось: 2 900g</span>
+                </div>
+              </div>
+            </div>
+
             <div class="item-stages-tabs" id="desktopItemStages" style="margin-top: 6px;">
               <button class="item-stage-tab active" data-dstage="core">Ядро</button>
               <button class="item-stage-tab" data-dstage="situational">Контр-пик</button>

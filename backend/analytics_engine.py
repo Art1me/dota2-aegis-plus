@@ -5,6 +5,11 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+try:
+    from backend.hero_builds import ITEM_CATALOG, ITEM_COMPONENTS, SPECIFIC_HERO_BUILDS, get_hero_build_raw
+except ImportError:
+    from hero_builds import ITEM_CATALOG, ITEM_COMPONENTS, SPECIFIC_HERO_BUILDS, get_hero_build_raw
+
 DATA_DIR = Path(__file__).parent.parent / "data"
 
 class AnalyticsEngine:
@@ -1146,192 +1151,14 @@ class AnalyticsEngine:
     # ==========================================
     def get_item_progression(self, hero_identifier: Any, role: str = "Carry") -> Dict[str, List[Dict[str, Any]]]:
         """
-        Returns authentic Dota Plus item build stages:
+        Returns authentic Dota Plus item build stages for each distinct hero:
         Starting Items, Early Game, Core Items, and Luxury / Late Game.
+        Uses comprehensive hero build database with distinct items for every hero.
         """
         hero_obj = self.get_hero_by_identifier(hero_identifier)
         hero_name = hero_obj.get("name", "") if hero_obj else str(hero_identifier or "")
-        attr = hero_obj.get("attr", "agi") if hero_obj else "agi"
 
-        # Item meta catalog with clean titles and costs
-        ITEM_CATALOG = {
-            "item_tango": ("Tango", 90),
-            "item_quelling_blade": ("Quelling Blade", 100),
-            "item_branches": ("Iron Branch", 50),
-            "item_circlet": ("Circlet", 155),
-            "item_slippers": ("Slippers of Agility", 140),
-            "item_gauntlets": ("Gauntlets of Strength", 140),
-            "item_mantle": ("Mantle of Intelligence", 140),
-            "item_faerie_fire": ("Faerie Fire", 65),
-            "item_magic_wand": ("Magic Wand", 450),
-            "item_power_treads": ("Power Treads", 1400),
-            "item_phase_boots": ("Phase Boots", 1500),
-            "item_arcane_boots": ("Arcane Boots", 1300),
-            "item_tranquil_boots": ("Tranquil Boots", 925),
-            "item_wraith_band": ("Wraith Band", 505),
-            "item_bracer": ("Bracer", 505),
-            "item_null_talisman": ("Null Talisman", 505),
-            "item_bottle": ("Bottle", 675),
-            "item_soul_ring": ("Soul Ring", 805),
-            "item_corrosion": ("Orb of Corrosion", 925),
-            "item_bfury": ("Battle Fury", 4100),
-            "item_manta": ("Manta Style", 4600),
-            "item_black_king_bar": ("Black King Bar", 4050),
-            "item_basher": ("Skull Basher", 2875),
-            "item_abyssal_blade": ("Abyssal Blade", 6250),
-            "item_butterfly": ("Butterfly", 4975),
-            "item_satanic": ("Satanic", 5050),
-            "item_skadi": ("Eye of Skadi", 5300),
-            "item_swift_blink": ("Swift Blink", 6800),
-            "item_overwhelming_blink": ("Overwhelming Blink", 6800),
-            "item_arcane_blink": ("Arcane Blink", 6800),
-            "item_blink": ("Blink Dagger", 2250),
-            "item_blade_mail": ("Blade Mail", 2100),
-            "item_aghanims_shard": ("Aghanim's Shard", 1400),
-            "item_ultimate_scepter": ("Aghanim's Scepter", 4200),
-            "item_heart": ("Heart of Tarrasque", 5100),
-            "item_shivas_guard": ("Shiva's Guard", 5175),
-            "item_diffusal_blade": ("Diffusal Blade", 2500),
-            "item_disperser": ("Disperser", 5700),
-            "item_desolator": ("Desolator", 3500),
-            "item_nullifier": ("Nullifier", 4375),
-            "item_pipe": ("Pipe of Insight", 3725),
-            "item_octarine_core": ("Octarine Core", 4800),
-            "item_refresher": ("Refresher Orb", 5000),
-            "item_sheepstick": ("Scythe of Vyse", 5575),
-            "item_glimmer_cape": ("Glimmer Cape", 2150),
-            "item_force_staff": ("Force Staff", 2200),
-            "item_wind_waker": ("Wind Waker", 6825),
-            "item_aeon_disk": ("Aeon Disk", 3000),
-            "item_dragon_lance": ("Dragon Lance", 1900),
-            "item_hurricane_pike": ("Hurricane Pike", 4450),
-            "item_maelstrom": ("Maelstrom", 2700),
-            "item_mjollnir": ("Mjollnir", 5500),
-            "item_daedalus": ("Daedalus", 5100),
-            "item_monkey_king_bar": ("Monkey King Bar", 4900),
-            "item_witch_blade": ("Witch Blade", 2600),
-            "item_kaya_and_sange": ("Kaya and Sange", 4100),
-            "item_sange_and_yasha": ("Sange and Yasha", 4100),
-            "item_yasha": ("Yasha", 2050),
-            "item_orchid": ("Orchid Malevolence", 3475),
-            "item_bloodthorn": ("Bloodthorn", 6800),
-            "item_vanguard": ("Vanguard", 1700),
-            "item_crimson_guard": ("Crimson Guard", 3725),
-            "item_assault": ("Assault Cuirass", 5125),
-            "item_lotus_orb": ("Lotus Orb", 3850),
-            "item_spirit_vessel": ("Spirit Vessel", 2780),
-            "item_urn_of_shadows": ("Urn of Shadows", 880),
-            "item_aether_lens": ("Aether Lens", 2275),
-            "item_bloodstone": ("Bloodstone", 4400),
-            "item_heavens_halberd": ("Heaven's Halberd", 3550),
-            "item_silver_edge": ("Silver Edge", 5450),
-            "item_sphere": ("Linken's Sphere", 4600),
-            "item_hand_of_midas": ("Hand of Midas", 2200),
-            "item_blood_grenade": ("Blood Grenade", 50),
-            "item_clarity": ("Clarity", 50),
-            "item_ward_observer": ("Observer Ward", 0),
-            "item_ward_sentry": ("Sentry Ward", 50),
-            "item_wind_lace": ("Wind Lace", 250),
-            "item_rapier": ("Divine Rapier", 5950)
-        }
-
-        # Hero-specific curated build definitions
-        HERO_BUILDS: Dict[str, Dict[str, List[str]]] = {
-            "npc_dota_hero_antimage": {
-                "starting": ["item_tango", "item_quelling_blade", "item_branches", "item_branches", "item_circlet", "item_slippers"],
-                "early_game": ["item_power_treads", "item_wraith_band", "item_magic_wand"],
-                "core": ["item_bfury", "item_manta", "item_black_king_bar", "item_basher"],
-                "luxury": ["item_abyssal_blade", "item_butterfly", "item_satanic", "item_swift_blink", "item_skadi"]
-            },
-            "npc_dota_hero_axe": {
-                "starting": ["item_tango", "item_quelling_blade", "item_gauntlets", "item_circlet", "item_branches", "item_branches"],
-                "early_game": ["item_phase_boots", "item_vanguard", "item_magic_wand"],
-                "core": ["item_blink", "item_blade_mail", "item_black_king_bar", "item_aghanims_shard"],
-                "luxury": ["item_overwhelming_blink", "item_heart", "item_shivas_guard", "item_bloodstone"]
-            },
-            "npc_dota_hero_juggernaut": {
-                "starting": ["item_tango", "item_quelling_blade", "item_slippers", "item_circlet", "item_branches", "item_branches"],
-                "early_game": ["item_phase_boots", "item_wraith_band", "item_magic_wand"],
-                "core": ["item_bfury", "item_manta", "item_diffusal_blade", "item_black_king_bar"],
-                "luxury": ["item_butterfly", "item_satanic", "item_disperser", "item_swift_blink", "item_skadi"]
-            },
-            "npc_dota_hero_phantom_assassin": {
-                "starting": ["item_tango", "item_quelling_blade", "item_slippers", "item_circlet", "item_branches", "item_branches"],
-                "early_game": ["item_power_treads", "item_wraith_band", "item_corrosion", "item_magic_wand"],
-                "core": ["item_bfury", "item_desolator", "item_black_king_bar", "item_basher"],
-                "luxury": ["item_abyssal_blade", "item_nullifier", "item_satanic", "item_swift_blink", "item_rapier"]
-            },
-            "npc_dota_hero_pudge": {
-                "starting": ["item_tango", "item_gauntlets", "item_circlet", "item_branches", "item_branches", "item_blood_grenade"],
-                "early_game": ["item_phase_boots", "item_urn_of_shadows", "item_magic_wand"],
-                "core": ["item_blink", "item_pipe", "item_aghanims_shard", "item_shivas_guard"],
-                "luxury": ["item_heart", "item_overwhelming_blink", "item_octarine_core", "item_lotus_orb"]
-            },
-            "npc_dota_hero_invoker": {
-                "starting": ["item_tango", "item_circlet", "item_branches", "item_branches", "item_faerie_fire"],
-                "early_game": ["item_power_treads", "item_urn_of_shadows", "item_bottle", "item_magic_wand"],
-                "core": ["item_spirit_vessel", "item_black_king_bar", "item_octarine_core", "item_aghanims_shard"],
-                "luxury": ["item_refresher", "item_sheepstick", "item_arcane_blink", "item_shivas_guard"]
-            },
-            "npc_dota_hero_crystal_maiden": {
-                "starting": ["item_tango", "item_ward_observer", "item_ward_sentry", "item_blood_grenade", "item_clarity", "item_branches"],
-                "early_game": ["item_tranquil_boots", "item_magic_wand", "item_wind_lace"],
-                "core": ["item_glimmer_cape", "item_force_staff", "item_black_king_bar", "item_aghanims_shard"],
-                "luxury": ["item_ultimate_scepter", "item_octarine_core", "item_aeon_disk", "item_wind_waker"]
-            },
-            "npc_dota_hero_sniper": {
-                "starting": ["item_tango", "item_slippers", "item_circlet", "item_branches", "item_branches", "item_faerie_fire"],
-                "early_game": ["item_power_treads", "item_dragon_lance", "item_wraith_band", "item_magic_wand"],
-                "core": ["item_maelstrom", "item_dragon_lance", "item_black_king_bar", "item_mjollnir"],
-                "luxury": ["item_hurricane_pike", "item_daedalus", "item_monkey_king_bar", "item_satanic", "item_butterfly"]
-            },
-            "npc_dota_hero_faceless_void": {
-                "starting": ["item_tango", "item_quelling_blade", "item_slippers", "item_circlet", "item_branches", "item_branches"],
-                "early_game": ["item_power_treads", "item_wraith_band", "item_magic_wand"],
-                "core": ["item_maelstrom", "item_manta", "item_black_king_bar", "item_mjollnir"],
-                "luxury": ["item_skadi", "item_butterfly", "item_refresher", "item_satanic", "item_swift_blink"]
-            },
-            "npc_dota_hero_legion_commander": {
-                "starting": ["item_tango", "item_quelling_blade", "item_gauntlets", "item_circlet", "item_branches", "item_branches"],
-                "early_game": ["item_phase_boots", "item_bracer", "item_soul_ring", "item_magic_wand"],
-                "core": ["item_blink", "item_blade_mail", "item_black_king_bar", "item_heavens_halberd"],
-                "luxury": ["item_overwhelming_blink", "item_assault", "item_satanic", "item_heart"]
-            }
-        }
-
-        build_raw = HERO_BUILDS.get(hero_name)
-
-        if not build_raw:
-            # Smart archetypal fallback based on role & attribute
-            r_lower = role.lower()
-            if "support" in r_lower or "pos 4" in r_lower or "pos 5" in r_lower:
-                build_raw = {
-                    "starting": ["item_tango", "item_ward_observer", "item_ward_sentry", "item_blood_grenade", "item_clarity", "item_branches"],
-                    "early_game": ["item_arcane_boots", "item_magic_wand", "item_wind_lace"],
-                    "core": ["item_glimmer_cape", "item_force_staff", "item_aether_lens", "item_aghanims_shard"],
-                    "luxury": ["item_aeon_disk", "item_lotus_orb", "item_wind_waker", "item_octarine_core"]
-                }
-            elif "offlane" in r_lower or "pos 3" in r_lower or attr == "str":
-                build_raw = {
-                    "starting": ["item_tango", "item_quelling_blade", "item_gauntlets", "item_circlet", "item_branches", "item_branches"],
-                    "early_game": ["item_phase_boots", "item_bracer", "item_soul_ring", "item_magic_wand"],
-                    "core": ["item_blink", "item_blade_mail", "item_black_king_bar", "item_crimson_guard"],
-                    "luxury": ["item_overwhelming_blink", "item_heart", "item_shivas_guard", "item_assault"]
-                }
-            elif "mid" in r_lower or "pos 2" in r_lower or attr == "int":
-                build_raw = {
-                    "starting": ["item_tango", "item_circlet", "item_branches", "item_branches", "item_faerie_fire"],
-                    "early_game": ["item_bottle", "item_power_treads", "item_null_talisman", "item_magic_wand"],
-                    "core": ["item_witch_blade", "item_kaya_and_sange", "item_black_king_bar", "item_octarine_core"],
-                    "luxury": ["item_sheepstick", "item_shivas_guard", "item_arcane_blink", "item_refresher"]
-                }
-            else:  # Agility / Safe Carry default
-                build_raw = {
-                    "starting": ["item_tango", "item_quelling_blade", "item_slippers", "item_circlet", "item_branches", "item_branches"],
-                    "early_game": ["item_power_treads", "item_wraith_band", "item_magic_wand"],
-                    "core": ["item_manta", "item_diffusal_blade", "item_black_king_bar", "item_basher"],
-                    "luxury": ["item_butterfly", "item_satanic", "item_skadi", "item_swift_blink"]
-                }
+        build_raw = get_hero_build_raw(hero_name, hero_obj or {}, role)
 
         result: Dict[str, List[Dict[str, Any]]] = {}
         for stage, items in build_raw.items():
@@ -1349,6 +1176,206 @@ class AnalyticsEngine:
             result[stage] = stage_items
 
         return result
+
+    def get_next_recommended_item(
+        self,
+        hero_identifier: Any,
+        role: str = "Carry",
+        current_gold: int = 0,
+        current_inventory: Optional[List[str]] = None,
+        clock_time: int = 0,
+        enemy_heroes: Optional[List[Any]] = None,
+        current_gpm: int = 0
+    ) -> Dict[str, Any]:
+        """
+        Dynamically analyzes the match context and recommends the single best item to buy RIGHT NOW.
+        Continuously adapts based on:
+        - Player's owned items (excludes already purchased items and previous components)
+        - Current gold and remaining gold needed
+        - Percentage progress bar (0% - 100%)
+        - Counter-item urgency (e.g., enemy magic burst >= 40% -> urgent BKB; evasion -> MKB; passives -> Silver Edge)
+        - Step-by-step next component suggestion (e.g. Ogre Axe, Broadsword, Cornucopia)
+        """
+        if current_inventory is None:
+            current_inventory = []
+        if enemy_heroes is None:
+            enemy_heroes = []
+
+        hero_obj = self.get_hero_by_identifier(hero_identifier)
+        hero_raw_name = hero_obj.get("name", "") if hero_obj else str(hero_identifier or "")
+
+        # 1. Normalize owned items into clean IDs
+        owned = set()
+        for item in current_inventory:
+            if not item:
+                continue
+            item_str = str(item).lower().strip()
+            if not item_str.startswith("item_"):
+                item_str = f"item_{item_str}"
+            owned.add(item_str)
+
+        # Handle upgrade chains (if player owns higher-tier item, lower tier counts as owned)
+        UPGRADE_MAP = {
+            "item_abyssal_blade": ["item_basher", "item_vanguard"],
+            "item_hurricane_pike": ["item_dragon_lance", "item_force_staff"],
+            "item_mjollnir": ["item_maelstrom"],
+            "item_disperser": ["item_diffusal_blade"],
+            "item_silver_edge": ["item_shadow_blade"],
+            "item_bloodthorn": ["item_orchid", "item_mage_slayer"],
+            "item_harpoon": ["item_echo_sabre"],
+            "item_octarine_core": ["item_aether_lens"],
+            "item_spirit_vessel": ["item_urn_of_shadows"],
+            "item_crimson_guard": ["item_vanguard"],
+            "item_wind_waker": ["item_cyclone"],
+            "item_parasma": ["item_witch_blade"],
+            "item_overwhelming_blink": ["item_blink"],
+            "item_swift_blink": ["item_blink"],
+            "item_arcane_blink": ["item_blink"],
+            "item_power_treads": ["item_boots"],
+            "item_phase_boots": ["item_boots"],
+            "item_arcane_boots": ["item_boots"],
+            "item_tranquil_boots": ["item_boots"],
+            "item_travel_boots": ["item_boots"],
+        }
+        for higher, lowers in UPGRADE_MAP.items():
+            if higher in owned:
+                for low in lowers:
+                    owned.add(low)
+
+        # 2. Check urgent counter-item priorities based on enemies
+        urgent_target: Optional[tuple[str, str]] = None
+        dmg_profile = self.calculate_damage_breakdown(enemy_heroes)
+        magic_pct = dmg_profile.get("magical_pct", dmg_profile.get("magic_pct", 0))
+
+        # A) Urgent BKB against magic burst / heavy crowd control (when enemies are detected/specified)
+        if enemy_heroes and magic_pct >= 42 and clock_time >= 480 and "item_black_king_bar" not in owned:
+            urgent_target = (
+                "item_black_king_bar",
+                f"У врагов {magic_pct}% маг. урона! Срочный BKB для выживания в драках."
+            )
+
+        # B) Urgent MKB against evasion
+        if not urgent_target and clock_time >= 900 and "item_monkey_king_bar" not in owned:
+            has_evasion = False
+            for eh in enemy_heroes:
+                e_obj = self.get_hero_by_identifier(eh)
+                if e_obj:
+                    e_name = e_obj.get("name", "").lower()
+                    if any(ev in e_name for ev in ["phantom_assassin", "windrunner", "brewmaster"]):
+                        has_evasion = True
+                        break
+            if has_evasion:
+                urgent_target = (
+                    "item_monkey_king_bar",
+                    "Контрпик: пробитие уклонения (True Strike) против вражеских промахов!"
+                )
+
+        # C) Urgent Silver Edge against passives
+        if not urgent_target and clock_time >= 720 and "item_silver_edge" not in owned:
+            has_passives = False
+            for eh in enemy_heroes:
+                e_obj = self.get_hero_by_identifier(eh)
+                if e_obj:
+                    e_name = e_obj.get("name", "").lower()
+                    if any(pv in e_name for pv in ["bristleback", "spectre", "huskar", "shredder"]):
+                        has_passives = True
+                        break
+            if has_passives and role.lower() in ["carry", "pos 1", "mid", "pos 2", "offlane", "pos 3"]:
+                urgent_target = (
+                    "item_silver_edge",
+                    "Контрпик: отключение пассивок (Break) против Bristleback / Spectre!"
+                )
+
+        # 3. Retrieve hero progression build
+        build_raw = get_hero_build_raw(hero_raw_name, hero_obj or {}, role)
+
+        chosen_id: Optional[str] = None
+        chosen_reason = "Рекомендуемый предмет по таймингу игры"
+        urgency = "normal"
+        stage_label = "Ядро"
+
+        if urgent_target:
+            chosen_id, chosen_reason = urgent_target
+            urgency = "urgent"
+            stage_label = "Срочный контрпик"
+        else:
+            # Check stages in chronological priority
+            early_candidates = [it for it in build_raw.get("early_game", []) if it not in owned]
+            core_candidates = [it for it in build_raw.get("core", []) if it not in owned]
+            luxury_candidates = [it for it in build_raw.get("luxury", []) if it not in owned]
+
+            if clock_time < 360 and early_candidates:
+                chosen_id = early_candidates[0]
+                stage_label = "Ранняя игра"
+                chosen_reason = "Стартовый разгон: статы и скорость передвижения на линии"
+            elif core_candidates:
+                chosen_id = core_candidates[0]
+                stage_label = "Ядро"
+                chosen_reason = "Ключевой артефакт билда для максимизации боевой эффективности"
+            elif luxury_candidates:
+                chosen_id = luxury_candidates[0]
+                stage_label = "Лейт / Роскошь"
+                chosen_reason = "Финальное усиление для победы в поздней стадии"
+            elif early_candidates:
+                chosen_id = early_candidates[0]
+                stage_label = "Ранняя игра"
+                chosen_reason = "Добор ранних статов и расходников"
+            else:
+                chosen_id = "item_moon_shard" if "item_moon_shard" not in owned else "item_rapier"
+                stage_label = "Ультра-лейт"
+                chosen_reason = "Финальный слот"
+
+        # 4. Construct response item metadata
+        clean_name = chosen_id.replace("item_", "")
+        title, cost = ITEM_CATALOG.get(chosen_id, (clean_name.replace("_", " ").title(), 2000))
+        gold_needed = max(0, cost - current_gold)
+        progress_pct = min(100, int((current_gold / cost) * 100)) if cost > 0 else 100
+        can_buy_now = (current_gold >= cost)
+
+        eta_seconds: Optional[int] = None
+        if gold_needed > 0 and current_gpm > 50:
+            gps = current_gpm / 60.0
+            eta_seconds = int(gold_needed / gps)
+
+        # 5. Determine the next step-by-step component to buy
+        comps = ITEM_COMPONENTS.get(chosen_id, [])
+        next_comp_text = ""
+        comp_affordable = False
+        if comps:
+            affordable_comps = [c for c in comps if c[1] <= current_gold]
+            if affordable_comps:
+                best_comp = max(affordable_comps, key=lambda c: c[1])
+                next_comp_text = f"{best_comp[0]} ({best_comp[1]}g) ✅ Готов к покупке!"
+                comp_affordable = True
+            else:
+                cheapest_comp = min(comps, key=lambda c: c[1])
+                needed_comp = cheapest_comp[1] - current_gold
+                next_comp_text = f"Копите на {cheapest_comp[0]} ({cheapest_comp[1]}g, нужно еще {needed_comp}g)"
+        else:
+            if can_buy_now:
+                next_comp_text = "Готов к покупке целиком!"
+                comp_affordable = True
+            else:
+                next_comp_text = f"Копите золото: осталось {gold_needed}g"
+
+        img_url = f"https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/{clean_name}.png"
+
+        return {
+            "id": chosen_id,
+            "name": title,
+            "cost": cost,
+            "current_gold": current_gold,
+            "gold_needed": gold_needed,
+            "progress_pct": progress_pct,
+            "can_buy_now": can_buy_now,
+            "eta_seconds": eta_seconds,
+            "next_component": next_comp_text,
+            "comp_affordable": comp_affordable,
+            "reason": chosen_reason,
+            "urgency": urgency,
+            "stage_label": stage_label,
+            "image_url": img_url
+        }
 
     # ==========================================
     # 10. ABILITY & TALENT BUILD GUIDE

@@ -266,7 +266,10 @@ function renderUI(data) {
     }
   }
 
-  // 3. Situational Items & Full Item Stages
+  // 3. Situational Items & Full Item Stages & Next Recommended Item
+  if (data.next_item) {
+    renderNextItem(data.next_item);
+  }
   renderItemProgression(data.item_build, data.recommended_items);
 
   // 4. Dota Plus Damage Breakdown
@@ -944,15 +947,21 @@ function renderMobileUI(data) {
     renderKDABenchmarks(b, "mobile");
 
     const cs = document.getElementById("mobileCS");
-    if (cs) cs.innerText = `${b.current_cs || 0} / ${b.target_cs || 0}`;
+    if (cs) cs.innerText = `${b.current_cs || 0} / ${b.current_denies || 0}`;
+    const targetCS = document.getElementById("mobileTargetCS");
+    if (targetCS) targetCS.innerText = `${b.target_cs || 0}`;
     updateDeltaBadge("mobileDeltaCSBadge", b.cs_arrow || "▲", (b.delta_cs >= 0 ? "+" : "") + (b.delta_cs || 0), b.cs_status === "ahead");
 
     const nw = document.getElementById("mobileNWVal");
     if (nw) nw.innerText = `${(b.current_nw || 0).toLocaleString()} 💰`;
+    const targetNW = document.getElementById("mobileTargetNW");
+    if (targetNW) targetNW.innerText = `${(b.target_nw || 0).toLocaleString()}`;
     updateDeltaBadge("mobileDeltaNWBadge", b.nw_arrow || "▲", (b.delta_nw >= 0 ? "+" : "") + ((b.delta_nw || 0).toLocaleString()) + "g", b.nw_status === "ahead");
 
     const gpm = document.getElementById("mobileGPMVal");
     if (gpm) gpm.innerText = `${b.current_gpm || 0} / ${b.current_xpm || 0}`;
+    const targetGPM = document.getElementById("mobileTargetGPM");
+    if (targetGPM) targetGPM.innerText = `${b.target_gpm || 0} / ${b.target_xpm || 0}`;
     updateDeltaBadge("mobileDeltaGPMBadge", b.gpm_arrow || "▲", (b.delta_gpm >= 0 ? "+" : "") + (b.delta_gpm || 0), b.gpm_status === "ahead");
 
     // Buyback on mobile
@@ -982,6 +991,11 @@ function renderMobileUI(data) {
         if (bbNote) bbNote.innerText = "Нужно больше фарма";
       }
     }
+  }
+
+  // Next Item on Mobile & Desktop
+  if (data.next_item) {
+    renderNextItem(data.next_item);
   }
 
   // Items on Mobile
@@ -1019,7 +1033,7 @@ function renderKDABenchmarks(b, prefix = "mobile") {
   const kdaVal = document.getElementById(`${prefix}KdaVal`);
   const kdaPlan = document.getElementById(`${prefix}KdaPlan`);
   if (kdaVal) kdaVal.innerText = b.current_kda !== undefined ? b.current_kda.toFixed(1) : "0.0";
-  if (kdaPlan) kdaPlan.innerText = `план ${b.target_kda !== undefined ? b.target_kda.toFixed(1) : "3.5"}`;
+  if (kdaPlan) kdaPlan.innerText = prefix === "mobile" ? (b.target_kda !== undefined ? b.target_kda.toFixed(1) : "3.5") : `план ${b.target_kda !== undefined ? b.target_kda.toFixed(1) : "3.5"}`;
   updateDeltaBadge(
     `${prefix}KdaDeltaBadge`,
     b.kda_arrow || "▲",
@@ -1031,7 +1045,7 @@ function renderKDABenchmarks(b, prefix = "mobile") {
   const kVal = document.getElementById(`${prefix}KillsVal`);
   const kPlan = document.getElementById(`${prefix}KillsPlan`);
   if (kVal) kVal.innerText = b.current_kills || 0;
-  if (kPlan) kPlan.innerText = `план ${b.target_kills || 0}`;
+  if (kPlan) kPlan.innerText = prefix === "mobile" ? (b.target_kills || 0) : `план ${b.target_kills || 0}`;
   updateDeltaBadge(
     `${prefix}KillsDeltaBadge`,
     b.kills_arrow || "▲",
@@ -1043,7 +1057,7 @@ function renderKDABenchmarks(b, prefix = "mobile") {
   const dVal = document.getElementById(`${prefix}DeathsVal`);
   const dPlan = document.getElementById(`${prefix}DeathsPlan`);
   if (dVal) dVal.innerText = b.current_deaths || 0;
-  if (dPlan) dPlan.innerText = `план ${b.target_deaths || 0}`;
+  if (dPlan) dPlan.innerText = prefix === "mobile" ? (b.target_deaths || 0) : `план ${b.target_deaths || 0}`;
   const dStr = (b.delta_deaths > 0 ? "+" : "") + (b.delta_deaths !== undefined ? b.delta_deaths : 0);
   updateDeltaBadge(
     `${prefix}DeathsDeltaBadge`,
@@ -1056,7 +1070,7 @@ function renderKDABenchmarks(b, prefix = "mobile") {
   const aVal = document.getElementById(`${prefix}AssistsVal`);
   const aPlan = document.getElementById(`${prefix}AssistsPlan`);
   if (aVal) aVal.innerText = b.current_assists || 0;
-  if (aPlan) aPlan.innerText = `план ${b.target_assists || 0}`;
+  if (aPlan) aPlan.innerText = prefix === "mobile" ? (b.target_assists || 0) : `план ${b.target_assists || 0}`;
   updateDeltaBadge(
     `${prefix}AssistsDeltaBadge`,
     b.assists_arrow || "▲",
@@ -1253,6 +1267,118 @@ function renderItemProgression(itemBuild, situationalItems) {
   }
 }
 
+function renderNextItem(nextItem) {
+  if (!nextItem) return;
+
+  // 1. Mobile Next Item Card
+  const mName = document.getElementById("mobileNextItemName");
+  if (mName) mName.innerText = nextItem.name || nextItem.id || "Предмет";
+
+  const mCost = document.getElementById("mobileNextItemCost");
+  if (mCost) mCost.innerText = `${(nextItem.cost || 0).toLocaleString()} 💰`;
+
+  const mGoldStatus = document.getElementById("mobileNextItemGoldStatus");
+  if (mGoldStatus) {
+    mGoldStatus.innerText = `${(nextItem.current_gold || 0).toLocaleString()} / ${(nextItem.cost || 0).toLocaleString()} 💰`;
+  }
+
+  const mETA = document.getElementById("mobileNextItemETA");
+  if (mETA) {
+    if (nextItem.can_buy_now) {
+      mETA.innerText = "Хватает золота!";
+      mETA.style.color = "#10b981";
+    } else {
+      const etaStr = nextItem.eta_seconds ? ` (~${Math.ceil(nextItem.eta_seconds / 60)} мин)` : "";
+      mETA.innerText = `Осталось: ${(nextItem.gold_needed || 0).toLocaleString()}g${etaStr}`;
+      mETA.style.color = "var(--text-muted)";
+    }
+  }
+
+  const mProgressFill = document.getElementById("mobileNextItemProgressFill");
+  if (mProgressFill) {
+    mProgressFill.style.width = `${Math.min(100, Math.max(0, nextItem.progress_pct || 0))}%`;
+  }
+
+  const mProgressPct = document.getElementById("mobileNextItemProgressPct");
+  if (mProgressPct) {
+    mProgressPct.innerText = `${nextItem.progress_pct || 0}%`;
+  }
+
+  const mImg = document.getElementById("mobileNextItemImg");
+  const mImgWrap = document.getElementById("mobileNextItemImgWrap");
+  if (mImg) {
+    mImg.src = nextItem.image_url || `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/${(nextItem.id || "").replace("item_", "")}.png`;
+  }
+  if (mImgWrap) {
+    if (nextItem.can_buy_now) {
+      mImgWrap.classList.add("affordable");
+    } else {
+      mImgWrap.classList.remove("affordable");
+    }
+  }
+
+  const mUrgency = document.getElementById("mobileNextItemUrgency");
+  if (mUrgency) {
+    mUrgency.innerText = nextItem.stage_label || (nextItem.urgency === "urgent" ? "Срочный контрпик" : "Ядро");
+    if (nextItem.urgency === "urgent") {
+      mUrgency.className = "mobile-badge next-item-urgency-badge urgent";
+    } else {
+      mUrgency.className = "mobile-badge next-item-urgency-badge";
+    }
+  }
+
+  const mCompBar = document.getElementById("mobileNextItemComponentBar");
+  const mCompText = document.getElementById("mobileNextItemComponentText");
+  if (mCompText) {
+    mCompText.innerText = nextItem.next_component || "Копите золото";
+  }
+  if (mCompBar) {
+    if (nextItem.comp_affordable || nextItem.can_buy_now) {
+      mCompBar.className = "next-item-component-bar can-buy";
+    } else {
+      mCompBar.className = "next-item-component-bar";
+    }
+  }
+
+  const mReason = document.getElementById("mobileNextItemReason");
+  if (mReason) {
+    mReason.innerText = nextItem.reason || "Рекомендуемый предмет";
+  }
+
+  // 2. Desktop Next Item Bar
+  const dName = document.getElementById("desktopNextItemName");
+  if (dName) dName.innerText = nextItem.name || nextItem.id || "Предмет";
+
+  const dCost = document.getElementById("desktopNextItemCost");
+  if (dCost) dCost.innerText = `${(nextItem.cost || 0).toLocaleString()} 💰`;
+
+  const dProgressFill = document.getElementById("desktopNextItemProgressFill");
+  if (dProgressFill) {
+    dProgressFill.style.width = `${Math.min(100, Math.max(0, nextItem.progress_pct || 0))}%`;
+  }
+
+  const dImg = document.getElementById("desktopNextItemImg");
+  if (dImg) {
+    dImg.src = nextItem.image_url || `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/${(nextItem.id || "").replace("item_", "")}.png`;
+  }
+
+  const dCompText = document.getElementById("desktopNextItemComponentText");
+  if (dCompText) {
+    dCompText.innerText = nextItem.next_component || "Копите золото";
+  }
+
+  const dETA = document.getElementById("desktopNextItemETA");
+  if (dETA) {
+    if (nextItem.can_buy_now) {
+      dETA.innerText = "Готов к покупке!";
+      dETA.style.color = "#10b981";
+    } else {
+      dETA.innerText = `Осталось: ${(nextItem.gold_needed || 0).toLocaleString()}g`;
+      dETA.style.color = "var(--text-muted)";
+    }
+  }
+}
+
 function renderAbilityBuild(abilityBuild, heroLevel) {
   if (!abilityBuild) return;
   const seq = abilityBuild.sequence || [];
@@ -1380,6 +1506,24 @@ document.addEventListener("DOMContentLoaded", () => {
       triggerHaptic(30);
     });
   });
+
+  // Mobile Collapsible Net Worth Graph Toggle
+  const btnToggleNWGraph = document.getElementById("btnToggleNWGraph");
+  const mobileNWGraphCollapsible = document.getElementById("mobileNWGraphCollapsible");
+  const nwGraphToggleArrow = document.getElementById("nwGraphToggleArrow");
+  if (btnToggleNWGraph && mobileNWGraphCollapsible) {
+    btnToggleNWGraph.addEventListener("click", () => {
+      const isHidden = mobileNWGraphCollapsible.classList.contains("hidden");
+      if (isHidden) {
+        mobileNWGraphCollapsible.classList.remove("hidden");
+        if (nwGraphToggleArrow) nwGraphToggleArrow.innerText = "▴";
+      } else {
+        mobileNWGraphCollapsible.classList.add("hidden");
+        if (nwGraphToggleArrow) nwGraphToggleArrow.innerText = "▾";
+      }
+      triggerHaptic(25);
+    });
+  }
 
   // Desktop Item Stage Tabs
   document.querySelectorAll("#desktopItemStages .item-stage-tab").forEach(tab => {

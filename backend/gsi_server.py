@@ -139,6 +139,15 @@ class AppState:
             "damage_breakdown": self.engine.calculate_damage_breakdown(self.manual_enemy_heroes),
             "item_build": self.engine.get_item_progression("npc_dota_hero_juggernaut", self.selected_role),
             "ability_build": self.engine.get_ability_build("npc_dota_hero_juggernaut"),
+            "next_item": self.engine.get_next_recommended_item(
+                "npc_dota_hero_juggernaut",
+                self.selected_role,
+                current_gold=600,
+                current_inventory=[],
+                clock_time=0,
+                enemy_heroes=self.manual_enemy_heroes,
+                current_gpm=0
+            ),
             "nw_history": []
         }
 
@@ -307,6 +316,15 @@ class AppState:
         damage_breakdown = self.engine.calculate_damage_breakdown(effective_enemy_heroes)
         item_build = self.engine.get_item_progression(hero_raw_name or "npc_dota_hero_juggernaut", self.selected_role)
         ability_build = self.engine.get_ability_build(hero_raw_name or "npc_dota_hero_juggernaut")
+        next_item = self.engine.get_next_recommended_item(
+            hero_identifier=hero_raw_name or "npc_dota_hero_juggernaut",
+            role=self.selected_role,
+            current_gold=current_gold,
+            current_inventory=player_item_list,
+            clock_time=clock_time,
+            enemy_heroes=effective_enemy_heroes,
+            current_gpm=current_gpm
+        )
 
         # Record timeline history (Net Worth progression graph)
         if clock_time >= 0:
@@ -368,6 +386,7 @@ class AppState:
             "damage_breakdown": damage_breakdown,
             "item_build": item_build,
             "ability_build": ability_build,
+            "next_item": next_item,
             "nw_history": list(self.timeline_history)
         }
 
@@ -461,6 +480,17 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
                         "manual_enemy_heroes": state.manual_enemy_heroes
                     }
                     state.cached_analysis["recommended_items"] = state.engine.recommend_items(state.manual_enemy_heroes)
+                    state.cached_analysis["damage_breakdown"] = state.engine.calculate_damage_breakdown(state.manual_enemy_heroes)
+                    state.cached_analysis["item_build"] = state.engine.get_item_progression("npc_dota_hero_juggernaut", state.selected_role)
+                    state.cached_analysis["next_item"] = state.engine.get_next_recommended_item(
+                        "npc_dota_hero_juggernaut",
+                        state.selected_role,
+                        600,
+                        [],
+                        0,
+                        state.manual_enemy_heroes,
+                        0
+                    )
                     state.notify_subscribers()
 
                 self.send_response(HTTPStatus.OK)

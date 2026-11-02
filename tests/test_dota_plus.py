@@ -90,5 +90,69 @@ class TestDotaPlusFeatures(unittest.TestCase):
         self.assertEqual(b["plan_status"], "ahead")
         self.assertGreaterEqual(b["ahead_count"], 3)
 
+    def test_distinct_hero_builds(self):
+        # 2 completely different heroes must have distinct builds
+        am = self.engine.get_item_progression("antimage", "Carry")
+        axe = self.engine.get_item_progression("axe", "Offlane")
+        cm = self.engine.get_item_progression("crystal_maiden", "Support")
+
+        am_core_ids = [it["id"] for it in am["core"]]
+        axe_core_ids = [it["id"] for it in axe["core"]]
+        cm_core_ids = [it["id"] for it in cm["core"]]
+
+        self.assertIn("item_bfury", am_core_ids)
+        self.assertNotIn("item_bfury", axe_core_ids)
+        self.assertIn("item_blink", axe_core_ids)
+        self.assertIn("item_glimmer_cape", cm_core_ids)
+        self.assertNotEqual(am_core_ids, axe_core_ids)
+        self.assertNotEqual(axe_core_ids, cm_core_ids)
+
+    def test_dynamic_next_recommended_item(self):
+        # 1. Early game AM with 1200 gold should recommend Power Treads and affordable component
+        res1 = self.engine.get_next_recommended_item(
+            hero_identifier="antimage",
+            role="Carry",
+            current_gold=1200,
+            current_inventory=[],
+            clock_time=200,
+            enemy_heroes=[],
+            current_gpm=500
+        )
+        self.assertEqual(res1["id"], "item_power_treads")
+        self.assertEqual(res1["stage_label"], "Ранняя игра")
+        self.assertIn("Boots of Speed", res1["next_component"])
+        self.assertTrue(res1["comp_affordable"])
+        self.assertEqual(res1["progress_pct"], 85)
+
+        # 2. Mid game AM with completed early items should recommend Battle Fury
+        res2 = self.engine.get_next_recommended_item(
+            hero_identifier="antimage",
+            role="Carry",
+            current_gold=1350,
+            current_inventory=["item_power_treads", "item_wraith_band", "item_magic_wand"],
+            clock_time=480,
+            enemy_heroes=[],
+            current_gpm=600
+        )
+        self.assertEqual(res2["id"], "item_bfury")
+        self.assertEqual(res2["stage_label"], "Ядро")
+        self.assertIn("Claymore", res2["next_component"])
+        self.assertTrue(res2["comp_affordable"])
+
+        # 3. Urgent BKB against heavy magic burst enemies
+        res3 = self.engine.get_next_recommended_item(
+            hero_identifier="antimage",
+            role="Carry",
+            current_gold=1100,
+            current_inventory=["item_power_treads", "item_bfury"],
+            clock_time=900,
+            enemy_heroes=["npc_dota_hero_lina", "npc_dota_hero_lion", "npc_dota_hero_zeus"],
+            current_gpm=650
+        )
+        self.assertEqual(res3["id"], "item_black_king_bar")
+        self.assertEqual(res3["urgency"], "urgent")
+        self.assertIn("маг. урона", res3["reason"])
+        self.assertIn("Ogre Axe", res3["next_component"])
+
 if __name__ == "__main__":
     unittest.main()
