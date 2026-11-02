@@ -347,7 +347,10 @@ class AnalyticsEngine:
         gold_unreliable: int = 0,
         hero_alive: bool = True,
         hero_buyback_cost: Optional[int] = None,
-        buyback_cooldown: int = 0
+        buyback_cooldown: int = 0,
+        current_kills: int = 0,
+        current_deaths: int = 0,
+        current_assists: int = 0
     ) -> Dict[str, Any]:
         minute = max(1, math.floor(clock_time / 60)) if clock_time > 0 else 0
         rank_data = self.benchmarks_data.get("benchmarks", {}).get(rank, {}).get(role, {})
@@ -361,6 +364,64 @@ class AnalyticsEngine:
         delta_nw = current_networth - target_nw
         delta_gpm = current_gpm - target_gpm
         delta_xpm = current_xpm - target_xpm
+
+        # Target KDA benchmarks based on role, rank and game minute
+        r_lower = role.lower()
+        rank_lower = rank.lower()
+        if any(rk in rank_lower for rk in ["divine", "immortal"]):
+            k_mult, d_mult = 1.15, 0.85
+        elif any(rk in rank_lower for rk in ["herald", "guardian"]):
+            k_mult, d_mult = 0.85, 1.25
+        else:
+            k_mult, d_mult = 1.0, 1.0
+
+        if "support" in r_lower or "pos 4" in r_lower or "pos 5" in r_lower:
+            target_kills = round(max(0.0, (0.08 * minute - 0.2) * k_mult), 1)
+            target_deaths = round(max(0.0, (0.16 * minute + 0.3) * d_mult), 1)
+            target_assists = round(max(0.0, (0.50 * minute - 0.5) * k_mult), 1)
+        elif "offlane" in r_lower or "pos 3" in r_lower:
+            target_kills = round(max(0.0, (0.18 * minute - 0.4) * k_mult), 1)
+            target_deaths = round(max(0.0, (0.14 * minute + 0.2) * d_mult), 1)
+            target_assists = round(max(0.0, (0.42 * minute - 0.5) * k_mult), 1)
+        elif "mid" in r_lower or "pos 2" in r_lower:
+            target_kills = round(max(0.0, (0.28 * minute - 0.4) * k_mult), 1)
+            target_deaths = round(max(0.0, (0.12 * minute) * d_mult), 1)
+            target_assists = round(max(0.0, (0.32 * minute - 0.5) * k_mult), 1)
+        else:  # Carry / Pos 1
+            target_kills = round(max(0.0, (0.24 * minute - 0.4) * k_mult), 1)
+            target_deaths = round(max(0.0, (0.10 * minute) * d_mult), 1)
+            target_assists = round(max(0.0, (0.22 * minute - 0.4) * k_mult), 1)
+
+        target_kda = round((target_kills + target_assists) / max(1.0, target_deaths), 2)
+        current_kda = round((current_kills + current_assists) / max(1, current_deaths), 2)
+        delta_kda = round(current_kda - target_kda, 2)
+        delta_kills = round(current_kills - target_kills, 1)
+        delta_deaths = round(current_deaths - target_deaths, 1)
+        delta_assists = round(current_assists - target_assists, 1)
+
+        # Ahead / Behind status indicators
+        cs_ahead = delta_cs >= 0
+        nw_ahead = delta_nw >= 0
+        gpm_ahead = delta_gpm >= 0
+        xpm_ahead = delta_xpm >= 0
+        kda_ahead = delta_kda >= 0
+        kills_ahead = delta_kills >= 0
+        deaths_ahead = current_deaths <= target_deaths  # Fewer deaths than average = GOOD
+        assists_ahead = delta_assists >= 0
+
+        ahead_count = sum([1 for f in [cs_ahead, nw_ahead, gpm_ahead, kda_ahead, deaths_ahead] if f])
+        if ahead_count >= 4:
+            plan_verdict = "Опережение графика (S-тир)"
+            plan_status = "ahead"
+        elif ahead_count >= 3:
+            plan_verdict = "В графике плана ранга"
+            plan_status = "ahead"
+        elif ahead_count == 2:
+            plan_verdict = "Небольшое отставание"
+            plan_status = "behind"
+        else:
+            plan_verdict = "Критическое отставание"
+            plan_status = "behind"
 
         # Rolling 3-minute GPM calculation (180s circular window)
         if clock_time > 0:
@@ -442,15 +503,55 @@ class AnalyticsEngine:
                 "target_cs": target_cs,
                 "current_cs": current_cs,
                 "delta_cs": delta_cs,
+                "cs_status": "ahead" if cs_ahead else "behind",
+                "cs_arrow": "▲" if cs_ahead else "▼",
+
                 "target_nw": target_nw,
                 "current_nw": current_networth,
                 "delta_nw": delta_nw,
+                "nw_status": "ahead" if nw_ahead else "behind",
+                "nw_arrow": "▲" if nw_ahead else "▼",
+
                 "target_gpm": target_gpm,
                 "current_gpm": current_gpm,
                 "delta_gpm": delta_gpm,
+                "gpm_status": "ahead" if gpm_ahead else "behind",
+                "gpm_arrow": "▲" if gpm_ahead else "▼",
+
                 "target_xpm": target_xpm,
                 "current_xpm": current_xpm,
                 "delta_xpm": delta_xpm,
+                "xpm_status": "ahead" if xpm_ahead else "behind",
+                "xpm_arrow": "▲" if xpm_ahead else "▼",
+
+                "current_kills": current_kills,
+                "target_kills": target_kills,
+                "delta_kills": delta_kills,
+                "kills_status": "ahead" if kills_ahead else "behind",
+                "kills_arrow": "▲" if kills_ahead else "▼",
+
+                "current_deaths": current_deaths,
+                "target_deaths": target_deaths,
+                "delta_deaths": delta_deaths,
+                "deaths_status": "ahead" if deaths_ahead else "behind",
+                "deaths_arrow": "▲" if deaths_ahead else "▼",
+
+                "current_assists": current_assists,
+                "target_assists": target_assists,
+                "delta_assists": delta_assists,
+                "assists_status": "ahead" if assists_ahead else "behind",
+                "assists_arrow": "▲" if assists_ahead else "▼",
+
+                "current_kda": current_kda,
+                "target_kda": target_kda,
+                "delta_kda": delta_kda,
+                "kda_status": "ahead" if kda_ahead else "behind",
+                "kda_arrow": "▲" if kda_ahead else "▼",
+
+                "plan_verdict": plan_verdict,
+                "plan_status": plan_status,
+                "ahead_count": ahead_count,
+                "total_metrics": 5,
                 "rolling_gpm": rolling_gpm,
                 "is_high_tempo": is_high_tempo
             },

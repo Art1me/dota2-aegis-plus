@@ -2161,4 +2161,101 @@ body.mode-hud-only .right-hud {
   to { opacity: 1; box-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
 }
 
+/* ========================================================================= */
+/* KDA BENCHMARKS & DYNAMIC ARROWS (AHEAD / BEHIND)                          */
+/* ========================================================================= */
+
+.plan-verdict-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+.plan-verdict-pill.ahead {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+.plan-verdict-pill.behind {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+.kda-benchmark-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 6px 0 10px 0;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+}
+
+.kda-sub-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.kda-sub-label {
+  font-size: 9px;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.kda-sub-val {
+  font-size: 13px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.kda-sub-plan {
+  font-size: 9px;
+  color: #64748b;
+}
+
+.delta-arrow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.delta-arrow-badge.ahead {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.delta-arrow-badge.behind {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.metric-delta-arrow {
+  font-size: 9px;
+  margin-right: 1px;
+}
+
+.target-plan-hint {
+  font-size: 9px;
+  color: #94a3b8;
+  margin-left: 4px;
+}
+
 

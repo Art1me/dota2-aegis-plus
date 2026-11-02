@@ -197,18 +197,18 @@ function renderUI(data) {
     gradeBadge.style.color = perf.grade_color;
 
     const b = perf.benchmarks;
-    document.getElementById("metricCS").innerText = `${b.current_cs} / ${b.target_cs} target`;
-    
-    const deltaCSEl = document.getElementById("deltaCS");
-    deltaCSEl.innerText = (b.delta_cs >= 0 ? "+" : "") + b.delta_cs;
-    deltaCSEl.className = "metric-delta " + (b.delta_cs >= 0 ? "positive" : "negative");
+    document.getElementById("metricCS").innerText = `${b.current_cs} / ${b.target_cs}`;
+    updateDeltaBadge("deltaCSBadge", b.cs_arrow || "▲", (b.delta_cs >= 0 ? "+" : "") + b.delta_cs, b.cs_status === "ahead");
 
     document.getElementById("metricNW").innerText = `${b.current_nw.toLocaleString()} 💰`;
-    const deltaNWEl = document.getElementById("deltaNW");
-    deltaNWEl.innerText = (b.delta_nw >= 0 ? "+" : "") + b.delta_nw.toLocaleString() + "g";
-    deltaNWEl.className = "metric-delta " + (b.delta_nw >= 0 ? "positive" : "negative");
+    updateDeltaBadge("deltaNWBadge", b.nw_arrow || "▲", (b.delta_nw >= 0 ? "+" : "") + b.delta_nw.toLocaleString() + "g", b.nw_status === "ahead");
 
     document.getElementById("metricGPM").innerText = `${b.current_gpm} / ${b.current_xpm}`;
+    updateDeltaBadge("deltaGPMBadge", b.gpm_arrow || "▲", (b.delta_gpm >= 0 ? "+" : "") + b.delta_gpm, b.gpm_status === "ahead");
+
+    // Render Desktop KDA Plan vs Actual Grid & Plan Verdict
+    renderKDABenchmarks(b, "desktop");
+
     const rollingGPMEl = document.getElementById("metricRollingGPM");
     if (rollingGPMEl) {
       rollingGPMEl.innerText = `3м: ${b.rolling_gpm !== undefined ? b.rolling_gpm : b.current_gpm} GPM`;
@@ -788,7 +788,12 @@ function renderMobileUI(data) {
     if (hLvl) hLvl.innerText = `Ур. ${p.hero_level || (data.raw && data.raw.hero && data.raw.hero.level) || 1}`;
 
     const kda = document.getElementById("mobileKDA");
-    if (kda) kda.innerText = `${p.kills || 0} / ${p.deaths || 0} / ${p.assists || 0}`;
+    if (kda) {
+      const b = (data.performance && data.performance.benchmarks) || {};
+      const arrowIcon = b.kda_arrow || "▲";
+      const arrowColor = b.kda_status === "ahead" ? "#10b981" : "#ef4444";
+      kda.innerHTML = `${p.kills || 0} / ${p.deaths || 0} / ${p.assists || 0} <span style="color: ${arrowColor}; font-weight: 800; font-size: 10px;">${arrowIcon} ${b.current_kda !== undefined ? b.current_kda.toFixed(1) : '0.0'}</span> <span style="font-size: 9px; color: #94a3b8;">(пл: ${b.target_kills || 0}/${b.target_deaths || 0})</span>`;
+    }
     const nw = document.getElementById("mobileNW");
     if (nw) nw.innerText = `${(p.gold || 0).toLocaleString()} 💰`;
     const gpm = document.getElementById("mobileGPM");
@@ -936,12 +941,19 @@ function renderMobileUI(data) {
       grade.style.color = p.grade_color || "#10b981";
     }
     const b = p.benchmarks || {};
+    renderKDABenchmarks(b, "mobile");
+
     const cs = document.getElementById("mobileCS");
     if (cs) cs.innerText = `${b.current_cs || 0} / ${b.target_cs || 0}`;
+    updateDeltaBadge("mobileDeltaCSBadge", b.cs_arrow || "▲", (b.delta_cs >= 0 ? "+" : "") + (b.delta_cs || 0), b.cs_status === "ahead");
+
     const nw = document.getElementById("mobileNWVal");
-    if (nw) nw.innerText = `${(b.current_nw || 0).toLocaleString()} 💰 (${b.delta_nw >= 0 ? '+' : ''}${b.delta_nw || 0})`;
+    if (nw) nw.innerText = `${(b.current_nw || 0).toLocaleString()} 💰`;
+    updateDeltaBadge("mobileDeltaNWBadge", b.nw_arrow || "▲", (b.delta_nw >= 0 ? "+" : "") + ((b.delta_nw || 0).toLocaleString()) + "g", b.nw_status === "ahead");
+
     const gpm = document.getElementById("mobileGPMVal");
     if (gpm) gpm.innerText = `${b.current_gpm || 0} / ${b.current_xpm || 0}`;
+    updateDeltaBadge("mobileDeltaGPMBadge", b.gpm_arrow || "▲", (b.delta_gpm >= 0 ? "+" : "") + (b.delta_gpm || 0), b.gpm_status === "ahead");
 
     // Buyback on mobile
     if (p.buyback) {
@@ -981,6 +993,77 @@ function renderMobileUI(data) {
 // ==========================================
 // DOTA PLUS SUITE: DAMAGE BREAKDOWN, NET WORTH GRAPH, ITEM PROGRESSION, ABILITIES
 // ==========================================
+
+function updateDeltaBadge(elemId, arrow, deltaStr, isAhead) {
+  const el = document.getElementById(elemId);
+  if (!el) return;
+  el.className = `delta-arrow-badge ${isAhead ? 'ahead' : 'behind'}`;
+  el.innerHTML = `<span class="metric-delta-arrow">${arrow}</span> ${deltaStr}`;
+}
+
+function renderKDABenchmarks(b, prefix = "mobile") {
+  if (!b) return;
+
+  // Plan verdict
+  const verdictPill = document.getElementById(`${prefix}PlanVerdict`);
+  const verdictText = document.getElementById(`${prefix}PlanVerdictText`);
+  const verdictArrow = document.getElementById(`${prefix}PlanVerdictArrow`);
+  if (verdictPill && verdictText && verdictArrow) {
+    const isAhead = b.plan_status === "ahead";
+    verdictPill.className = `plan-verdict-pill ${isAhead ? 'ahead' : 'behind'}`;
+    verdictText.innerText = `${b.plan_verdict || 'В плане'} (${b.ahead_count !== undefined ? b.ahead_count : 4}/${b.total_metrics || 5})`;
+    verdictArrow.innerText = isAhead ? "▲ В плюсе" : "▼ Отставание";
+  }
+
+  // KDA Ratio
+  const kdaVal = document.getElementById(`${prefix}KdaVal`);
+  const kdaPlan = document.getElementById(`${prefix}KdaPlan`);
+  if (kdaVal) kdaVal.innerText = b.current_kda !== undefined ? b.current_kda.toFixed(1) : "0.0";
+  if (kdaPlan) kdaPlan.innerText = `план ${b.target_kda !== undefined ? b.target_kda.toFixed(1) : "3.5"}`;
+  updateDeltaBadge(
+    `${prefix}KdaDeltaBadge`,
+    b.kda_arrow || "▲",
+    (b.delta_kda >= 0 ? "+" : "") + (b.delta_kda !== undefined ? b.delta_kda.toFixed(1) : "0.0"),
+    b.kda_status === "ahead"
+  );
+
+  // Kills
+  const kVal = document.getElementById(`${prefix}KillsVal`);
+  const kPlan = document.getElementById(`${prefix}KillsPlan`);
+  if (kVal) kVal.innerText = b.current_kills || 0;
+  if (kPlan) kPlan.innerText = `план ${b.target_kills || 0}`;
+  updateDeltaBadge(
+    `${prefix}KillsDeltaBadge`,
+    b.kills_arrow || "▲",
+    (b.delta_kills >= 0 ? "+" : "") + (b.delta_kills !== undefined ? b.delta_kills : 0),
+    b.kills_status === "ahead"
+  );
+
+  // Deaths (fewer deaths than target = ahead!)
+  const dVal = document.getElementById(`${prefix}DeathsVal`);
+  const dPlan = document.getElementById(`${prefix}DeathsPlan`);
+  if (dVal) dVal.innerText = b.current_deaths || 0;
+  if (dPlan) dPlan.innerText = `план ${b.target_deaths || 0}`;
+  const dStr = (b.delta_deaths > 0 ? "+" : "") + (b.delta_deaths !== undefined ? b.delta_deaths : 0);
+  updateDeltaBadge(
+    `${prefix}DeathsDeltaBadge`,
+    b.deaths_arrow || "▲",
+    dStr,
+    b.deaths_status === "ahead"
+  );
+
+  // Assists
+  const aVal = document.getElementById(`${prefix}AssistsVal`);
+  const aPlan = document.getElementById(`${prefix}AssistsPlan`);
+  if (aVal) aVal.innerText = b.current_assists || 0;
+  if (aPlan) aPlan.innerText = `план ${b.target_assists || 0}`;
+  updateDeltaBadge(
+    `${prefix}AssistsDeltaBadge`,
+    b.assists_arrow || "▲",
+    (b.delta_assists >= 0 ? "+" : "") + (b.delta_assists !== undefined ? b.delta_assists : 0),
+    b.assists_status === "ahead"
+  );
+}
 
 function renderDamageBreakdown(dmg) {
   if (!dmg) return;

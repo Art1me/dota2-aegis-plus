@@ -246,6 +246,9 @@ class AppState:
         current_gpm = safe_int(player_data.get("gpm"), 0)
         current_xpm = safe_int(player_data.get("xpm"), 0)
         hero_alive = bool(hero_data.get("alive", True))
+        current_kills = safe_int(player_data.get("kills"), 0)
+        current_deaths = safe_int(player_data.get("deaths"), 0)
+        current_assists = safe_int(player_data.get("assists"), 0)
 
         bb_cost_raw = hero_data.get("buyback_cost")
         bb_cost = safe_int(bb_cost_raw, None) if bb_cost_raw is not None else None
@@ -272,7 +275,10 @@ class AppState:
             gold_unreliable=gold_unreliable,
             hero_alive=hero_alive,
             hero_buyback_cost=bb_cost,
-            buyback_cooldown=bb_cd
+            buyback_cooldown=bb_cd,
+            current_kills=current_kills,
+            current_deaths=current_deaths,
+            current_assists=current_assists
         )
 
         daytime = bool(map_data.get("daytime", True))
@@ -721,10 +727,10 @@ def run_simulation():
 
         # 2. In-Game Phase progression
         simulated_stages = [
-            { "clock": 165, "cs": 18, "nw": 1350, "gpm": 420, "xpm": 390 },
-            { "clock": 405, "cs": 52, "nw": 3100, "gpm": 460, "xpm": 480 },
-            { "clock": 595, "cs": 86, "nw": 5400, "gpm": 510, "xpm": 520 },
-            { "clock": 1035, "cs": 142, "nw": 9200, "gpm": 540, "xpm": 560 }
+            { "clock": 165, "cs": 18, "nw": 1350, "gpm": 420, "xpm": 390, "kills": 1, "deaths": 0, "assists": 0 },
+            { "clock": 405, "cs": 52, "nw": 3100, "gpm": 460, "xpm": 480, "kills": 2, "deaths": 0, "assists": 2 },
+            { "clock": 595, "cs": 86, "nw": 5400, "gpm": 510, "xpm": 520, "kills": 4, "deaths": 1, "assists": 4 },
+            { "clock": 1035, "cs": 142, "nw": 9200, "gpm": 540, "xpm": 560, "kills": 7, "deaths": 1, "assists": 8 }
         ]
 
         for stage in simulated_stages:
@@ -745,9 +751,9 @@ def run_simulation():
                     "gpm": stage["gpm"],
                     "xpm": stage["xpm"],
                     "net_worth": stage["nw"],
-                    "kills": 4,
-                    "deaths": 1,
-                    "assists": 6
+                    "kills": stage["kills"],
+                    "deaths": stage["deaths"],
+                    "assists": stage["assists"]
                 },
                 "hero": {
                     "name": "npc_dota_hero_juggernaut",

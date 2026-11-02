@@ -62,5 +62,33 @@ class TestDotaPlusFeatures(unittest.TestCase):
         timer_ids = [t["id"] for t in radar_600["timers"]]
         self.assertIn("tormentor", timer_ids)
 
+    def test_kda_benchmarks_and_arrows(self):
+        # Minute 15 Carry test: kills=4, deaths=0, assists=3
+        perf = self.engine.evaluate_performance(
+            clock_time=900,
+            rank="Archon",
+            role="Carry",
+            current_cs=120,
+            current_denies=12,
+            current_networth=8000,
+            current_gpm=550,
+            current_xpm=580,
+            current_gold=1200,
+            current_kills=4,
+            current_deaths=0,
+            current_assists=3
+        )
+        b = perf["benchmarks"]
+        self.assertIn("current_kda", b)
+        self.assertIn("target_kda", b)
+        self.assertEqual(b["kda_status"], "ahead")
+        self.assertEqual(b["kda_arrow"], "▲")
+        self.assertEqual(b["deaths_status"], "ahead")
+        self.assertEqual(b["deaths_arrow"], "▲")
+        self.assertEqual(b["cs_arrow"], "▲")
+        self.assertEqual(b["nw_arrow"], "▲")
+        self.assertEqual(b["plan_status"], "ahead")
+        self.assertGreaterEqual(b["ahead_count"], 3)
+
 if __name__ == "__main__":
     unittest.main()

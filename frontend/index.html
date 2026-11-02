@@ -219,17 +219,61 @@
             <span class="mobile-card-title">📊 Бенчмарк темпа ранга</span>
             <span class="mobile-badge positive" id="mobileBenchmarkGrade">A</span>
           </div>
+
+          <!-- Overall Plan Progress Verdict -->
+          <div class="plan-verdict-pill ahead" id="mobilePlanVerdict">
+            <span id="mobilePlanVerdictText">В графике плана (+4 из 5)</span>
+            <span id="mobilePlanVerdictArrow">▲ В плюсе</span>
+          </div>
+
+          <!-- KDA Plan vs Actual Grid -->
+          <div class="kda-benchmark-grid" id="mobileKDAGrid">
+            <div class="kda-sub-box">
+              <span class="kda-sub-label">KDA RATIO</span>
+              <span class="kda-sub-val" id="mobileKdaVal">0.0</span>
+              <span class="kda-sub-plan" id="mobileKdaPlan">план 3.5</span>
+              <span class="delta-arrow-badge ahead" id="mobileKdaDeltaBadge">▲ +0.0</span>
+            </div>
+            <div class="kda-sub-box">
+              <span class="kda-sub-label">Убийства (K)</span>
+              <span class="kda-sub-val" id="mobileKillsVal" style="color: #60a5fa;">0</span>
+              <span class="kda-sub-plan" id="mobileKillsPlan">план 0</span>
+              <span class="delta-arrow-badge ahead" id="mobileKillsDeltaBadge">▲ +0</span>
+            </div>
+            <div class="kda-sub-box">
+              <span class="kda-sub-label">Смерти (D)</span>
+              <span class="kda-sub-val" id="mobileDeathsVal" style="color: #f87171;">0</span>
+              <span class="kda-sub-plan" id="mobileDeathsPlan">план 0</span>
+              <span class="delta-arrow-badge ahead" id="mobileDeathsDeltaBadge">▲ -0</span>
+            </div>
+            <div class="kda-sub-box">
+              <span class="kda-sub-label">Ассисты (A)</span>
+              <span class="kda-sub-val" id="mobileAssistsVal" style="color: #a78bfa;">0</span>
+              <span class="kda-sub-plan" id="mobileAssistsPlan">план 0</span>
+              <span class="delta-arrow-badge ahead" id="mobileAssistsDeltaBadge">▲ +0</span>
+            </div>
+          </div>
+
           <div class="mobile-metric-row">
             <span>Крипстат (LH / DN):</span>
-            <span class="metric-val" id="mobileCS">0 / 0</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="metric-val" id="mobileCS">0 / 0</span>
+              <span class="delta-arrow-badge ahead" id="mobileDeltaCSBadge">▲ +0</span>
+            </div>
           </div>
           <div class="mobile-metric-row">
             <span>Нетворс:</span>
-            <span class="metric-val" id="mobileNWVal">600 💰</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="metric-val" id="mobileNWVal">600 💰</span>
+              <span class="delta-arrow-badge ahead" id="mobileDeltaNWBadge">▲ +0</span>
+            </div>
           </div>
           <div class="mobile-metric-row">
             <span>Темп GPM / XPM:</span>
-            <span class="metric-val" id="mobileGPMVal">0 / 0</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="metric-val" id="mobileGPMVal">0 / 0</span>
+              <span class="delta-arrow-badge ahead" id="mobileDeltaGPMBadge">▲ +0</span>
+            </div>
           </div>
 
           <!-- Dynamic SVG Net Worth Progression Chart -->
@@ -604,11 +648,45 @@
             </div>
           </div>
 
+          <!-- Overall Plan Progress Verdict -->
+          <div class="plan-verdict-pill ahead" id="desktopPlanVerdict">
+            <span id="desktopPlanVerdictText">В графике плана (+4 из 5)</span>
+            <span id="desktopPlanVerdictArrow">▲ В плюсе</span>
+          </div>
+
+          <!-- KDA Plan vs Actual Grid -->
+          <div class="kda-benchmark-grid" id="desktopKDAGrid">
+            <div class="kda-sub-box">
+              <span class="kda-sub-label">KDA</span>
+              <span class="kda-sub-val" id="desktopKdaVal">0.0</span>
+              <span class="kda-sub-plan" id="desktopKdaPlan">пл. 3.5</span>
+              <span class="delta-arrow-badge ahead" id="desktopKdaDeltaBadge">▲ +0.0</span>
+            </div>
+            <div class="kda-sub-box">
+              <span class="kda-sub-label">Kills (K)</span>
+              <span class="kda-sub-val" id="desktopKillsVal" style="color: #60a5fa;">0</span>
+              <span class="kda-sub-plan" id="desktopKillsPlan">пл. 0</span>
+              <span class="delta-arrow-badge ahead" id="desktopKillsDeltaBadge">▲ +0</span>
+            </div>
+            <div class="kda-sub-box">
+              <span class="kda-sub-label">Deaths (D)</span>
+              <span class="kda-sub-val" id="desktopDeathsVal" style="color: #f87171;">0</span>
+              <span class="kda-sub-plan" id="desktopDeathsPlan">пл. 0</span>
+              <span class="delta-arrow-badge ahead" id="desktopDeathsDeltaBadge">▲ -0</span>
+            </div>
+            <div class="kda-sub-box">
+              <span class="kda-sub-label">Assists (A)</span>
+              <span class="kda-sub-val" id="desktopAssistsVal" style="color: #a78bfa;">0</span>
+              <span class="kda-sub-plan" id="desktopAssistsPlan">пл. 0</span>
+              <span class="delta-arrow-badge ahead" id="desktopAssistsDeltaBadge">▲ +0</span>
+            </div>
+          </div>
+
           <div class="metric-row">
             <span class="metric-name">Крипстат (LH / DN):</span>
             <div class="metric-value-wrap">
               <span class="metric-val" id="metricCS">0 / 0</span>
-              <span class="metric-delta positive" id="deltaCS">+0</span>
+              <span class="delta-arrow-badge ahead" id="deltaCSBadge">▲ +0</span>
             </div>
           </div>
 
@@ -616,7 +694,7 @@
             <span class="metric-name">Нетворс:</span>
             <div class="metric-value-wrap">
               <span class="metric-val" id="metricNW">600 💰</span>
-              <span class="metric-delta positive" id="deltaNW">+0</span>
+              <span class="delta-arrow-badge ahead" id="deltaNWBadge">▲ +0</span>
             </div>
           </div>
 
@@ -624,6 +702,7 @@
             <span class="metric-name">Темп GPM / XPM:</span>
             <div class="metric-value-wrap" style="align-items: flex-end;">
               <span class="metric-val" id="metricGPM">0 / 0</span>
+              <span class="delta-arrow-badge ahead" id="deltaGPMBadge">▲ +0</span>
               <span class="metric-sub" id="metricRollingGPM" style="font-size: 10px; color: var(--text-muted);">3м: 0</span>
             </div>
           </div>
