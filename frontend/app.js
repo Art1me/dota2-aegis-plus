@@ -934,12 +934,12 @@ function renderMobileUI(data) {
 
   // Items on Mobile
   const items = data.recommended_items || (data.items && data.items.situational) || [];
-  const container = document.getElementById("mobileItemsContainer");
-  if (container) {
+  const itemsContainer = document.getElementById("mobileItemsContainer");
+  if (itemsContainer) {
     if (items.length === 0) {
-      container.innerHTML = `<span style="color: #94a3b8; font-size: 12px; text-align: center; padding: 12px; display: block;">Оптимальные предметы вычисляются по пику...</span>`;
+      itemsContainer.innerHTML = `<span style="color: #94a3b8; font-size: 12px; text-align: center; padding: 12px; display: block;">Оптимальные предметы вычисляются по пику...</span>`;
     } else {
-      container.innerHTML = "";
+      itemsContainer.innerHTML = "";
       items.slice(0, 6).forEach(it => {
         const cleanName = (it.id || "").replace("item_", "");
         const imgUrl = it.image_url || `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/${cleanName}.png`;
@@ -956,10 +956,11 @@ function renderMobileUI(data) {
             ${it.reasons && it.reasons.length ? `<span style="font-size: 10px; color: #fbbf24; display: block; margin-top: 2px;">• ${it.reasons.join(', ')}</span>` : ''}
           </div>
         `;
-        container.appendChild(itemDiv);
+        itemsContainer.appendChild(itemDiv);
       });
     }
   }
+
 }
 
 

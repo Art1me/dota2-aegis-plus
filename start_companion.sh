@@ -38,4 +38,9 @@ echo ""
 
 
 # 3. Запуск сервера ядра (доступен локально и по Wi-Fi)
+fuser -k 3000/tcp >/dev/null 2>&1 || true
+pkill -f "backend/gsi_server.py" >/dev/null 2>&1 || true
+sleep 0.5
+
 exec python3 "$DIR/backend/gsi_server.py"
+

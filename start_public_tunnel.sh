@@ -14,20 +14,23 @@ echo "===================================================================="
 echo "🛡️   AegisPlus Pro: Запуск открытого хостинга для телефона"
 echo "===================================================================="
 
-# 1. Проверяем работу сервера
-if ! curl -s http://127.0.0.1:3000/api/status >/dev/null 2>&1; then
-    echo "⚙️  Сервер AegisPlus не запущен. Запускаю в фоне..."
-    nohup python3 "$DIR/backend/gsi_server.py" >/tmp/aegis_companion.log 2>&1 &
-    
-    # Ждем подтверждения старта
-    for i in {1..10}; do
-        if curl -s http://127.0.0.1:3000/api/status >/dev/null 2>&1; then
-            echo "✅ Сервер AegisPlus успешно запущен и отвечает на 127.0.0.1:3000!"
-            break
-        fi
-        sleep 0.5
-    done
-fi
+# 1. Перезапускаем сервер с актуальным кодом
+echo "⚙️  Очистка старых процессов и запуск сервера AegisPlus..."
+fuser -k 3000/tcp >/dev/null 2>&1 || true
+pkill -f "backend/gsi_server.py" >/dev/null 2>&1 || true
+sleep 0.5
+
+nohup python3 "$DIR/backend/gsi_server.py" >/tmp/aegis_companion.log 2>&1 &
+
+# Ждем подтверждения старта
+for i in {1..15}; do
+    if curl -s http://127.0.0.1:3000/api/status >/dev/null 2>&1; then
+        echo "✅ Сервер AegisPlus успешно запущен и отвечает на 127.0.0.1:3000!"
+        break
+    fi
+    sleep 0.4
+done
+
 
 if ! curl -s http://127.0.0.1:3000/api/status >/dev/null 2>&1; then
     echo "❌ Ошибка: Сервер не смог запуститься. Лог ошибки:"

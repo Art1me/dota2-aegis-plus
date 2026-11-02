@@ -1241,7 +1241,22 @@ body.mode-hud-only .right-hud {
     padding-bottom: 76px;
     background: #080c14;
     color: #f1f5f9;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 9999;
   }
+
+  #mobileCompanion button,
+  #mobileCompanion .nav-tab-btn,
+  #mobileCompanion .btn-giant-roshan,
+  #mobileCompanion .btn-secondary-roshan,
+  #mobileCompanion .mobile-haptic-btn,
+  #mobileCompanion .mobile-sim-btn {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
 }
 
 /* Mobile Header */
