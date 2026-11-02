@@ -718,28 +718,27 @@ function renderMobileUI(data) {
     // Scores
     const radScore = document.getElementById("mobileScoreRad");
     const direScore = document.getElementById("mobileScoreDire");
-    if (data.raw && data.raw.map) {
-      if (radScore) radScore.innerText = data.raw.map.radiant_score || 0;
-      if (direScore) direScore.innerText = data.raw.map.dire_score || 0;
-    }
+    const m = data.match_info || (data.raw && data.raw.map) || {};
+    if (radScore) radScore.innerText = m.radiant_score !== undefined ? m.radiant_score : 0;
+    if (direScore) direScore.innerText = m.dire_score !== undefined ? m.dire_score : 0;
 
     // Hero stats
-    if (data.raw && data.raw.hero) {
-      const hero = data.raw.hero;
-      const hName = document.getElementById("mobileHeroName");
-      if (hName) hName.innerText = (hero.name || "Герой").replace("npc_dota_hero_", "").replace(/_/g, " ").toUpperCase();
-      const hLvl = document.getElementById("mobileHeroLvl");
-      if (hLvl) hLvl.innerText = `Ур. ${hero.level || 1}`;
+    const p = data.player || (data.raw && data.raw.player) || {};
+    const heroRaw = p.hero_name || (data.raw && data.raw.hero && data.raw.hero.name) || "";
+    const hName = document.getElementById("mobileHeroName");
+    if (hName) {
+      const cleanHero = heroRaw.replace("npc_dota_hero_", "").replace(/_/g, " ").toUpperCase();
+      hName.innerText = cleanHero || "Герой не выбран";
     }
-    if (data.raw && data.raw.player) {
-      const p = data.raw.player;
-      const kda = document.getElementById("mobileKDA");
-      if (kda) kda.innerText = `${p.kills || 0} / ${p.deaths || 0} / ${p.assists || 0}`;
-      const nw = document.getElementById("mobileNW");
-      if (nw) nw.innerText = `${(p.gold || 0).toLocaleString()} 💰`;
-      const gpm = document.getElementById("mobileGPM");
-      if (gpm) gpm.innerText = `${p.gpm || 0} GPM`;
-    }
+    const hLvl = document.getElementById("mobileHeroLvl");
+    if (hLvl) hLvl.innerText = `Ур. ${p.hero_level || (data.raw && data.raw.hero && data.raw.hero.level) || 1}`;
+
+    const kda = document.getElementById("mobileKDA");
+    if (kda) kda.innerText = `${p.kills || 0} / ${p.deaths || 0} / ${p.assists || 0}`;
+    const nw = document.getElementById("mobileNW");
+    if (nw) nw.innerText = `${(p.gold || 0).toLocaleString()} 💰`;
+    const gpm = document.getElementById("mobileGPM");
+    if (gpm) gpm.innerText = `${p.gpm || 0} GPM`;
 
     // Roshan on mobile
     const rosh = data.radar.roshan;
@@ -899,28 +898,45 @@ function renderMobileUI(data) {
   }
 
   // Items on Mobile
-  if (data.items && data.items.situational) {
-    const container = document.getElementById("mobileItemsContainer");
-    if (container) {
+  const items = data.recommended_items || (data.items && data.items.situational) || [];
+  const container = document.getElementById("mobileItemsContainer");
+  if (container) {
+    if (items.length === 0) {
+      container.innerHTML = `<span style="color: #94a3b8; font-size: 12px; text-align: center; padding: 12px; display: block;">Оптимальные предметы вычисляются по пику...</span>`;
+    } else {
       container.innerHTML = "";
-      data.items.situational.slice(0, 6).forEach(item => {
+      items.slice(0, 6).forEach(it => {
+        const cleanName = (it.id || "").replace("item_", "");
+        const imgUrl = it.image_url || `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/${cleanName}.png`;
         const itemDiv = document.createElement("div");
         itemDiv.className = "glass";
-        itemDiv.style.cssText = "display: flex; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 8px;";
+        itemDiv.style.cssText = "display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; margin-bottom: 6px;";
         itemDiv.innerHTML = `
-          <div style="font-size: 20px;">🗡️</div>
-          <div style="flex: 1;">
-            <div style="display: flex; justify-content: space-between;">
-              <strong style="color: #60a5fa; font-size: 13px;">${item.name || item.id}</strong>
-              <span style="font-size: 11px; color: #fbbf24; font-weight: 700;">${item.cost || 0} 💰</span>
-            </div>
-            <p style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">${item.reason || ''}</p>
+          <div style="width: 44px; height: 32px; border-radius: 6px; overflow: hidden; background: #000; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.15);">
+            <img src="${imgUrl}" alt="${it.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/branches.png'">
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <strong style="color: #60a5fa; font-size: 13px; display: block;">${it.name || it.id}</strong>
+            <span style="font-size: 11px; color: #cbd5e1; display: block; margin-top: 2px;">${it.advice || ''}</span>
+            ${it.reasons && it.reasons.length ? `<span style="font-size: 10px; color: #fbbf24; display: block; margin-top: 2px;">• ${it.reasons.join(', ')}</span>` : ''}
           </div>
         `;
         container.appendChild(itemDiv);
       });
     }
   }
+}
+
+
+// State Pulling Fallback for Tab Switching & Window Focus
+function fetchLatestState() {
+  fetch("/api/state")
+    .then(r => r.json())
+    .then(data => {
+      latestData = data;
+      renderUI(data);
+    })
+    .catch(err => console.warn("Fetch state error:", err));
 }
 
 // Event Listeners on DOM Ready
@@ -932,6 +948,22 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.remove("mode-menu");
   }
 
+  // Auto-refresh when window or tab regains focus
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      fetchLatestState();
+    }
+  });
+
+  window.addEventListener("focus", () => {
+    fetchLatestState();
+  });
+
+  // Continuous background sync (1.5s interval)
+  setInterval(() => {
+    fetchLatestState();
+  }, 1500);
+
   // Mobile Tabs
   document.querySelectorAll(".nav-tab-btn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -941,9 +973,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const targetId = btn.getAttribute("data-target");
       const page = document.getElementById(targetId);
       if (page) page.classList.add("active");
+      if (latestData) {
+        renderMobileUI(latestData);
+      }
       triggerHaptic(40);
     });
   });
+
 
   // Mobile Haptic Toggle
   const btnHaptic = document.getElementById("btnMobileHaptic");

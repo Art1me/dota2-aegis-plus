@@ -18,16 +18,42 @@ from backend.analytics_engine import AnalyticsEngine
 from backend.config_manager import ConfigManager
 from backend.qr_generator import SimpleQRCode
 
-def get_local_ip() -> str:
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+def get_local_ips() -> List[str]:
+    ips = set()
+    # 1. Subprocess hostname -I
     try:
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
+        out = subprocess.check_output(["hostname", "-I"], text=True, timeout=1).strip().split()
+        for ip in out:
+            if not ip.startswith("127.") and not ip.startswith("172.17.") and ":" not in ip:
+                ips.add(ip)
     except Exception:
-        ip = "127.0.0.1"
-    finally:
+        pass
+
+    # 2. UDP routing probe
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        cand = s.getsockname()[0]
         s.close()
-    return ip
+        if not cand.startswith("127."):
+            ips.add(cand)
+    except Exception:
+        pass
+
+    # 3. ip route
+    try:
+        out = subprocess.check_output(["ip", "route", "get", "1.1.1.1"], text=True, timeout=1)
+        for part in out.split():
+            if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", part) and not part.startswith("127."):
+                ips.add(part)
+    except Exception:
+        pass
+
+    return list(ips) or ["127.0.0.1"]
+
+def get_local_ip() -> str:
+    return get_local_ips()[0]
+
 
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
@@ -715,21 +741,28 @@ class ReusableThreadingHTTPServer(ThreadingHTTPServer):
 
 
 def start_server(port: int = 3000):
-    local_ip = get_local_ip()
-    mobile_url = f"http://{local_ip}:{port}"
+    public_url = os.environ.get("AEGIS_PUBLIC_URL", "").strip()
+    all_ips = get_local_ips()
+    primary_ip = all_ips[0]
+    local_url = f"http://{primary_ip}:{port}"
     localhost_url = f"http://127.0.0.1:{port}"
-    qr_ascii = SimpleQRCode.to_terminal_string(mobile_url)
+    active_target_url = public_url if public_url else local_url
+    qr_ascii = SimpleQRCode.to_terminal_string(active_target_url)
 
-    print("\n" + "=" * 62)
+    print("\n" + "=" * 65)
     print("🛡️   AegisPlus Pro: Dota 2 Mobile Companion & Game Server")
-    print("=" * 62)
+    print("=" * 65)
     print(f"👉 Локально на ПК:      {localhost_url}")
     print(f"👉 Steam In-Game HUD:   {localhost_url}/?mode=hud")
-    print(f"👉 С телефона по Wi-Fi: {mobile_url}")
-    print("-" * 62)
-    print("📱 Отсканируйте QR-код камерой телефона (в одной Wi-Fi сети):")
+    for idx, ip in enumerate(all_ips):
+        print(f"👉 По Wi-Fi сети #{idx+1}:   http://{ip}:{port}")
+    if public_url:
+        print(f"🌐 ОТКРЫТЫЙ ИНТЕРНЕТ:   {public_url}")
+    print("-" * 65)
+    print(f"📱 Отсканируйте QR-код камерой телефона ({'Интернет' if public_url else 'Wi-Fi'}):")
     print(qr_ascii)
-    print("=" * 62 + "\n")
+    print("=" * 65 + "\n")
+
 
     try:
         server = ReusableThreadingHTTPServer(("0.0.0.0", port), GSIHTTPRequestHandler)
