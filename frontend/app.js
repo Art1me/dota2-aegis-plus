@@ -789,6 +789,79 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Center Command Center Handlers
+  const btnCenterClose = document.getElementById("btnCenterClose");
+  if (btnCenterClose) {
+    btnCenterClose.addEventListener("click", () => {
+      window.closeMenu();
+    });
+  }
+
+  const btnCenterDraft = document.getElementById("btnCenterDraft");
+  if (btnCenterDraft) {
+    btnCenterDraft.addEventListener("click", () => {
+      const draftModal = document.getElementById("draftOverlay");
+      if (draftModal) {
+        draftModal.classList.remove("hidden");
+        const searchInp = document.getElementById("heroSearchInput");
+        if (searchInp) searchInp.focus();
+      }
+    });
+  }
+
+  const btnCenterSim = document.getElementById("btnCenterSimulate");
+  if (btnCenterSim) {
+    btnCenterSim.addEventListener("click", () => {
+      const origHtml = btnCenterSim.innerHTML;
+      btnCenterSim.innerHTML = "<span>⏳ Симуляция...</span>";
+      fetch("/api/simulate", { method: "POST" })
+        .then(() => {
+          setTimeout(() => { btnCenterSim.innerHTML = origHtml; }, 1000);
+        })
+        .catch(() => {
+          btnCenterSim.innerHTML = origHtml;
+        });
+    });
+  }
+
+  const btnCenterRosh = document.getElementById("btnCenterRosh");
+  if (btnCenterRosh) {
+    btnCenterRosh.addEventListener("click", () => {
+      btnCenterRosh.innerText = "✓ Скопировано!";
+      setTimeout(() => { btnCenterRosh.innerText = "⚔️ Рошан убит"; }, 1500);
+      fetch("/api/roshan_killed", { method: "POST" })
+        .then(r => r.json())
+        .then(data => {
+          if (data.chat_string) {
+            copyToClipboard(data.chat_string);
+            showSingleToast("⚔️ Рошан зафиксирован!", `Тайминг скопирован в буфер: ${data.chat_string}`, "info");
+          }
+        })
+        .catch(e => console.error("Roshan killed err:", e));
+    });
+  }
+
+  const btnCenterGlyph = document.getElementById("btnCenterGlyph");
+  if (btnCenterGlyph) {
+    btnCenterGlyph.addEventListener("click", () => {
+      btnCenterGlyph.innerText = "✓ Запущен";
+      setTimeout(() => { btnCenterGlyph.innerText = "🛡️ Глиф врага"; }, 1500);
+      fetch("/api/glyph_used", { method: "POST" })
+        .then(r => r.json())
+        .then(() => {
+          showSingleToast("🛡️ Глиф врага использован!", "Таймер перезарядки (300с) запущен", "warning");
+        })
+        .catch(e => console.error("Glyph used err:", e));
+    });
+  }
+
+  const btnCenterQuit = document.getElementById("btnCenterQuit");
+  if (btnCenterQuit) {
+    btnCenterQuit.addEventListener("click", () => {
+      window.shutdownApp();
+    });
+  }
+
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       const draftModal = document.getElementById("draftOverlay");

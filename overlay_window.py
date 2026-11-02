@@ -95,22 +95,29 @@ class OverlayApplication(Gtk.Application):
                         Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.LEFT, True)
                         Gtk4LayerShell.set_anchor(self.window, Gtk4LayerShell.Edge.RIGHT, True)
 
+                        display = Gdk.Display.get_default()
+                        if display:
+                            monitors = display.get_monitors()
+                            if monitors.get_n_items() > 0:
+                                target_mon = monitors.get_item(monitors.get_n_items() - 1)
+                                Gtk4LayerShell.set_monitor(self.window, target_mon)
+
                         layer_shell_active = True
                         print("[AegisPlus] Wayland Layer Shell (OVERLAY) успешно активирован")
                 except Exception as e:
                     print(f"[AegisPlus] Layer Shell запущен с предупреждением: {e}")
 
             self.window.set_default_size(1920, 1080)
+            self.window.set_opacity(1.0)
             if not layer_shell_active:
                 self.window.set_decorated(False)
+                self.window.set_title("AegisPlus")
                 print("[AegisPlus] Запуск в режиме независимого прозрачного плавающего окна")
 
-            # 2. Transparent background for GTK4 Window and WebKit
+            # 2. Transparent background for GTK4 Window (preserving WebKit native render buffer)
             css_provider = Gtk.CssProvider()
             css_provider.load_from_data(b"""
-            window, window.background, .background, webkitwebview {
-                background: none;
-                background-image: none;
+            window.background {
                 background-color: transparent;
             }
             """)

@@ -154,6 +154,12 @@ class ConfigManager:
         block_header = "# --- AegisPlus Overlay ---"
         clean_block = (
             f"\n{block_header}\n"
+            f"windowrulev2 = float, title:^(AegisPlus)$\n"
+            f"windowrulev2 = pin, title:^(AegisPlus)$\n"
+            f"windowrulev2 = noborder, title:^(AegisPlus)$\n"
+            f"windowrulev2 = noshadow, title:^(AegisPlus)$\n"
+            f"windowrulev2 = size 100% 100%, title:^(AegisPlus)$\n"
+            f"windowrulev2 = move 0 0, title:^(AegisPlus)$\n"
             f"bind = SUPER, O, exec, {toggle_script}\n"
             f"bind = SUPER SHIFT, O, exec, {toggle_script} quit\n"
         )

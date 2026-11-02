@@ -4,17 +4,8 @@ chmod +x "$SCRIPT_DIR/start.sh" "$SCRIPT_DIR/toggle_overlay.sh" 2>/dev/null || t
 
 ACTION="${1:-toggle}"
 
-notify_toggle() {
-    hyprctl notify -1 1500 "rgb(00ff88)" "AegisPlus: Toggle" >/dev/null 2>&1 || notify-send -t 1500 "AegisPlus" "Переключение режима оверлея" >/dev/null 2>&1 || true
-}
-
-notify_quit() {
-    hyprctl notify -1 1500 "rgb(ff4444)" "AegisPlus: Stopped" >/dev/null 2>&1 || true
-}
-
 case "$ACTION" in
     quit|stop|exit|kill)
-        notify_quit
         curl -s --max-time 0.3 -X POST "http://127.0.0.1:3000/api/shutdown" >/dev/null 2>&1 || true
         pkill -TERM -f "overlay_window\.py" 2>/dev/null || true
         exit 0
@@ -25,15 +16,12 @@ case "$ACTION" in
         ;;
     show|open)
         if curl -s --max-time 0.3 -X POST "http://127.0.0.1:3000/api/overlay/open" >/dev/null 2>&1; then
-            notify_toggle
             exit 0
         fi
         setsid -f "$SCRIPT_DIR/start.sh" >/tmp/aegis_plus.log 2>&1
-        notify_toggle
         exit 0
         ;;
     toggle|*)
-        notify_toggle
         if curl -s --max-time 0.3 -X POST "http://127.0.0.1:3000/api/toggle_menu" >/dev/null 2>&1; then
             exit 0
         fi
@@ -44,7 +32,7 @@ case "$ACTION" in
             exit 0
         fi
 
-        # Otherwise start the overlay completely detached
+        # Otherwise start the overlay in background
         setsid -f "$SCRIPT_DIR/start.sh" >/tmp/aegis_plus.log 2>&1
         exit 0
         ;;

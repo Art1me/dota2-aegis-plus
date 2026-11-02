@@ -150,8 +150,62 @@
         </div>
       </aside>
 
-      <!-- Center Spacer / Game View Area -->
-      <div style="flex: 1;"></div>
+      <!-- Center Command Center (Visible in Menu mode, Super + O) -->
+      <div class="menu-command-center glass interactive" id="menuCommandCenter">
+        <div class="command-center-header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 26px;">🛡️</span>
+            <div>
+              <h2 style="font-size: 17px; font-weight: 800; color: #00ff88; letter-spacing: 0.5px;">AegisPlus Pro Command Center</h2>
+              <span style="font-size: 11px; color: var(--text-muted);">Интерактивное меню оверлея (хоткей Super + O)</span>
+            </div>
+          </div>
+          <button class="btn-close-center" id="btnCenterClose" title="Свернуть в HUD (Esc / Super+O)">✕</button>
+        </div>
+
+        <div class="command-center-body">
+          <div class="command-grid">
+            <div class="command-tile">
+              <div class="tile-icon">🎯</div>
+              <div class="tile-content">
+                <h3>Драфт & Контрпики</h3>
+                <p>Анализ сетапов команд, расчет преимуществ и выбор контрпиков для All Pick и Рейтинга.</p>
+                <button class="cmd-btn" id="btnCenterDraft">Открыть ассистент драфта</button>
+              </div>
+            </div>
+
+            <div class="command-tile">
+              <div class="tile-icon">▶</div>
+              <div class="tile-content">
+                <h3>Демо-режим (Тест GSI)</h3>
+                <p>Запуск пошаговой симуляции матча для проверки виджетов GPM, крипстата и таймеров.</p>
+                <button class="cmd-btn" id="btnCenterSimulate">Запустить симуляцию матча</button>
+              </div>
+            </div>
+
+            <div class="command-tile">
+              <div class="tile-icon">⚔️</div>
+              <div class="tile-content">
+                <h3>Тайминги Рошана и Глифа</h3>
+                <p>Быстрая фиксация убийства Рошана (копирует тайминг в буфер) и запуск КД глифа.</p>
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                  <button class="cmd-btn" id="btnCenterRosh">⚔️ Рошан убит</button>
+                  <button class="cmd-btn" id="btnCenterGlyph">🛡️ Глиф врага</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="command-tile">
+              <div class="tile-icon">⌨️</div>
+              <div class="tile-content">
+                <h3>Управление и Горячие клавиши</h3>
+                <p><kbd>Super + O</kbd> — переключение HUD / Меню<br><kbd>Esc</kbd> — возврат к сквозному HUD в игре<br><kbd>Super + Shift + O</kbd> — полное выключение</p>
+                <button class="cmd-btn cmd-btn-danger" id="btnCenterQuit" style="margin-top: 6px;">⏻ Выйти из AegisPlus</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Right Panel: Live Benchmarks & Buyback -->
       <aside class="right-hud">

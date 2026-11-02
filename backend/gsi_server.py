@@ -303,8 +303,8 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(FRONTEND_DIR), **kwargs)
 
     def log_message(self, format, *args):
-        # Suppress routine GET logging for cleaner stdout
-        if len(args) >= 1 and isinstance(args[0], str) and ("GET /api/events" in args[0] or "GET /style.css" in args[0]):
+        # Suppress routine SSE polling for cleaner stdout
+        if len(args) >= 1 and isinstance(args[0], str) and "GET /api/events" in args[0]:
             return
         super().log_message(format, *args)
 

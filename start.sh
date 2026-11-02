@@ -33,6 +33,7 @@ if [ -z "$WAYLAND_DISPLAY" ]; then
     fi
 fi
 export GDK_BACKEND=wayland
+export GSK_RENDERER=gl
 
 # Preload libgtk4-layer-shell.so before libwayland-client loads
 if [ -f "/usr/lib64/libgtk4-layer-shell.so" ]; then
@@ -41,7 +42,6 @@ elif [ -f "/usr/lib/libgtk4-layer-shell.so" ]; then
     export LD_PRELOAD="/usr/lib/libgtk4-layer-shell.so"
 fi
 
-export WEBKIT_DISABLE_DMABUF_RENDERER=1
 export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1
 export PYTHONUNBUFFERED=1
 export PYTHONPATH="$DIR:$PYTHONPATH"
@@ -50,7 +50,7 @@ export PYTHONPATH="$DIR:$PYTHONPATH"
 python3 "$DIR/backend/config_manager.py"
 
 echo "🚀 Запуск AegisPlus..."
-echo "👉 Оверлей: Wayland ($WAYLAND_DISPLAY, GDK_BACKEND=$GDK_BACKEND)"
+echo "👉 Оверлей: Wayland ($WAYLAND_DISPLAY, GDK_BACKEND=$GDK_BACKEND, GSK_RENDERER=$GSK_RENDERER)"
 echo "👉 Веб-панель: доступна по адресу http://127.0.0.1:3000"
 echo "----------------------------------------------------------"
 
