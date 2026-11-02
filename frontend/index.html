@@ -23,11 +23,11 @@
     <header class="mobile-header glass">
       <div class="mobile-header-left">
         <div class="mobile-app-brand">
-          <span class="brand-shield">🛡️</span>
-          <div class="brand-title-wrap">
-            <span class="brand-title">AegisPlus Mobile</span>
-            <span class="mobile-connection-pill" id="mobileStatusText">Ожидание Dota 2</span>
+          <div class="dota-plus-badge">
+            <span class="dota-plus-plus">+</span>
+            <span class="dota-plus-text">DOTA PLUS</span>
           </div>
+          <span class="mobile-connection-pill" id="mobileStatusText">Ожидание Dota 2</span>
         </div>
       </div>
       <div class="mobile-header-center">
@@ -45,8 +45,26 @@
       </div>
     </header>
 
+    <!-- Dota Plus Live Win Probability Bar -->
+    <div class="dota-plus-win-meter glass">
+      <div class="win-meter-header">
+        <span class="win-meter-title">⚡ DOTA PLUS ВЕРОЯТНОСТЬ ПОБЕДЫ</span>
+        <span class="win-meter-lead" id="winMeterLead">Равные шансы</span>
+      </div>
+      <div class="win-meter-bar-track">
+        <div class="win-meter-fill-rad" id="winMeterFillRad" style="width: 50%;"></div>
+        <div class="win-meter-divider" id="winMeterDivider" style="left: 50%;"></div>
+        <div class="win-meter-fill-dire" id="winMeterFillDire" style="width: 50%;"></div>
+      </div>
+      <div class="win-meter-labels">
+        <span class="win-label-rad" id="winLabelRad">Radiant 50%</span>
+        <span class="win-label-dire" id="winLabelDire">Dire 50%</span>
+      </div>
+    </div>
+
     <!-- Mobile Hero Strip -->
     <div class="mobile-hero-strip glass">
+
       <div class="mobile-hero-info">
         <span class="mobile-hero-name" id="mobileHeroName">Герой не выбран</span>
         <span class="mobile-hero-lvl" id="mobileHeroLvl">Ур. 1</span>
@@ -393,8 +411,9 @@
           <div style="display: flex; align-items: center; gap: 12px;">
             <span style="font-size: 26px;">🛡️</span>
             <div>
-              <h2 style="font-size: 17px; font-weight: 800; color: #00ff88; letter-spacing: 0.5px;">AegisPlus Pro Command Center</h2>
-              <span style="font-size: 11px; color: var(--text-muted);">Интерактивное меню оверлея (хоткей Super + O)</span>
+              <h2 style="font-size: 17px; font-weight: 800; color: #e5c158; letter-spacing: 0.5px;">Dota Plus Tactical Assistant</h2>
+              <span style="font-size: 11px; color: var(--text-muted);">Интерактивный аналитический помощник</span>
+
             </div>
           </div>
           <button class="btn-close-center" id="btnCenterClose" title="Свернуть в HUD (Esc / Super+O)">✕</button>

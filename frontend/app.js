@@ -719,8 +719,43 @@ function renderMobileUI(data) {
     const radScore = document.getElementById("mobileScoreRad");
     const direScore = document.getElementById("mobileScoreDire");
     const m = data.match_info || (data.raw && data.raw.map) || {};
-    if (radScore) radScore.innerText = m.radiant_score !== undefined ? m.radiant_score : 0;
-    if (direScore) direScore.innerText = m.dire_score !== undefined ? m.dire_score : 0;
+    const rScoreVal = m.radiant_score !== undefined ? m.radiant_score : 0;
+    const dScoreVal = m.dire_score !== undefined ? m.dire_score : 0;
+    if (radScore) radScore.innerText = rScoreVal;
+    if (direScore) direScore.innerText = dScoreVal;
+
+    // Dota Plus Live Win Probability Bar calculation
+    const diff = rScoreVal - dScoreVal;
+    let radWinChance = 50 + diff * 2.5;
+    radWinChance = Math.max(15, Math.min(85, Math.round(radWinChance)));
+    const direWinChance = 100 - radWinChance;
+
+    const fillRad = document.getElementById("winMeterFillRad");
+    const fillDire = document.getElementById("winMeterFillDire");
+    const divMeter = document.getElementById("winMeterDivider");
+    const labelRad = document.getElementById("winLabelRad");
+    const labelDire = document.getElementById("winLabelDire");
+    const leadText = document.getElementById("winMeterLead");
+
+    if (fillRad) fillRad.style.width = `${radWinChance}%`;
+    if (fillDire) fillDire.style.width = `${direWinChance}%`;
+    if (divMeter) divMeter.style.left = `${radWinChance}%`;
+    if (labelRad) labelRad.innerText = `Radiant ${radWinChance}%`;
+    if (labelDire) labelDire.innerText = `Dire ${direWinChance}%`;
+
+    if (leadText) {
+      if (Math.abs(diff) <= 1) {
+        leadText.innerText = "Равные шансы";
+        leadText.style.color = "#e5c158";
+      } else if (diff > 1) {
+        leadText.innerText = `Преимущество Radiant (+${diff})`;
+        leadText.style.color = "#10b981";
+      } else {
+        leadText.innerText = `Преимущество Dire (+${Math.abs(diff)})`;
+        leadText.style.color = "#ef4444";
+      }
+    }
+
 
     // Hero stats
     const p = data.player || (data.raw && data.raw.player) || {};

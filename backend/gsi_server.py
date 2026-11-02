@@ -3,7 +3,10 @@ import json
 import mimetypes
 import os
 import queue
+import re
 import socket
+import subprocess
+import sys
 import threading
 import time
 from http import HTTPStatus
@@ -11,6 +14,12 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 from urllib.parse import parse_qs, urlparse
+
+# Ensure project root is in sys.path regardless of execution directory
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 
 from gi.repository import GLib
 
