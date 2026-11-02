@@ -135,19 +135,17 @@ class OverlayApplication(Gtk.Application):
             self.webview.load_uri(SERVER_URL)
             self.window.set_child(self.webview)
 
-            # Ensure input region is configured whenever surface is realized or mapped
-            def on_surface_ready(widget):
-                GLib.idle_add(self.apply_current_input_region)
+            # Ensure input region is configured after surface is mapped
+            def on_map(widget):
+                GLib.idle_add(lambda: self.set_interactive_mode(True))
 
-            self.window.connect("realize", on_surface_ready)
-            self.window.connect("map", on_surface_ready)
+            self.window.connect("map", on_map)
 
             # Register Unix signal handlers via GLib exclusively
             self.setup_glib_signals()
 
         self.window.set_visible(True)
         self.window.present()
-        self.set_interactive_mode(True)
 
     def set_interactive_mode(self, interactive: bool):
         """
@@ -156,25 +154,17 @@ class OverlayApplication(Gtk.Application):
         - interactive == True:  Menu mode (full input enabled, modal/controls interactive).
         """
         self.interactive = interactive
-        self.apply_current_input_region()
-
-        # Notify WebKit frontend to toggle CSS classes (.mode-hud vs .mode-menu)
-        if self.webview:
-            js = f"if (window.setUiMode) window.setUiMode({str(interactive).lower()});"
-            self.webview.evaluate_javascript(js, -1, None, None, None, None, None)
-
-    def apply_current_input_region(self):
-        """Applies input region and keyboard mode depending on self.interactive."""
         if not self.window:
             return
 
         surface = self.window.get_surface()
+        if surface is None:
+            return
 
         if not self.interactive:
             # HUD mode: empty input region -> clicks go straight into Dota 2
-            if surface:
-                empty_region = cairo.Region(cairo.RectangleInt(0, 0, 0, 0))
-                surface.set_input_region(empty_region)
+            empty_region = cairo.Region(cairo.RectangleInt(0, 0, 0, 0))
+            surface.set_input_region(empty_region)
 
             if HAS_LAYER_SHELL and Gtk4LayerShell.is_supported():
                 try:
@@ -185,8 +175,7 @@ class OverlayApplication(Gtk.Application):
             print("[AegisPlus] Режим HUD: сквозной ввод в Dota 2 (клики проходят сквозь окно)")
         else:
             # Menu mode: full window input region -> user can click buttons & select options
-            if surface:
-                surface.set_input_region(None)
+            surface.set_input_region(None)
 
             if HAS_LAYER_SHELL and Gtk4LayerShell.is_supported():
                 try:
@@ -196,20 +185,36 @@ class OverlayApplication(Gtk.Application):
 
             print("[AegisPlus] Режим Меню: оверлей интерактивен (управление панелью)")
 
+        # Notify WebKit frontend to toggle CSS classes (.mode-hud vs .mode-menu)
+        if self.webview:
+            js = f"if (window.setUiMode) window.setUiMode({str(interactive).lower()});"
+            try:
+                self.webview.evaluate_javascript(js, -1, None, None, None, None, None)
+            except TypeError:
+                try:
+                    self.webview.evaluate_javascript(js, -1)
+                except Exception as e:
+                    print(f"[AegisPlus] Ошибка JavaScript evaluation: {e}")
+            except Exception as e:
+                print(f"[AegisPlus] Ошибка JavaScript evaluation: {e}")
+
+    def toggle_interactive_mode(self):
+        """Toggles between Menu and HUD modes."""
+        self.set_interactive_mode(not self.interactive)
+
     def setup_glib_signals(self):
         """Registers Unix signals using GLib.unix_signal_add instead of standard signal.signal."""
         GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, self.handle_sigint_term)
         GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, self.handle_sigint_term)
         GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self.handle_sigusr1)
 
-    def handle_sigusr1(self):
+    def handle_sigusr1(self, *args):
         """Toggles interactive mode (Menu <-> HUD) on SIGUSR1 from Super+O."""
-        new_mode = not self.interactive
-        print(f"[AegisPlus] SIGUSR1 получен: переключение режима Меню -> {new_mode}")
-        self.set_interactive_mode(new_mode)
+        print(f"[AegisPlus] SIGUSR1 получен: переключение режима Меню/HUD")
+        self.toggle_interactive_mode()
         return GLib.SOURCE_CONTINUE
 
-    def handle_sigint_term(self):
+    def handle_sigint_term(self, *args):
         """Handles clean termination on SIGINT / SIGTERM."""
         print("[AegisPlus] Получен сигнал завершения...")
         self.quit_application()
@@ -250,6 +255,12 @@ def main():
     # 1. Install / verify GSI config for Dota 2 in all candidate locations
     success, msg = ConfigManager.install_gsi_config()
     print(f"[AegisPlus GSI] {msg}")
+    gsi_ok, gsi_msg = ConfigManager.check_steam_launch_options()
+    if not gsi_ok:
+        print(gsi_msg)
+    else:
+        print(f"[AegisPlus GSI] {gsi_msg}")
+    ConfigManager.setup_hyprland_config()
 
     # 2. Start Background HTTP + SSE Server
     server_thread = threading.Thread(target=start_server, args=(3000,), daemon=True)

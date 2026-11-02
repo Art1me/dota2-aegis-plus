@@ -1,5 +1,6 @@
 import os
 import re
+import subprocess
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -139,7 +140,98 @@ class ConfigManager:
                 return True
         return False
 
+    @classmethod
+    def setup_hyprland_config(cls) -> bool:
+        """
+        Ensures Hyprland has noanim & noblur layer rules for aegis-overlay and keybinds
+        pointing to the current toggle_overlay.sh absolute path.
+        """
+        hypr_conf = Path.home() / ".config" / "hypr" / "hyprland.conf"
+        if not hypr_conf.exists():
+            return False
+
+        toggle_script = (Path(__file__).parent.parent / "toggle_overlay.sh").resolve()
+        block_header = "# --- AegisPlus Overlay ---"
+        aegis_block = (
+            f"\n{block_header}\n"
+            f"layerrule = noanim, aegis-overlay\n"
+            f"layerrule = noblur, aegis-overlay\n"
+            f"bind = SUPER, O, exec, {toggle_script}\n"
+            f"bind = SUPER SHIFT, O, exec, {toggle_script} quit\n"
+        )
+
+        try:
+            content = hypr_conf.read_text(encoding="utf-8", errors="ignore")
+            if block_header in content:
+                pattern = re.compile(
+                    r"# --- AegisPlus Overlay ---.*?(?=\n\S|\n# [^\-]|\Z)",
+                    re.DOTALL
+                )
+                updated_content = pattern.sub(aegis_block.strip(), content)
+                if updated_content != content:
+                    hypr_conf.write_text(updated_content, encoding="utf-8")
+                    subprocess.run(["hyprctl", "reload"], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    print("[AegisPlus Config] Конфигурация Hyprland обновлена и перезагружена.")
+            else:
+                with open(hypr_conf, "a", encoding="utf-8") as f:
+                    f.write(aegis_block)
+                subprocess.run(["hyprctl", "reload"], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                print("[AegisPlus Config] Правила слоя и бинды AegisPlus добавлены в hyprland.conf.")
+            return True
+        except Exception as e:
+            print(f"[AegisPlus Config] Ошибка настройки Hyprland: {e}")
+            return False
+
+    @classmethod
+    def check_steam_launch_options(cls) -> Tuple[bool, str]:
+        """
+        Checks localconfig.vdf files in Steam userdata directories to see if
+        '-gamestateintegration' is present for Dota 2 (App ID 570).
+        """
+        found_any = False
+        has_gsi_flag = False
+
+        for root in cls.get_all_steam_libraries():
+            # Check root/userdata and root/../userdata
+            candidates = [root / "userdata", root.parent / "userdata"]
+            for userdata_dir in candidates:
+                if userdata_dir.exists() and userdata_dir.is_dir():
+                    for user_folder in userdata_dir.glob("*"):
+                        localconfig = user_folder / "config" / "localconfig.vdf"
+                        if localconfig.exists():
+                            found_any = True
+                            try:
+                                text = localconfig.read_text(encoding="utf-8", errors="ignore")
+                                if "-gamestateintegration" in text:
+                                    has_gsi_flag = True
+                                    break
+                            except Exception as e:
+                                print(f"[AegisPlus Config] Ошибка чтения {localconfig}: {e}")
+                if has_gsi_flag:
+                    break
+            if has_gsi_flag:
+                break
+
+        if has_gsi_flag:
+            return True, "Параметр '-gamestateintegration' обнаружен в Steam localconfig.vdf"
+        elif found_any:
+            msg = (
+                "\n⚠️  [AegisPlus GSI Warning] ⚠️\n"
+                "В параметрах запуска Dota 2 не найден флаг '-gamestateintegration'!\n"
+                "Рекомендуется добавить '-gamestateintegration' в свойства игры в Steam:\n"
+                "Steam -> Библиотека -> ПКМ по Dota 2 -> Свойства -> Общие -> Параметры запуска:\n"
+                "  -gamestateintegration\n"
+            )
+            return False, msg
+        return True, "Steam userdata не найден, проверка пропущена."
+
 
 if __name__ == "__main__":
     success, msg = ConfigManager.install_gsi_config()
     print(msg)
+    gsi_ok, gsi_msg = ConfigManager.check_steam_launch_options()
+    if not gsi_ok:
+        print(gsi_msg)
+    else:
+        print(f"[AegisPlus GSI] {gsi_msg}")
+    ConfigManager.setup_hyprland_config()

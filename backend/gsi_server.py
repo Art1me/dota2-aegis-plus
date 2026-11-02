@@ -324,7 +324,18 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.wfile.write(b'{"status":"menu_closed"}')
             return
 
-        # 2. API: Shutdown Application (Quit button)
+        # 2. API: Toggle Menu (Super + O)
+        elif parsed.path == "/api/toggle_menu":
+            if overlay_app:
+                GLib.idle_add(overlay_app.toggle_interactive_mode)
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(b'{"status":"ok"}')
+            return
+
+        # 3. API: Shutdown Application (Quit button)
         elif parsed.path in ["/api/shutdown", "/api/quit"]:
             if overlay_app:
                 GLib.idle_add(overlay_app.quit_application)
@@ -486,7 +497,21 @@ class GSIHTTPRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
 
-        if parsed.path == "/api/state":
+        if parsed.path == "/api/status":
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            is_interactive = overlay_app.interactive if overlay_app else True
+            status_data = {
+                "status": "running",
+                "interactive": is_interactive,
+                "gsi_connected": state.is_connected
+            }
+            self.wfile.write(json.dumps(status_data).encode("utf-8"))
+            return
+
+        elif parsed.path == "/api/state":
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")

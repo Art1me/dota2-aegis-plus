@@ -1,5 +1,6 @@
 import json
 import math
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -93,10 +94,11 @@ class AnalyticsEngine:
         chat_string = f"{self.format_clock(aegis_end)} Aegis | {self.format_clock(rosh_min)} - {self.format_clock(rosh_max)} Roshan"
 
         # Copy to clipboard via wl-copy (Wayland) if available
-        try:
-            subprocess.Popen(["wl-copy", chat_string], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except Exception:
-            pass
+        if shutil.which("wl-copy"):
+            try:
+                subprocess.Popen(["wl-copy", chat_string], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except Exception as e:
+                print(f"[AegisPlus Analytics] Ошибка wl-copy: {e}")
 
         return {
             "roshan_death_time": clock_time,
