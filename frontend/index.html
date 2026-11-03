@@ -9,7 +9,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#080c14">
-  <link rel="stylesheet" href="style.css?v=2.3">
+  <link rel="stylesheet" href="style.css?v=2.4">
+  <script>
+    if (new URLSearchParams(window.location.search).get("mode") === "hud") {
+      document.documentElement.classList.add("hud-mode");
+    }
+  </script>
 </head>
 <body class="mode-menu">
   <!-- Steam Overlay Backdrop (blurred dark backdrop when overlay is open on desktop) -->
@@ -488,7 +493,7 @@
   <!-- ========================================================================= -->
   <!-- DESKTOP OVERLAY & STEAM HUD BAR                                          -->
   <!-- ========================================================================= -->
-  <div class="hud-container" id="hudContainer">
+  <div class="hud-container main-container" id="hudContainer">
     
     <!-- Top Bar Controls & Radar -->
     <header class="top-bar">
@@ -601,7 +606,7 @@
     <main class="main-body" id="mainBody">
       <!-- Left Panel: Shifted above minimap (leaves bottom 310px free) -->
       <aside class="left-hud">
-        <div class="hud-card glass interactive" id="itemsCard">
+        <div class="hud-card glass interactive items-card" id="itemsCard">
           <div class="card-header">
             <span class="card-title">💡 Dota Plus Сборки</span>
             <div class="item-stages-tabs" id="desktopBuildTabs" style="margin-bottom: 0;">
@@ -734,7 +739,7 @@
       <!-- Right Panel: Live Benchmarks & Buyback -->
       <aside class="right-hud">
         <!-- Benchmarks Card -->
-        <div class="hud-card glass interactive" id="benchmarksCard">
+        <div class="hud-card glass interactive benchmark-card" id="benchmarksCard">
           <div class="card-header">
             <span class="card-title">📊 Бенчмарк ранга</span>
             <div class="grade-badge" id="gradeBadge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
@@ -844,6 +849,6 @@
 
   </div>
 
-  <script src="app.js?v=2.3"></script>
+  <script src="app.js?v=2.4"></script>
 </body>
 </html>

@@ -1173,58 +1173,127 @@ select option {
 }
 
 /* ==========================================================================
-   STEAM IN-GAME HUD MODE (?mode=hud)
+   STEAM IN-GAME HUD OVERLAY (?mode=hud)
    ========================================================================== */
+html.hud-mode,
+body.hud-mode,
 body.mode-hud-only {
   background: transparent !important;
+  background-color: transparent !important;
+  overflow: hidden !important;
+  pointer-events: none !important; /* Пропускаем клики мыши сквозь пустые участки экрана в саму Доту */
 }
 
-body.mode-hud-only #mobileCompanion {
-  display: none !important;
-}
-
-body.mode-hud-only #steamBackdrop {
-  display: none !important;
-}
-
+/* Скрываем затемняющую подложку, меню и мобильный компаньон */
+body.hud-mode #steamBackdrop,
+body.mode-hud-only #steamBackdrop,
+body.hud-mode #mobileCompanion,
+body.mode-hud-only #mobileCompanion,
+body.hud-mode .controls-cluster,
 body.mode-hud-only .controls-cluster,
+body.hud-mode .steam-control,
 body.mode-hud-only .steam-control,
+body.hud-mode #menuCommandCenter,
 body.mode-hud-only #menuCommandCenter,
+body.hud-mode #draftOverlay,
 body.mode-hud-only #draftOverlay {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
+/* Убираем сплошную подложку главного контейнера и обнуляем все фоны оберток (для Linux CEF) */
+body.hud-mode .main-container,
+body.hud-mode .hud-container,
+body.mode-hud-only .main-container,
+body.mode-hud-only .hud-container,
+body.hud-mode .main-body,
+body.mode-hud-only .main-body,
+body.hud-mode main,
+body.mode-hud-only main,
+body.hud-mode aside,
+body.mode-hud-only aside {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  position: relative !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Возвращаем кликабельность самим виджетам интерфейса */
+body.hud-mode .items-card,
+body.hud-mode #itemsCard,
+body.hud-mode .left-hud,
+body.mode-hud-only .items-card,
+body.mode-hud-only #itemsCard,
+body.mode-hud-only .left-hud,
+body.hud-mode .top-bar,
+body.hud-mode #macroRadar,
+body.mode-hud-only .top-bar,
+body.mode-hud-only #macroRadar,
+body.hud-mode .benchmark-card,
+body.hud-mode #benchmarksCard,
+body.hud-mode .right-hud,
+body.mode-hud-only .benchmark-card,
+body.mode-hud-only #benchmarksCard,
+body.mode-hud-only .right-hud,
+body.hud-mode .interactive,
+body.mode-hud-only .interactive {
+  pointer-events: auto !important;
+}
+
+/* Левая панель сборок предметов */
+body.hud-mode .items-card,
+body.hud-mode .left-hud,
+body.mode-hud-only .items-card,
 body.mode-hud-only .left-hud {
   display: flex !important;
   position: fixed !important;
+  left: 15px !important;
   top: 70px !important;
-  left: 14px !important;
   width: 330px !important;
   margin-bottom: 0 !important;
-  pointer-events: auto !important;
+  z-index: 1000 !important;
 }
 
+/* Верхняя панель таймеров объектов */
+body.hud-mode .top-bar,
 body.mode-hud-only .top-bar {
+  display: flex !important;
+  position: fixed !important;
+  top: 54px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  margin: 0 !important;
+  padding: 0 !important;
   justify-content: center !important;
-  padding: 6px 12px !important;
-  pointer-events: none !important;
-  margin-top: 54px !important;
+  z-index: 1000 !important;
 }
 
+body.hud-mode #macroRadar,
 body.mode-hud-only #macroRadar {
-  pointer-events: auto !important;
   background: rgba(11, 15, 25, 0.88) !important;
-  border: 1px solid rgba(0, 255, 136, 0.5) !important;
+  border: 1px solid rgba(0, 255, 136, 0.4) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
 }
 
+/* Правая панель бенчмарка и статуса выкупа */
+body.hud-mode .benchmark-card,
+body.hud-mode .right-hud,
+body.mode-hud-only .benchmark-card,
 body.mode-hud-only .right-hud {
+  display: flex !important;
   position: fixed !important;
+  right: 15px !important;
   top: 70px !important;
-  right: 14px !important;
-  transform: scale(0.9) !important;
-  transform-origin: top right !important;
-  pointer-events: auto !important;
+  width: 290px !important;
+  z-index: 1000 !important;
 }
 
 /* ==========================================================================

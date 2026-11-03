@@ -1683,9 +1683,10 @@ function fetchLatestState() {
 
 // Event Listeners on DOM Ready
 document.addEventListener("DOMContentLoaded", () => {
-  // Check Steam HUD Mode
+  // Check Steam HUD Mode (?mode=hud)
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("mode") === "hud") {
+    document.body.classList.add("hud-mode");
     document.body.classList.add("mode-hud-only");
     document.body.classList.remove("mode-menu");
   }
